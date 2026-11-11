@@ -43,8 +43,11 @@ object CompositionEnsemble {
 
     /**
      * Fuses [estimates] (home methods only, uncalibrated) into one figure for
-     * [date]. Returns null with nothing to fuse. A DXA scan is the calibration
-     * anchor, not a member: pass scans to [DexaCalibration] instead.
+     * [date]. Only readings dated [date] are fused, so callers can pass a
+     * multi-day list (e.g. all of [BiaProtocol.acceptedEstimates]) without
+     * yesterday's reading shifting today's figure. Returns null when none fall
+     * on that day. A DXA scan is the calibration anchor, not a member: pass
+     * scans to [DexaCalibration] instead.
      */
     fun combine(
         date: LocalDate,
@@ -55,9 +58,10 @@ object CompositionEnsemble {
         require(estimates.all { it.method.isEnsembleMember }) {
             "Only home methods are ensemble members; DXA is the calibration anchor"
         }
-        if (estimates.isEmpty()) return null
+        val todays = estimates.filter { it.date == date }
+        if (todays.isEmpty()) return null
 
-        val members = estimates.map(calibration::apply)
+        val members = todays.map(calibration::apply)
 
         // Collapse each input source to one witness.
         class Witness(val value: Double, val standardError: Double, val readings: List<Pair<BodyFatEstimate, Double>>)
