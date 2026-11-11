@@ -1,1 +1,74 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS5kYXRhCgppbXBvcnQgY29tLmZvcmdlLmNvcmUubW9kZWwuRXF1aXBtZW50CmltcG9ydCBjb20uZm9yZ2UuY29yZS5tb2RlbC5FeGVyY2lzZQppbXBvcnQgY29tLmZvcmdlLmNvcmUubW9kZWwuTXVzY2xlR3JvdXAKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLlJvdXRpbmUKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLlJvdXRpbmVFeGVyY2lzZQppbXBvcnQgamF2YS50aW1lLkRheU9mV2VlawoKLyoqCiAqIEJ1aWx0LWluIHN0YXJ0ZXIgY29udGVudCAoYmx1ZXByaW50IDMuMik6IGEgc21hbGwgZXhlcmNpc2UgbGlicmFyeSBhbmQgUHVzaC9QdWxsL0xlZ3MKICogdGVtcGxhdGVzIHNvIGRheSBvbmUgaXNuJ3QgYSBibGFuayBwYWdlLiBTaGFyZWQgYnkgdGhlIHBob25lIGFuZCB3YXRjaCBhcHBzLgogKiBUT0RPKFBoYXNlIDIpOiBtb3ZlIHRoZSBmdWxsIGxpYnJhcnkgKyB0ZW1wbGF0ZXMgKFVwcGVyL0xvd2VyLCA1w5c1KSBpbnRvIHRoZSByb3V0aW5lCiAqIGJ1aWxkZXIncyBzZWVkIGRhdGEgb25jZSBSb29tIGxhbmRzLgogKi8Kb2JqZWN0IFNhbXBsZURhdGEgewoKICAgIHZhbCBiZW5jaFByZXNzID0gRXhlcmNpc2UoImV4LWJlbmNoLXByZXNzIiwgIkJlbmNoIFByZXNzIiwgTXVzY2xlR3JvdXAuQ0hFU1QsIEVxdWlwbWVudC5CQVJCRUxMKQogICAgdmFsIG92ZXJoZWFkUHJlc3MgPSBFeGVyY2lzZSgiZXgtb3ZlcmhlYWQtcHJlc3MiLCAiT3ZlcmhlYWQgUHJlc3MiLCBNdXNjbGVHcm91cC5TSE9VTERFUlMsIEVxdWlwbWVudC5CQVJCRUxMKQogICAgdmFsIHRyaWNlcFB1c2hkb3duID0gRXhlcmNpc2UoImV4LXRyaWNlcC1wdXNoZG93biIsICJUcmljZXAgUHVzaGRvd24iLCBNdXNjbGVHcm91cC5UUklDRVBTLCBFcXVpcG1lbnQuQ0FCTEUpCiAgICB2YWwgYmFyYmVsbFJvdyA9IEV4ZXJjaXNlKCJleC1iYXJiZWxsLXJvdyIsICJCYXJiZWxsIFJvdyIsIE11c2NsZUdyb3VwLkJBQ0ssIEVxdWlwbWVudC5CQVJCRUxMKQogICAgdmFsIHB1bGxVcCA9IEV4ZXJjaXNlKCJleC1wdWxsLXVwIiwgIlB1bGwtVXAiLCBNdXNjbGVHcm91cC5CQUNLLCBFcXVpcG1lbnQuQk9EWVdFSUdIVCkKICAgIHZhbCBiaWNlcEN1cmwgPSBFeGVyY2lzZSgiZXgtYmljZXAtY3VybCIsICJCaWNlcCBDdXJsIiwgTXVzY2xlR3JvdXAuQklDRVBTLCBFcXVpcG1lbnQuRFVNQkJFTEwpCiAgICB2YWwgc3F1YXQgPSBFeGVyY2lzZSgiZXgtc3F1YXQiLCAiU3F1YXQiLCBNdXNjbGVHcm91cC5RVUFEUywgRXF1aXBtZW50LkJBUkJFTEwpCiAgICB2YWwgZGVhZGxpZnQgPSBFeGVyY2lzZSgiZXgtZGVhZGxpZnQiLCAiRGVhZGxpZnQiLCBNdXNjbGVHcm91cC5IQU1TVFJJTkdTLCBFcXVpcG1lbnQuQkFSQkVMTCkKICAgIHZhbCBsZWdQcmVzcyA9IEV4ZXJjaXNlKCJleC1sZWctcHJlc3MiLCAiTGVnIFByZXNzIiwgTXVzY2xlR3JvdXAuUVVBRFMsIEVxdWlwbWVudC5NQUNISU5FKQogICAgdmFsIGNhbGZSYWlzZSA9IEV4ZXJjaXNlKCJleC1jYWxmLXJhaXNlIiwgIkNhbGYgUmFpc2UiLCBNdXNjbGVHcm91cC5DQUxWRVMsIEVxdWlwbWVudC5NQUNISU5FKQoKICAgIHZhbCBleGVyY2lzZXM6IExpc3Q8RXhlcmNpc2U+ID0gbGlzdE9mKAogICAgICAgIGJlbmNoUHJlc3MsIG92ZXJoZWFkUHJlc3MsIHRyaWNlcFB1c2hkb3duLAogICAgICAgIGJhcmJlbGxSb3csIHB1bGxVcCwgYmljZXBDdXJsLAogICAgICAgIHNxdWF0LCBkZWFkbGlmdCwgbGVnUHJlc3MsIGNhbGZSYWlzZSwKICAgICkKCiAgICB2YWwgcHVzaEEgPSBSb3V0aW5lKAogICAgICAgIGlkID0gInJvdXRpbmUtcHVzaC1hIiwKICAgICAgICBuYW1lID0gIlB1c2ggQSIsCiAgICAgICAgZXhlcmNpc2VzID0gbGlzdE9mKAogICAgICAgICAgICBSb3V0aW5lRXhlcmNpc2UoYmVuY2hQcmVzcywgdGFyZ2V0U2V0cyA9IDQsIHJlcFJhbmdlID0gNi4uOCwgdGFyZ2V0V2VpZ2h0S2cgPSA2MC4wLCByZXN0U2Vjb25kcyA9IDEyMCksCiAgICAgICAgICAgIFJvdXRpbmVFeGVyY2lzZShvdmVyaGVhZFByZXNzLCB0YXJnZXRTZXRzID0gMywgcmVwUmFuZ2UgPSA4Li4xMCwgdGFyZ2V0V2VpZ2h0S2cgPSA0MC4wLCByZXN0U2Vjb25kcyA9IDkwKSwKICAgICAgICAgICAgUm91dGluZUV4ZXJjaXNlKHRyaWNlcFB1c2hkb3duLCB0YXJnZXRTZXRzID0gMywgcmVwUmFuZ2UgPSAxMC4uMTIsIHRhcmdldFdlaWdodEtnID0gMjUuMCwgcmVzdFNlY29uZHMgPSA2MCksCiAgICAgICAgKSwKICAgICkKCiAgICB2YWwgcHVsbEEgPSBSb3V0aW5lKAogICAgICAgIGlkID0gInJvdXRpbmUtcHVsbC1hIiwKICAgICAgICBuYW1lID0gIlB1bGwgQSIsCiAgICAgICAgZXhlcmNpc2VzID0gbGlzdE9mKAogICAgICAgICAgICBSb3V0aW5lRXhlcmNpc2UoYmFyYmVsbFJvdywgdGFyZ2V0U2V0cyA9IDQsIHJlcFJhbmdlID0gNi4uOCwgdGFyZ2V0V2VpZ2h0S2cgPSA2MC4wLCByZXN0U2Vjb25kcyA9IDEyMCksCiAgICAgICAgICAgIFJvdXRpbmVFeGVyY2lzZShwdWxsVXAsIHRhcmdldFNldHMgPSAzLCByZXBSYW5nZSA9IDUuLjgsIHRhcmdldFdlaWdodEtnID0gMC4wLCByZXN0U2Vjb25kcyA9IDkwKSwKICAgICAgICAgICAgUm91dGluZUV4ZXJjaXNlKGJpY2VwQ3VybCwgdGFyZ2V0U2V0cyA9IDMsIHJlcFJhbmdlID0gMTAuLjEyLCB0YXJnZXRXZWlnaHRLZyA9IDEyLjUsIHJlc3RTZWNvbmRzID0gNjApLAogICAgICAgICksCiAgICApCgogICAgdmFsIGxlZ3NBID0gUm91dGluZSgKICAgICAgICBpZCA9ICJyb3V0aW5lLWxlZ3MtYSIsCiAgICAgICAgbmFtZSA9ICJMZWdzIEEiLAogICAgICAgIGV4ZXJjaXNlcyA9IGxpc3RPZigKICAgICAgICAgICAgUm91dGluZUV4ZXJjaXNlKHNxdWF0LCB0YXJnZXRTZXRzID0gNCwgcmVwUmFuZ2UgPSA1Li42LCB0YXJnZXRXZWlnaHRLZyA9IDgwLjAsIHJlc3RTZWNvbmRzID0gMTUwKSwKICAgICAgICAgICAgUm91dGluZUV4ZXJjaXNlKGRlYWRsaWZ0LCB0YXJnZXRTZXRzID0gMywgcmVwUmFuZ2UgPSA1Li41LCB0YXJnZXRXZWlnaHRLZyA9IDEwMC4wLCByZXN0U2Vjb25kcyA9IDE1MCksCiAgICAgICAgICAgIFJvdXRpbmVFeGVyY2lzZShsZWdQcmVzcywgdGFyZ2V0U2V0cyA9IDMsIHJlcFJhbmdlID0gMTAuLjEyLCB0YXJnZXRXZWlnaHRLZyA9IDEyMC4wLCByZXN0U2Vjb25kcyA9IDkwKSwKICAgICAgICAgICAgUm91dGluZUV4ZXJjaXNlKGNhbGZSYWlzZSwgdGFyZ2V0U2V0cyA9IDMsIHJlcFJhbmdlID0gMTIuLjE1LCB0YXJnZXRXZWlnaHRLZyA9IDQwLjAsIHJlc3RTZWNvbmRzID0gNjApLAogICAgICAgICksCiAgICApCgogICAgdmFsIHJvdXRpbmVzOiBMaXN0PFJvdXRpbmU+ID0gbGlzdE9mKHB1c2hBLCBwdWxsQSwgbGVnc0EpCgogICAgLyoqIERlZmF1bHQgd2Vla2x5IHNjaGVkdWxlIChibHVlcHJpbnQgMy4yKTogd2Vla2RheSDihpIgcm91dGluZSBpZC4gKi8KICAgIHZhbCBzY2hlZHVsZTogTWFwPERheU9mV2VlaywgU3RyaW5nPiA9IG1hcE9mKAogICAgICAgIERheU9mV2Vlay5NT05EQVkgdG8gcHVzaEEuaWQsCiAgICAgICAgRGF5T2ZXZWVrLldFRE5FU0RBWSB0byBwdWxsQS5pZCwKICAgICAgICBEYXlPZldlZWsuRlJJREFZIHRvIGxlZ3NBLmlkLAogICAgKQp9Cg==
+package com.forge.core.data
+
+import com.forge.core.model.Equipment
+import com.forge.core.model.Exercise
+import com.forge.core.model.MuscleGroup
+import com.forge.core.model.Routine
+import com.forge.core.model.RoutineExercise
+import java.time.DayOfWeek
+
+/**
+ * Built-in starter content (blueprint 3.2): a small exercise library and Push/Pull/Legs
+ * templates so day one isn't a blank page. Shared by the phone and watch apps.
+ * TODO(Phase 2): move the full library + templates (Upper/Lower, 5×5) into the routine
+ * builder's seed data once Room lands.
+ */
+object SampleData {
+
+    val benchPress = Exercise("ex-bench-press", "Bench Press", MuscleGroup.CHEST, Equipment.BARBELL)
+    val overheadPress = Exercise("ex-overhead-press", "Overhead Press", MuscleGroup.SHOULDERS, Equipment.BARBELL)
+    val tricepPushdown = Exercise("ex-tricep-pushdown", "Tricep Pushdown", MuscleGroup.TRICEPS, Equipment.CABLE)
+    val barbellRow = Exercise("ex-barbell-row", "Barbell Row", MuscleGroup.BACK, Equipment.BARBELL)
+    val pullUp = Exercise("ex-pull-up", "Pull-Up", MuscleGroup.BACK, Equipment.BODYWEIGHT)
+    val bicepCurl = Exercise("ex-bicep-curl", "Bicep Curl", MuscleGroup.BICEPS, Equipment.DUMBBELL)
+    val squat = Exercise("ex-squat", "Squat", MuscleGroup.QUADS, Equipment.BARBELL)
+    val deadlift = Exercise("ex-deadlift", "Deadlift", MuscleGroup.HAMSTRINGS, Equipment.BARBELL)
+    val legPress = Exercise("ex-leg-press", "Leg Press", MuscleGroup.QUADS, Equipment.MACHINE)
+    val calfRaise = Exercise("ex-calf-raise", "Calf Raise", MuscleGroup.CALVES, Equipment.MACHINE)
+
+    val exercises: List<Exercise> = listOf(
+        benchPress, overheadPress, tricepPushdown,
+        barbellRow, pullUp, bicepCurl,
+        squat, deadlift, legPress, calfRaise,
+    )
+
+    val pushA = Routine(
+        id = "routine-push-a",
+        name = "Push A",
+        exercises = listOf(
+            RoutineExercise(benchPress, targetSets = 4, repRange = 6..8, targetWeightKg = 60.0, restSeconds = 120),
+            RoutineExercise(overheadPress, targetSets = 3, repRange = 8..10, targetWeightKg = 40.0, restSeconds = 90),
+            RoutineExercise(tricepPushdown, targetSets = 3, repRange = 10..12, targetWeightKg = 25.0, restSeconds = 60),
+        ),
+    )
+
+    val pullA = Routine(
+        id = "routine-pull-a",
+        name = "Pull A",
+        exercises = listOf(
+            RoutineExercise(barbellRow, targetSets = 4, repRange = 6..8, targetWeightKg = 60.0, restSeconds = 120),
+            RoutineExercise(pullUp, targetSets = 3, repRange = 5..8, targetWeightKg = 0.0, restSeconds = 90),
+            RoutineExercise(bicepCurl, targetSets = 3, repRange = 10..12, targetWeightKg = 12.5, restSeconds = 60),
+        ),
+    )
+
+    val legsA = Routine(
+        id = "routine-legs-a",
+        name = "Legs A",
+        exercises = listOf(
+            RoutineExercise(squat, targetSets = 4, repRange = 5..6, targetWeightKg = 80.0, restSeconds = 150),
+            RoutineExercise(deadlift, targetSets = 3, repRange = 5..5, targetWeightKg = 100.0, restSeconds = 150),
+            RoutineExercise(legPress, targetSets = 3, repRange = 10..12, targetWeightKg = 120.0, restSeconds = 90),
+            RoutineExercise(calfRaise, targetSets = 3, repRange = 12..15, targetWeightKg = 40.0, restSeconds = 60),
+        ),
+    )
+
+    val routines: List<Routine> = listOf(pushA, pullA, legsA)
+
+    /** Default weekly schedule (blueprint 3.2): weekday → routine id. */
+    val schedule: Map<DayOfWeek, String> = mapOf(
+        DayOfWeek.MONDAY to pushA.id,
+        DayOfWeek.WEDNESDAY to pullA.id,
+        DayOfWeek.FRIDAY to legsA.id,
+    )
+}
