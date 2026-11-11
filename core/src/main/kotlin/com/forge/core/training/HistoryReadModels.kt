@@ -185,12 +185,12 @@ object HistoryReadModels {
      * What "the weight actually lifted" means is pinned down so progression is
      * never earned by sets that didn't do the prescribed work:
      * - The working weight is the heaviest load every prescribed set reached
-     *   (the targetSets-th heaviest completed set), not the single best set:
-     *   one 80 kg set plus three 60 kg sets progresses 60, not 80.
+     *   (the Nth heaviest completed set, N = the prescribed set count), not the
+     *   single best set: one 80 kg set plus three 60 kg sets progresses 60, not 80.
      * - An exercise programmed in several blocks of the routine must have done
-     *   the blocks' combined set count at that weight. Stored sets don't say
-     *   which block they belonged to, so one block's sets can never satisfy
-     *   another's prescription.
+     *   the blocks' combined set count, and N above is that combined count.
+     *   Stored sets don't say which block they belonged to, so one block's
+     *   sets can never satisfy another's prescription.
      * - When [constraints] allow intensity to scale down only (a heart-rate cap,
      *   blueprint 3.0), the rule never raises the weight: a target that would
      *   have progressed holds at the working weight, and the reason says why.
@@ -232,10 +232,11 @@ object HistoryReadModels {
                     val combinedTargetSets = plan.exercises
                         .filter { it.exercise.id == entry.exercise.id }
                         .sumOf { it.prescription.targetSets }
+                    // Same set count for picking the weight as for qualifying it.
                     val workingWeight = ghost.sets
                         .map { it.weightKg }
                         .sortedDescending()
-                        .getOrNull(prescription.targetSets - 1)
+                        .getOrNull(combinedTargetSets - 1)
                     val earned = workingWeight?.let { weight ->
                         ProgressiveOverload.suggest(
                             entry.exercise,

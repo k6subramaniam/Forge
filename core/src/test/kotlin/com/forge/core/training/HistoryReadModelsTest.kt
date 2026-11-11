@@ -240,6 +240,19 @@ class HistoryReadModelsTest {
     }
 
     @Test
+    fun `repeated blocks pick the working weight with the combined set count`() {
+        // Codex P2 (#3, follow-up): two 2-set bench blocks, sets 80×8 twice then
+        // 60×8 twice. All four prescribed sets supported 60 kg, so both blocks
+        // progress to 62.5. The per-block count picked 80 and held there.
+        val history = listOf(
+            workout("s1", "2026-11-10T15:00:00Z", bench to listOf(80.0 to 8, 80.0 to 8, 60.0 to 8, 60.0 to 8)),
+        )
+        val plan = HistoryReadModels.nextSessionPrescription(benchTwice, history, zone)
+        assertEquals(62.5, plan.exercises[0].suggestedWeightKg, 1e-9)
+        assertEquals(62.5, plan.exercises[2].suggestedWeightKg, 1e-9)
+    }
+
+    @Test
     fun `a heart-rate cap holds the weight instead of progressing it`() {
         // Codex P1 (#3): with intensity allowed to scale down only (high blood
         // pressure here), a session that earned +2.5 kg holds at 60 instead.
