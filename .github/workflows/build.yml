@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Core tests + debug builds
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+
+      - name: Unit tests (:core)
+        run: gradle :core:test --stacktrace
+
+      - name: Assemble debug (:mobile and :wear)
+        run: gradle :mobile:assembleDebug :wear:assembleDebug --stacktrace
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-test-report
+          path: core/build/reports/tests/test
+          if-no-files-found: ignore
