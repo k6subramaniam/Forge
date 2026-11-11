@@ -277,6 +277,40 @@ class TagConstraintTest {
     }
 
     @Test
+    fun `callers that pass no library still get the tagged library's safety checks`() {
+        // Codex P2 (#2): with the old 10-exercise default, "Landmine press" resolved to a
+        // generated, untagged exercise and slipped past a vertical-press restriction.
+        val constraints = FunctionalConstraints(
+            exerciseExclusions = listOf(
+                ExerciseExclusion(
+                    area = JointArea.SHOULDER,
+                    excludedMovements = emptyList(),
+                    substitutions = listOf("Landmine press", "Cable lateral raise"),
+                    reason = "Test shoulder limitation.",
+                    restrictions = listOf(
+                        MovementRestriction(
+                            patterns = setOf(MovementPattern.VERTICAL_PRESS),
+                            description = "no vertical pressing",
+                        ),
+                    ),
+                ),
+            ),
+            heartRateCapPercentOfMax = null,
+            intensityMayOnlyScaleDown = false,
+            promptConstraints = emptyList(),
+        )
+        val started = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start, constraints = constraints)
+        assertEquals("ex-cable-lateral-raise", started.exercises[1].exercise.id)
+
+        val added = SessionEngine.addExercise(
+            SessionEngine.startFreeform(sessionId = "s2", startTime = start),
+            RoutineExercise(SampleData.overheadPress, targetSets = 3, repRange = 8..10, targetWeightKg = 40.0),
+            constraints = constraints,
+        )
+        assertEquals("ex-cable-lateral-raise", added.exercises.single().exercise.id)
+    }
+
+    @Test
     fun `freeform additions are matched on tags as well`() {
         var state = SessionEngine.startFreeform(sessionId = "s2", startTime = start)
         state = SessionEngine.addExercise(
@@ -305,7 +339,7 @@ class TagConstraintTest {
         )
         val slot = state.exercises.single()
         assertEquals(customOverhead, slot.substitutedFor)
-        assertEquals("Landmine press", slot.exercise.name)
+        assertEquals(ExerciseLibrary.landminePress, slot.exercise)
         // The quoted movement name in the reason shows the name path decided it.
         assertTrue(slot.adjustmentReason!!.contains("'Overhead press'"))
     }

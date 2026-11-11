@@ -85,6 +85,30 @@ class AdaptiveTdeeTest {
         assertEquals(2730, result.backCalculatedTdeeKcal)
     }
 
+    @Test
+    fun `intake is averaged over the weigh-in interval, not the whole window`() {
+        // Codex P2 (#4): weigh-ins only on Jan 7, 11, 16 and 21 (stable at 80 kg).
+        // Intake 2,000 on Jan 1–6, then 2,800. Averaging the whole window gave
+        // 2,571. The weight was observed over Jan 7–21, when intake was 2,800.
+        val weighIns = listOf(7L, 11L, 16L, 21L).map { WeighIn(start.plusDays(it - 1), 80.0) }
+        val intake = intake(start, 6, 2000) + intake(start.plusDays(6), 15, 2800)
+        val result = AdaptiveTdee.estimate(profile(), weighIns, intake, end)
+        assertEquals(TdeeBasis.BACK_CALCULATED, result.basis)
+        assertEquals(2800, result.backCalculatedTdeeKcal)
+        assertEquals(15, result.intakeDaysUsed)
+    }
+
+    @Test
+    fun `the intake-day minimum is checked on the weigh-in interval`() {
+        // Plenty of intake days before the first weigh-in, but only 5 inside the
+        // Jan 7–21 interval: not enough to back-calculate.
+        val weighIns = listOf(7L, 11L, 16L, 21L).map { WeighIn(start.plusDays(it - 1), 80.0) }
+        val intake = intake(start, 6, 2400) + intake(start.plusDays(6), 5, 2400)
+        val result = AdaptiveTdee.estimate(profile(), weighIns, intake, end)
+        assertEquals(TdeeBasis.FORMULA, result.basis)
+        assertEquals(5, result.intakeDaysUsed)
+    }
+
     // -- Insufficient data falls back to the formula, labelled ---------------------------
 
     @Test

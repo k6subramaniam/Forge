@@ -1,6 +1,6 @@
 package com.forge.core.training
 
-import com.forge.core.data.SampleData
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.model.Exercise
 import com.forge.core.model.PRRecord
 import com.forge.core.model.PrType
@@ -181,13 +181,27 @@ object HistoryReadModels {
      * range on every set progresses by the rule's increment, anything short
      * holds at the last top-set weight. Without history, the routine's
      * prescribed target is the fallback.
+     *
+     * What "the weight actually lifted" means is pinned down so progression is
+     * never earned by sets that didn't do the prescribed work:
+     * - The working weight is the heaviest load every prescribed set reached
+     *   (the targetSets-th heaviest completed set), not the single best set:
+     *   one 80 kg set plus three 60 kg sets progresses 60, not 80.
+     * - An exercise programmed in several blocks of the routine must have done
+     *   the blocks' combined set count at that weight. Stored sets don't say
+     *   which block they belonged to, so one block's sets can never satisfy
+     *   another's prescription.
+     * - When [constraints] allow intensity to scale down only (a heart-rate cap,
+     *   blueprint 3.0), the rule never raises the weight: a target that would
+     *   have progressed holds at the working weight, and the reason says why.
+     *   The lifter can still raise it by hand.
      */
     fun nextSessionPrescription(
         routine: Routine,
         history: List<CompletedSession>,
         zone: ZoneId,
         constraints: FunctionalConstraints = SessionEngine.NO_CONSTRAINTS,
-        library: List<Exercise> = SampleData.exercises,
+        library: List<Exercise> = ExerciseLibrary.all,
     ): NextSessionPrescription {
         // The engine state is used purely as the constraint-resolution step;
         // the placeholder id/time never surface (nothing is logged or finished).
@@ -215,9 +229,34 @@ object HistoryReadModels {
                     // Judge the weight actually lifted last time: the overload
                     // rule progresses the working weight, not a stale routine
                     // target the lifter may already have moved past.
-                    val judgedTarget = prescription.copy(targetWeightKg = ghost.topSet.weightKg)
-                    val suggestion = ProgressiveOverload.suggest(entry.exercise, judgedTarget, ghost.sets)
-                    if (suggestion != null) {
+                    val combinedTargetSets = plan.exercises
+                        .filter { it.exercise.id == entry.exercise.id }
+                        .sumOf { it.prescription.targetSets }
+                    val workingWeight = ghost.sets
+                        .map { it.weightKg }
+                        .sortedDescending()
+                        .getOrNull(prescription.targetSets - 1)
+                    val earned = workingWeight?.let { weight ->
+                        ProgressiveOverload.suggest(
+                            entry.exercise,
+                            prescription.copy(targetWeightKg = weight, targetSets = combinedTargetSets),
+                            ghost.sets.filter { it.weightKg >= weight },
+                        )
+                    }
+                    val suggestion = earned?.takeUnless { constraints.intensityMayOnlyScaleDown }
+                    if (earned != null && suggestion == null) {
+                        PrescribedExerciseTarget(
+                            prescription = prescription,
+                            suggestedWeightKg = earned.currentTargetWeightKg,
+                            reason = "All sets reached the top of the range at " +
+                                "${formatKg(earned.currentTargetWeightKg)} kg, but your heart-rate limitation means " +
+                                "intensity only scales down, so the weight holds. You can still raise it yourself.",
+                            ghost = ghost,
+                            overload = null,
+                            substitutedFor = entry.substitutedFor,
+                            adjustmentReason = entry.adjustmentReason,
+                        )
+                    } else if (suggestion != null) {
                         PrescribedExerciseTarget(
                             prescription = prescription,
                             suggestedWeightKg = suggestion.suggestedWeightKg,
