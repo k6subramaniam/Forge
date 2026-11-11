@@ -1,1 +1,7 @@
-Ly8gRm9yZ2Ug4oCUIHJvb3QgYnVpbGQgZmlsZS4gUGx1Z2luIHZlcnNpb25zIGxpdmUgaW4gZ3JhZGxlL2xpYnMudmVyc2lvbnMudG9tbC4KcGx1Z2lucyB7CiAgICBhbGlhcyhsaWJzLnBsdWdpbnMuYW5kcm9pZC5hcHBsaWNhdGlvbikgYXBwbHkgZmFsc2UKICAgIGFsaWFzKGxpYnMucGx1Z2lucy5rb3RsaW4uYW5kcm9pZCkgYXBwbHkgZmFsc2UKICAgIGFsaWFzKGxpYnMucGx1Z2lucy5rb3RsaW4uanZtKSBhcHBseSBmYWxzZQogICAgYWxpYXMobGlicy5wbHVnaW5zLmtvdGxpbi5jb21wb3NlKSBhcHBseSBmYWxzZQp9Cg==
+// Forge — root build file. Plugin versions live in gradle/libs.versions.toml.
+plugins {
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+}
