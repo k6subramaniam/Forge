@@ -71,7 +71,8 @@ class DexaCalibrationTest {
         // Three scans at 20%, each paired with BIA readings of 16% and 24%. Each
         // window averages to 20, so the anchor means agree perfectly, but any one
         // reading is ±4 off. The error applies to single readings, so it must
-        // carry that scatter: gaps ±4 six times → SD √(96/5) = 4.382; × √(4/3) = 5.060.
+        // carry that scatter: gaps ±4 six times → variance 96/5. The anchor means
+        // all agree (0, 0, 0), so the offset adds nothing: SE = √(96/5) = 4.382.
         val scanDays = (0..2).map { d0.plusDays(100L * it) }
         val scans = scanDays.map { DexaScan(it, clinic, 20.0) }
         val readings = scanDays.flatMap { listOf(bia(it.minusDays(1), 16.0), bia(it.plusDays(1), 24.0)) }
@@ -79,8 +80,25 @@ class DexaCalibrationTest {
 
         assertEquals(3, biaCal.anchorCount)
         assertEquals(0.0, biaCal.offsetPp, 1e-9)
-        assertEquals(sqrt(96.0 / 5.0 * 4.0 / 3.0), biaCal.calibratedStandardErrorPp!!, 1e-9)
+        assertEquals(sqrt(96.0 / 5.0), biaCal.calibratedStandardErrorPp!!, 1e-9)
         assertTrue(biaCal.calibratedStandardErrorPp!! > 4.0)
+    }
+
+    @Test
+    fun `many readings at one scan can't hide disagreement between scans`() {
+        // Codex P2 (#6, follow-up): anchor gaps [+4], twenty × [0], [−4]. The offset
+        // weights anchors equally (0), so its uncertainty must too: anchor-mean
+        // variance 16 ÷ 3 anchors = 5.333. Reading scatter: 32 / 21 = 1.524.
+        // SE = √(1.524 + 5.333) = 2.619. The reading-weighted pool alone gave 1.43.
+        val scanDays = (0..2).map { d0.plusDays(100L * it) }
+        val scans = scanDays.map { DexaScan(it, clinic, 20.0) }
+        val readings = listOf(bia(scanDays[0], 16.0)) +
+            (1..20).map { bia(scanDays[1], 20.0) } +
+            listOf(bia(scanDays[2], 24.0))
+        val biaCal = DexaCalibration.calibrate(scans, readings).methods.getValue(CompositionMethod.WRIST_BIA)
+        assertEquals(0.0, biaCal.offsetPp, 1e-9)
+        assertEquals(sqrt(32.0 / 21.0 + 16.0 / 3.0), biaCal.calibratedStandardErrorPp!!, 1e-9)
+        assertTrue(biaCal.calibratedStandardErrorPp!! > sqrt(16.0 / 3.0))
     }
 
     @Test

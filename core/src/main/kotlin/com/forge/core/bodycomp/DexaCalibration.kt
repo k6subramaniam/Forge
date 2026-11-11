@@ -103,13 +103,16 @@ data class PersonalCalibration(
  * - One anchor corrects the bias. From [MIN_ANCHORS_TO_NARROW] anchors the
  *   remaining error is measured, and the interval narrows to match.
  *   The calibrated error is the error of ONE new reading, because that is what
- *   it is applied to: the SD of every individual paired reading's gap around
- *   the offset (scatter within a scan's window counts, not just between scans),
- *   × √(1 + 1/n anchors) for the offset's own uncertainty. Averaging the
- *   readings first would hide that scatter and make the interval narrower
- *   than any single reading deserves. It is never below DXA's repeat
- *   precision: a reading can't agree with DXA more closely than DXA agrees
- *   with itself.
+ *   it is applied to. It has two parts, added in quadrature:
+ *   - the reading's own scatter: the variance of every individual paired
+ *     reading's gap around the offset. Scatter within a scan's window counts,
+ *     not just between scans; averaging first would hide it.
+ *   - the offset's uncertainty: the variance of the per-anchor mean gaps ÷ n
+ *     anchors, which matches how the offset is formed (anchors weighted
+ *     equally). Piling readings onto one scan therefore can't mask
+ *     disagreement between scans.
+ *   It is never below DXA's repeat precision: a reading can't agree with DXA
+ *   more closely than DXA agrees with itself.
  */
 object DexaCalibration {
 
@@ -138,11 +141,13 @@ object DexaCalibration {
             }
             if (gapsByAnchor.isEmpty()) return@mapNotNull null
             val n = gapsByAnchor.size
-            val offset = gapsByAnchor.map { it.average() }.average()
+            val anchorMeans = gapsByAnchor.map { it.average() }
+            val offset = anchorMeans.average()
             val calibratedSe = if (n >= MIN_ANCHORS_TO_NARROW) {
                 val gaps = gapsByAnchor.flatten()
                 val singleReadingVariance = gaps.sumOf { (it - offset) * (it - offset) } / (gaps.size - 1)
-                max(sqrt(singleReadingVariance) * sqrt(1.0 + 1.0 / n), MethodAccuracy.DXA_REPEAT_SE_PP)
+                val offsetVariance = anchorMeans.sumOf { (it - offset) * (it - offset) } / (n - 1) / n
+                max(sqrt(singleReadingVariance + offsetVariance), MethodAccuracy.DXA_REPEAT_SE_PP)
             } else {
                 null
             }
