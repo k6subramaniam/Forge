@@ -16,8 +16,12 @@ import com.forge.core.model.MuscleGroup
  * Leg press, Chest-supported row, Trap-bar deadlift — are first-class entries
  * here, not generated stand-ins.
  *
- * [SampleData] draws its ten starter exercises from this library (ids stable
- * since the scaffold); routines and templates stay in SampleData.
+ * The ten exercises the scaffold started with (bench press, overhead press,
+ * tricep pushdown, barbell row, pull-up, bicep curl, squat, deadlift, leg
+ * press, calf raise) are ordinary entries here, their ids stable since the
+ * scaffold. Routines and schedules are user data, created in the apps on top
+ * of this library — production code ships no built-in routines or target
+ * weights.
  */
 object ExerciseLibrary {
 
