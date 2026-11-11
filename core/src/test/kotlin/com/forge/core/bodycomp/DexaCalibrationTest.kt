@@ -67,6 +67,33 @@ class DexaCalibrationTest {
     }
 
     @Test
+    fun `scatter within a scan's window counts toward a single reading's error`() {
+        // Three scans at 20%, each paired with BIA readings of 16% and 24%. Each
+        // window averages to 20, so the anchor means agree perfectly, but any one
+        // reading is ±4 off. The error applies to single readings, so it must
+        // carry that scatter: gaps ±4 six times → SD √(96/5) = 4.382; × √(4/3) = 5.060.
+        val scanDays = (0..2).map { d0.plusDays(100L * it) }
+        val scans = scanDays.map { DexaScan(it, clinic, 20.0) }
+        val readings = scanDays.flatMap { listOf(bia(it.minusDays(1), 16.0), bia(it.plusDays(1), 24.0)) }
+        val biaCal = DexaCalibration.calibrate(scans, readings).methods.getValue(CompositionMethod.WRIST_BIA)
+
+        assertEquals(3, biaCal.anchorCount)
+        assertEquals(0.0, biaCal.offsetPp, 1e-9)
+        assertEquals(sqrt(96.0 / 5.0 * 4.0 / 3.0), biaCal.calibratedStandardErrorPp!!, 1e-9)
+        assertTrue(biaCal.calibratedStandardErrorPp!! > 4.0)
+    }
+
+    @Test
+    fun `a scan with many readings doesn't outweigh the others in the offset`() {
+        // Scan A: one reading, gap −2. Scan B: four readings, each gap −6.
+        // Mean of anchor means = −4 (not the −5.2 that pooling all readings gives).
+        val scans = listOf(DexaScan(d0, clinic, 18.0), DexaScan(d0.plusDays(100), clinic, 18.0))
+        val readings = listOf(bia(d0, 20.0)) + (0..3).map { bia(d0.plusDays(100), 24.0) }
+        val biaCal = DexaCalibration.calibrate(scans, readings).methods.getValue(CompositionMethod.WRIST_BIA)
+        assertEquals(-4.0, biaCal.offsetPp, 1e-9)
+    }
+
+    @Test
     fun `calibrated error never beats DXA's own repeat precision`() {
         // Perfectly consistent gaps (−2 each time) give residual SD 0, but a
         // reading can't agree with DXA more closely than DXA agrees with itself.

@@ -94,17 +94,22 @@ data class PersonalCalibration(
  * each DEXA scan with the method's readings near it, and the mean gap is
  * that bias for this person.
  *
- * - Readings within [PAIRING_WINDOW_DAYS] of a scan pair with it, averaged
- *   so one noisy reading can't set the offset.
+ * - Readings within [PAIRING_WINDOW_DAYS] of a scan pair with it. The offset
+ *   is the mean over anchors of each anchor's mean gap, so one noisy reading
+ *   can't set it and a scan with many readings doesn't outweigh the others.
  * - Anchors come only from the machine of the latest scan. Brands differ by
  *   about 1–2 pp, so "always rescan on the same machine". Scans from other
  *   machines are set aside, not mixed.
  * - One anchor corrects the bias. From [MIN_ANCHORS_TO_NARROW] anchors the
  *   remaining error is measured, and the interval narrows to match.
- *   The calibrated error is the anchors' residual SD × √(1 + 1/n), the
- *   prediction error for a new reading including the offset's own
- *   uncertainty. It is never below DXA's repeat precision: a reading can't
- *   agree with DXA more closely than DXA agrees with itself.
+ *   The calibrated error is the error of ONE new reading, because that is what
+ *   it is applied to: the SD of every individual paired reading's gap around
+ *   the offset (scatter within a scan's window counts, not just between scans),
+ *   × √(1 + 1/n anchors) for the offset's own uncertainty. Averaging the
+ *   readings first would hide that scatter and make the interval narrower
+ *   than any single reading deserves. It is never below DXA's repeat
+ *   precision: a reading can't agree with DXA more closely than DXA agrees
+ *   with itself.
  */
 object DexaCalibration {
 
@@ -124,16 +129,20 @@ object DexaCalibration {
         val (anchors, setAside) = scans.partition { it.scanner == scanner }
 
         val methods = homeEstimates.groupBy { it.method }.mapNotNull { (method, readings) ->
-            val residuals = anchors.mapNotNull { scan ->
-                val near = readings.filter { abs(ChronoUnit.DAYS.between(scan.date, it.date)) <= PAIRING_WINDOW_DAYS }
-                if (near.isEmpty()) null else scan.fatPercent - near.map { it.fatPercent }.average()
+            // Per anchor: the gap (DEXA − reading) of every reading paired with it.
+            val gapsByAnchor = anchors.mapNotNull { scan ->
+                readings
+                    .filter { abs(ChronoUnit.DAYS.between(scan.date, it.date)) <= PAIRING_WINDOW_DAYS }
+                    .map { scan.fatPercent - it.fatPercent }
+                    .ifEmpty { null }
             }
-            if (residuals.isEmpty()) return@mapNotNull null
-            val n = residuals.size
-            val offset = residuals.average()
+            if (gapsByAnchor.isEmpty()) return@mapNotNull null
+            val n = gapsByAnchor.size
+            val offset = gapsByAnchor.map { it.average() }.average()
             val calibratedSe = if (n >= MIN_ANCHORS_TO_NARROW) {
-                val variance = residuals.sumOf { (it - offset) * (it - offset) } / (n - 1)
-                max(sqrt(variance) * sqrt(1.0 + 1.0 / n), MethodAccuracy.DXA_REPEAT_SE_PP)
+                val gaps = gapsByAnchor.flatten()
+                val singleReadingVariance = gaps.sumOf { (it - offset) * (it - offset) } / (gaps.size - 1)
+                max(sqrt(singleReadingVariance) * sqrt(1.0 + 1.0 / n), MethodAccuracy.DXA_REPEAT_SE_PP)
             } else {
                 null
             }
