@@ -4,6 +4,7 @@ import com.forge.core.data.SampleData
 import com.forge.core.model.GoalProfile
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.Routine
+import com.forge.core.model.UserPreferences
 import com.forge.core.model.SetEntry
 import com.forge.core.model.WorkoutSession
 import java.time.DayOfWeek
@@ -30,15 +31,28 @@ class ForgeRepository {
     var healthProfile: HealthProfile? = null
         private set
 
+    /** Preferences from onboarding (units, coach, AI mode) — defaults until setup completes. */
+    var userPreferences: UserPreferences = UserPreferences.defaults()
+        private set
+
     private val sessions = mutableListOf<WorkoutSession>()
     private val sets = mutableListOf<SetEntry>()
 
     val routines: List<Routine> = SampleData.routines
     val schedule: Map<DayOfWeek, String> = SampleData.schedule
 
-    fun saveOnboarding(goal: GoalProfile, health: HealthProfile) {
+    fun saveOnboarding(
+        goal: GoalProfile,
+        health: HealthProfile,
+        preferences: UserPreferences = UserPreferences.defaults(),
+    ) {
         goalProfile = goal
         healthProfile = health
+        userPreferences = preferences
+    }
+
+    fun updateUserPreferences(preferences: UserPreferences) {
+        userPreferences = preferences
     }
 
     fun updateHealthProfile(health: HealthProfile) {
