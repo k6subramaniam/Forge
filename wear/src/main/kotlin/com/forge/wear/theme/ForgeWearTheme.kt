@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.Colors
 import androidx.wear.compose.material.MaterialTheme
 
-// Same palette as the phone app and the mockups: amber accent on charcoal/black.
+// Same palette as the phone app and the UI design visuals: amber accent on charcoal/black.
 private val ForgeWearColors = Colors(
     primary = Color(0xFFF2A93B),
     primaryVariant = Color(0xFFB97A1E),
