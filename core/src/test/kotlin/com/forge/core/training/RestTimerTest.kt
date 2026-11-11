@@ -1,6 +1,6 @@
 package com.forge.core.training
 
-import com.forge.core.data.SampleData
+import com.forge.core.testing.TestRoutines
 import com.forge.core.model.RoutineExercise
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -86,7 +86,7 @@ class RestTimerTest {
     @Test
     fun `startFor uses the routine prescription's rest seconds`() {
         val target = RoutineExercise(
-            exercise = SampleData.benchPress,
+            exercise = TestRoutines.benchPress,
             targetSets = 4,
             repRange = 6..8,
             targetWeightKg = 60.0,
