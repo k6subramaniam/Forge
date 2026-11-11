@@ -149,6 +149,44 @@ class EnergyTargetsTest {
     // -- Training / rest day split -----------------------------------------------------
 
     @Test
+    fun `protein is capped to fit the calories when the full dose cannot`() {
+        // Codex P2 (#4): 70-year-old woman, 180 kg, 150 cm, sedentary, fat loss.
+        // BMR = 1800 + 937.5 − 350 − 161 = 2226.5 → floored target 2,227 kcal.
+        // Dosed protein 2.2 × 180 = 396 g (1,584 kcal) + fat floor 90 g (810 kcal)
+        // = 2,394 kcal > 2,227. Capped protein = (2,227 − 810) / 4 = 354 g.
+        val heavy = profile(
+            goal = GoalType.LOSE_FAT, sex = Sex.FEMALE, age = 70,
+            heightCm = 150.0, weightKg = 180.0, activity = ActivityLevel.SEDENTARY, trainDays = 3,
+        )
+        val plan = EnergyTargets.dailyTargets(heavy, EnergyTargets.formulaTdee(heavy))
+        listOf(plan.averageDay, plan.trainingDay, plan.restDay).forEach { day ->
+            assertTrue(day.proteinCappedToFit)
+            assertEquals(90, day.fatGrams)
+            val kcal = day.proteinGrams * 4 + day.fatGrams * 9 + day.carbGrams * 4
+            assertTrue(kcal <= day.caloriesKcal + 2, "macros $kcal kcal exceed the ${day.caloriesKcal} target")
+        }
+        assertEquals(2227, plan.averageDay.caloriesKcal)
+        assertEquals(354, plan.averageDay.proteinGrams)
+        assertEquals(0, plan.averageDay.carbGrams)
+        // Protein stays identical across day types.
+        assertEquals(plan.averageDay.proteinGrams, plan.restDay.proteinGrams)
+        assertEquals(plan.averageDay.proteinGrams, plan.trainingDay.proteinGrams)
+    }
+
+    @Test
+    fun `macro targets cap protein directly too, and only when needed`() {
+        // 150 kg fat loss: dose 330 g (1,320 kcal), fat floor 75 g (675 kcal).
+        val roomy = EnergyTargets.macroTargets(2000, 150.0, GoalType.LOSE_FAT)
+        assertFalse(roomy.proteinCappedToFit)
+        assertEquals(330, roomy.proteinGrams)
+
+        val tight = EnergyTargets.macroTargets(1800, 150.0, GoalType.LOSE_FAT)
+        assertTrue(tight.proteinCappedToFit)
+        assertEquals((1800 - 75 * 9) / 4, tight.proteinGrams) // 281 g
+        assertEquals(0, tight.carbGrams)
+    }
+
+    @Test
     fun `training days carry more, rest days balance the week`() {
         // MAINTAIN at 2800 maintenance → average target 2800, 4 training days.
         // Training: 2800 × 1.05 = 2940. Rest: (7×2800 − 4×2940) / 3 = 7840/3 → 2613.
