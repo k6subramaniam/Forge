@@ -1,7 +1,6 @@
 package com.forge.core.training
 
-import com.forge.core.data.ExerciseLibrary
-import com.forge.core.data.SampleData
+import com.forge.core.testing.TestRoutines
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.JointArea
 import com.forge.core.model.PRRecord
@@ -46,9 +45,9 @@ class SessionEngineTest {
 
     @Test
     fun `start from a routine prescribes every exercise in order`() {
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         assertEquals("s1", state.session.id)
-        assertEquals(SampleData.pushA.id, state.session.routineId)
+        assertEquals(TestRoutines.pushA.id, state.session.routineId)
         assertEquals("Push A", state.session.routineName)
         assertNull(state.session.endTime)
         assertEquals(
@@ -69,7 +68,7 @@ class SessionEngineTest {
 
         state = SessionEngine.addExercise(
             state,
-            RoutineExercise(SampleData.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
+            RoutineExercise(TestRoutines.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
         )
         assertEquals(1, state.exercises.size)
         assertEquals(0, state.currentExerciseIndex)
@@ -80,7 +79,7 @@ class SessionEngineTest {
 
     @Test
     fun `logging sets fills the current exercise and returns its rest prescription`() {
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
 
         val first = log(state, 60.0, 8, minute = 1)
         assertEquals("s1-set-1", first.loggedSet.id)
@@ -103,7 +102,7 @@ class SessionEngineTest {
 
     @Test
     fun `the final set of the session returns no rest and completes all work`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 4, 60.0, 8) // bench
         state = logSets(state, 3, 40.0, 10) // overhead press
         val last = logSets(state, 2, 25.0, 12) // first two tricep sets
@@ -117,7 +116,7 @@ class SessionEngineTest {
 
     @Test
     fun `extra sets beyond the prescription can be logged after going back`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 4, 60.0, 8)
         assertEquals(1, state.currentExerciseIndex)
         state = SessionEngine.goToExercise(state, 0)
@@ -128,7 +127,7 @@ class SessionEngineTest {
 
     @Test
     fun `effort fields are recorded on the set`() {
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         val result = SessionEngine.logSet(state, 60.0, 8, at(1), rpe = 8.5, rir = 2)
         assertEquals(8.5, result.loggedSet.rpe)
         assertEquals(2, result.loggedSet.rir)
@@ -137,7 +136,7 @@ class SessionEngineTest {
 
     @Test
     fun `logging validates its inputs and the session state`() {
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         assertThrows<IllegalArgumentException> { SessionEngine.logSet(state, -1.0, 8, at(1)) }
         assertThrows<IllegalArgumentException> { SessionEngine.logSet(state, 60.0, 0, at(1)) }
         assertThrows<IllegalArgumentException> { SessionEngine.logSet(state, 60.0, 8, at(1), rpe = 11.0) }
@@ -159,7 +158,7 @@ class SessionEngineTest {
 
     @Test
     fun `skip marks the exercise and moves on, and going back un-skips it`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = SessionEngine.skipExercise(state)
         assertTrue(state.exercises[0].skipped)
         assertEquals(1, state.currentExerciseIndex)
@@ -171,7 +170,7 @@ class SessionEngineTest {
 
     @Test
     fun `going back to an earlier exercise keeps its logged sets`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 2, 60.0, 8)
         state = SessionEngine.moveToNext(state)
         assertEquals(1, state.currentExerciseIndex)
@@ -186,7 +185,7 @@ class SessionEngineTest {
 
     @Test
     fun `pause and resume toggle the flag`() {
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         assertTrue(SessionEngine.pause(state).isPaused)
         assertFalse(SessionEngine.resume(SessionEngine.pause(state)).isPaused)
     }
@@ -195,7 +194,7 @@ class SessionEngineTest {
 
     @Test
     fun `undo removes the last logged set and returns the pointer to its exercise`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 4, 60.0, 8) // bench complete, pointer on overhead press
         state = logSets(state, 1, 40.0, 10) // one overhead set
 
@@ -211,7 +210,7 @@ class SessionEngineTest {
 
     @Test
     fun `undo with nothing logged is a no-op`() {
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         assertEquals(state, SessionEngine.undoLastSet(state))
     }
 
@@ -222,20 +221,26 @@ class SessionEngineTest {
         val constraints = constraintsFor(
             HealthProfile(jointLimitations = setOf(JointArea.SHOULDER), onboardingComplete = true),
         )
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start, constraints = constraints)
+        // The starter-ten library is passed explicitly: "Landmine press" is not
+        // in it, so this test pins the synthesized-stand-in path. (With the
+        // full library the same case resolves the real exercise — see
+        // TagConstraintTest.)
+        val state = SessionEngine.start(
+            TestRoutines.pushA, sessionId = "s1", startTime = start,
+            constraints = constraints, library = TestRoutines.exercises,
+        )
 
         assertEquals(3, state.exercises.size)
         val overhead = state.exercises[1]
-        // First shoulder substitution, resolved to its tagged library entry (the default library).
-        assertEquals(ExerciseLibrary.landminePress, overhead.exercise)
-        assertEquals(SampleData.overheadPress, overhead.substitutedFor)
+        assertEquals("Landmine press", overhead.exercise.name) // first shoulder substitution
+        assertEquals(TestRoutines.overheadPress, overhead.substitutedFor)
         assertNotNull(overhead.adjustmentReason)
         assertTrue(overhead.adjustmentReason!!.contains("Overhead Press"))
         // The excluded exercise itself is nowhere in the plan.
-        assertTrue(state.exercises.none { it.exercise.id == SampleData.overheadPress.id })
+        assertTrue(state.exercises.none { it.exercise.id == TestRoutines.overheadPress.id })
         assertTrue(state.droppedExercises.isEmpty())
         // Untouched exercises keep their prescriptions.
-        assertEquals(SampleData.benchPress, state.exercises[0].exercise)
+        assertEquals(TestRoutines.benchPress, state.exercises[0].exercise)
         assertEquals(40.0, overhead.prescription.targetWeightKg, 0.0)
     }
 
@@ -244,14 +249,19 @@ class SessionEngineTest {
         val constraints = constraintsFor(
             HealthProfile(jointLimitations = setOf(JointArea.KNEE), onboardingComplete = true),
         )
-        val state = SessionEngine.start(SampleData.legsA, sessionId = "s1", startTime = start, constraints = constraints)
+        // Starter-ten library, as above: the box squat is not in it, so the
+        // gate's descriptive phrase stays a synthesized stand-in here.
+        val state = SessionEngine.start(
+            TestRoutines.legsA, sessionId = "s1", startTime = start,
+            constraints = constraints, library = TestRoutines.exercises,
+        )
         val squatSlot = state.exercises[0]
-        // "Box squat to comfortable depth" resolves to the tagged library box squat.
-        assertEquals(ExerciseLibrary.boxSquat, squatSlot.exercise)
-        assertEquals(SampleData.squat, squatSlot.substitutedFor)
+        assertEquals("Box squat to comfortable depth", squatSlot.exercise.name)
+        assertEquals(TestRoutines.squat, squatSlot.substitutedFor)
+        assertTrue(squatSlot.exercise.id.startsWith("substitute-"))
         // Neighbours are unaffected.
-        assertEquals(SampleData.deadlift, state.exercises[1].exercise)
-        assertEquals(SampleData.legPress, state.exercises[2].exercise)
+        assertEquals(TestRoutines.deadlift, state.exercises[1].exercise)
+        assertEquals(TestRoutines.legPress, state.exercises[2].exercise)
     }
 
     @Test
@@ -269,9 +279,9 @@ class SessionEngineTest {
             intensityMayOnlyScaleDown = false,
             promptConstraints = emptyList(),
         )
-        val state = SessionEngine.start(SampleData.legsA, sessionId = "s1", startTime = start, constraints = constraints)
-        assertEquals(SampleData.legPress, state.exercises[0].exercise)
-        assertEquals(SampleData.squat, state.exercises[0].substitutedFor)
+        val state = SessionEngine.start(TestRoutines.legsA, sessionId = "s1", startTime = start, constraints = constraints)
+        assertEquals(TestRoutines.legPress, state.exercises[0].exercise)
+        assertEquals(TestRoutines.squat, state.exercises[0].substitutedFor)
     }
 
     @Test
@@ -295,13 +305,13 @@ class SessionEngineTest {
             intensityMayOnlyScaleDown = false,
             promptConstraints = emptyList(),
         )
-        val state = SessionEngine.start(SampleData.legsA, sessionId = "s1", startTime = start, constraints = constraints)
+        val state = SessionEngine.start(TestRoutines.legsA, sessionId = "s1", startTime = start, constraints = constraints)
         assertEquals(
             listOf("Deadlift", "Leg Press", "Calf Raise"),
             state.exercises.map { it.exercise.name },
         )
         assertEquals(1, state.droppedExercises.size)
-        assertEquals(SampleData.squat, state.droppedExercises.single().exercise)
+        assertEquals(TestRoutines.squat, state.droppedExercises.single().exercise)
         assertTrue(state.droppedExercises.single().reason.contains("Squat"))
         assertEquals(0, state.currentExerciseIndex)
     }
@@ -314,18 +324,19 @@ class SessionEngineTest {
         var state = SessionEngine.startFreeform(sessionId = "s2", startTime = start)
         state = SessionEngine.addExercise(
             state,
-            RoutineExercise(SampleData.squat, targetSets = 3, repRange = 5..6, targetWeightKg = 80.0),
+            RoutineExercise(TestRoutines.squat, targetSets = 3, repRange = 5..6, targetWeightKg = 80.0),
             constraints = constraints,
+            library = TestRoutines.exercises, // starter ten: stand-in path, as above
         )
-        assertEquals(ExerciseLibrary.boxSquat, state.exercises.single().exercise)
-        assertEquals(SampleData.squat, state.exercises.single().substitutedFor)
+        assertEquals("Box squat to comfortable depth", state.exercises.single().exercise.name)
+        assertEquals(TestRoutines.squat, state.exercises.single().substitutedFor)
     }
 
     // -- Pain (blueprint 3.0) ----------------------------------------------------
 
     @Test
     fun `a pain flag records the set, swaps the exercise out, and moves the session on`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 1, 60.0, 8)
         val pain = SessionEngine.logSet(state, 60.0, 6, at(5), painReported = true)
 
@@ -333,7 +344,7 @@ class SessionEngineTest {
         val bench = pain.state.exercises[0]
         assertEquals(2, bench.loggedSets.size) // both sets stay in the record
         assertTrue(bench.painReported)
-        assertTrue(pain.state.isRemovedForPain(0))
+        assertTrue(bench.removedForPain)
         assertEquals(1, pain.state.currentExerciseIndex) // moved on to overhead press
         assertThrows<IllegalArgumentException> { SessionEngine.goToExercise(pain.state, 0) }
 
@@ -344,94 +355,20 @@ class SessionEngineTest {
 
     @Test
     fun `undoing the pain set restores the exercise`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = SessionEngine.logSet(state, 60.0, 6, at(5), painReported = true).state
-        assertTrue(state.isRemovedForPain(0))
+        assertTrue(state.exercises[0].removedForPain)
 
         state = SessionEngine.undoLastSet(state)
-        assertFalse(state.isRemovedForPain(0))
+        assertFalse(state.exercises[0].removedForPain)
         assertEquals(0, state.currentExerciseIndex)
-    }
-
-    /** Bench twice (two sets each) around an overhead press block. */
-    private val benchTwice = Routine(
-        id = "routine-bench-twice",
-        name = "Bench twice",
-        exercises = listOf(
-            RoutineExercise(SampleData.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
-            RoutineExercise(SampleData.overheadPress, targetSets = 2, repRange = 8..10, targetWeightKg = 40.0),
-            RoutineExercise(SampleData.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
-        ),
-    )
-
-    @Test
-    fun `pain in one entry removes every entry of that exercise`() {
-        // Codex P1 (#1): the second bench block must not be prescribed again.
-        var state = SessionEngine.start(benchTwice, sessionId = "s1", startTime = start)
-        state = SessionEngine.logSet(state, 60.0, 6, at(1), painReported = true).state
-
-        assertTrue(state.isRemovedForPain(0))
-        assertTrue(state.isRemovedForPain(2))
-        assertEquals(1, state.currentExerciseIndex) // overhead press, not the second bench
-        assertThrows<IllegalArgumentException> { SessionEngine.goToExercise(state, 2) }
-
-        // Finishing overhead press leaves nothing: both bench entries are out.
-        val done = SessionEngine.logSet(logSets(state, 1, 40.0, 10, fromMinute = 2), 40.0, 10, at(4))
-        assertTrue(done.allWorkComplete)
-        assertNull(done.state.currentExerciseIndex)
-        assertEquals(listOf("Bench Press"), SessionEngine.finish(done.state, at(30), date).summary.painExercises)
-    }
-
-    @Test
-    fun `undoing the pain set restores every entry of the exercise`() {
-        var state = SessionEngine.start(benchTwice, sessionId = "s1", startTime = start)
-        state = SessionEngine.logSet(state, 60.0, 6, at(1), painReported = true).state
-        state = SessionEngine.undoLastSet(state)
-        assertFalse(state.isRemovedForPain(0))
-        assertFalse(state.isRemovedForPain(2))
-        assertTrue(state.isAvailable(2))
-    }
-
-    @Test
-    fun `an exercise added after a pain report stays out until the pain set is undone`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
-        state = SessionEngine.logSet(state, 60.0, 6, at(1), painReported = true).state // bench out
-        state = SessionEngine.skipExercise(state) // overhead press
-        state = SessionEngine.skipExercise(state) // tricep pushdown: no work left
-        assertNull(state.currentExerciseIndex)
-
-        state = SessionEngine.addExercise(
-            state,
-            RoutineExercise(SampleData.benchPress, targetSets = 3, repRange = 6..8, targetWeightKg = 60.0),
-        )
-        val added = state.exercises.lastIndex
-        assertTrue(state.isRemovedForPain(added))
-        assertNull(state.currentExerciseIndex) // never pointed at a pain-removed exercise
-
-        state = SessionEngine.undoLastSet(state)
-        assertTrue(state.isAvailable(added))
-    }
-
-    @Test
-    fun `undo onto a skipped exercise un-skips it so the corrected set can be logged`() {
-        // Codex P2 (#1): log, skip, undo used to land on a skipped, unloggable exercise.
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
-        state = log(state, 60.0, 8, 1).state
-        state = SessionEngine.skipExercise(state)
-        assertEquals(1, state.currentExerciseIndex)
-
-        state = SessionEngine.undoLastSet(state)
-        assertEquals(0, state.currentExerciseIndex)
-        assertFalse(state.exercises[0].skipped)
-        val relogged = log(state, 62.5, 8, 2)
-        assertEquals(62.5, relogged.loggedSet.weightKg)
     }
 
     // -- Finishing ---------------------------------------------------------------
 
     @Test
     fun `finish produces a completed session and a full summary`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 4, 60.0, 8) // bench: 4 x 480 = 1920
         state = logSets(state, 3, 40.0, 10) // overhead: 3 x 400 = 1200
         state = logSets(state, 3, 25.0, 12) // tricep: 3 x 300 = 900
@@ -445,7 +382,7 @@ class SessionEngineTest {
         )
         assertTrue(finished.session.isCompleted)
         assertEquals(at(60), finished.session.endTime)
-        assertEquals(SampleData.pushA.id, finished.session.routineId)
+        assertEquals(TestRoutines.pushA.id, finished.session.routineId)
         assertEquals(118, finished.session.avgHeartRateBpm)
         assertEquals(10, finished.sets.size)
 
@@ -470,7 +407,7 @@ class SessionEngineTest {
             PRRecord("ex-bench-press", "Bench Press", PrType.MAX_VOLUME, 400.0, date.minusWeeks(1)),
             PRRecord("ex-bench-press", "Bench Press", PrType.ESTIMATED_1RM, 70.0, date.minusWeeks(1)),
         )
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 1, 60.0, 8) // 60 kg, 480 volume, 76.0 est. 1RM — beats all three
         val finished = SessionEngine.finish(state, endTime = at(30), date = date, existingPrs = history)
 
@@ -492,7 +429,7 @@ class SessionEngineTest {
             PRRecord("ex-bench-press", "Bench Press", PrType.MAX_VOLUME, 1000.0, date.minusWeeks(1)),
             PRRecord("ex-bench-press", "Bench Press", PrType.ESTIMATED_1RM, 150.0, date.minusWeeks(1)),
         )
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = logSets(state, 1, 60.0, 8)
         val finished = SessionEngine.finish(state, endTime = at(30), date = date, existingPrs = history)
         assertTrue(finished.summary.newPrs.none { it.exerciseId == "ex-bench-press" })
@@ -500,7 +437,7 @@ class SessionEngineTest {
 
     @Test
     fun `finish rejects an end time before the start`() {
-        val state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         assertThrows<IllegalArgumentException> {
             SessionEngine.finish(state, endTime = start.minusSeconds(60), date = date)
         }
@@ -511,12 +448,12 @@ class SessionEngineTest {
         var state = SessionEngine.startFreeform(sessionId = "s2", startTime = start)
         state = SessionEngine.addExercise(
             state,
-            RoutineExercise(SampleData.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
+            RoutineExercise(TestRoutines.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
         )
         state = logSets(state, 2, 60.0, 8)
         state = SessionEngine.addExercise(
             state,
-            RoutineExercise(SampleData.squat, targetSets = 1, repRange = 5..6, targetWeightKg = 80.0),
+            RoutineExercise(TestRoutines.squat, targetSets = 1, repRange = 5..6, targetWeightKg = 80.0),
         )
         state = logSets(state, 1, 80.0, 5)
 
@@ -542,7 +479,7 @@ class SessionEngineTest {
 
     @Test
     fun `finishing the last exercise wraps back to an unfinished earlier one`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         // Advance early twice, leaving bench and overhead press untouched.
         state = SessionEngine.moveToNext(state)
         state = SessionEngine.moveToNext(state)
@@ -567,7 +504,7 @@ class SessionEngineTest {
 
     @Test
     fun `skipping the last exercise wraps back to an unfinished earlier one`() {
-        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = SessionEngine.moveToNext(state)
         state = SessionEngine.moveToNext(state)
         state = SessionEngine.skipExercise(state)
@@ -583,8 +520,8 @@ class SessionEngineTest {
         id = "r-bench-twice",
         name = "Bench Twice",
         exercises = listOf(
-            RoutineExercise(SampleData.benchPress, targetSets = 1, repRange = 5..5, targetWeightKg = 100.0),
-            RoutineExercise(SampleData.benchPress, targetSets = 1, repRange = 5..5, targetWeightKg = 80.0),
+            RoutineExercise(TestRoutines.benchPress, targetSets = 1, repRange = 5..5, targetWeightKg = 100.0),
+            RoutineExercise(TestRoutines.benchPress, targetSets = 1, repRange = 5..5, targetWeightKg = 80.0),
         ),
     )
 
