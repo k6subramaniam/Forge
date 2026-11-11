@@ -1,1 +1,64 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS50cmFpbmluZwoKLyoqCiAqIFBsYXRlIGNhbGN1bGF0b3IgKGJsdWVwcmludCAzLjEpOiBnaXZlbiBhIHRhcmdldCB0b3RhbCB3ZWlnaHQgYW5kIGEgYmFyIHdlaWdodCwKICogd29yayBvdXQgdGhlIHBsYXRlcyB0byBsb2FkIHBlciBzaWRlIGZyb20gdGhlIGd5bSdzIGtnIHBsYXRlIHNldC4KICoKICogTG9hZGluZyBpcyBncmVlZHksIGhlYXZpZXN0IHBsYXRlIGZpcnN0IOKAlCB3aGljaCBpcyBhbHNvIGhvdyBhIGh1bWFuIGxvYWRzIGEgYmFyLgogKiBBbGwgcGxhdGUgZGVub21pbmF0aW9ucyBhcmUgZXhhY3QgYmluYXJ5IGZyYWN0aW9ucy9pbnRlZ2Vycywgc28gRG91YmxlIG1hdGggaGVyZQogKiBpcyBleGFjdDsgbm8gcm91bmRpbmcgZnVkZ2UgaXMgbmVlZGVkLgogKi8Kb2JqZWN0IFBsYXRlQ2FsY3VsYXRvciB7CgogICAgLyoqIEF2YWlsYWJsZSBwbGF0ZSBkZW5vbWluYXRpb25zIGluIGtnLCBoZWF2aWVzdCBmaXJzdCAoYmx1ZXByaW50IDMuMSkuICovCiAgICB2YWwgUExBVEVTX0tHOiBMaXN0PERvdWJsZT4gPSBsaXN0T2YoMjUuMCwgMjAuMCwgMTUuMCwgMTAuMCwgNS4wLCAyLjUsIDEuMjUpCgogICAgY29uc3QgdmFsIERFRkFVTFRfQkFSX0tHID0gMjAuMAoKICAgIGRhdGEgY2xhc3MgUGxhdGVMb2FkKAogICAgICAgIHZhbCB0YXJnZXRXZWlnaHRLZzogRG91YmxlLAogICAgICAgIHZhbCBiYXJXZWlnaHRLZzogRG91YmxlLAogICAgICAgIC8qKiBQbGF0ZXMgZm9yIE9ORSBzaWRlIG9mIHRoZSBiYXIsIGhlYXZpZXN0IGZpcnN0LiAqLwogICAgICAgIHZhbCBwbGF0ZXNQZXJTaWRlOiBMaXN0PERvdWJsZT4sCiAgICAgICAgLyoqIFRoZSB3ZWlnaHQgYWN0dWFsbHkgbG9hZGVkIChiYXIgKyBib3RoIHNpZGVzKS4gKi8KICAgICAgICB2YWwgYWNoaWV2ZWRXZWlnaHRLZzogRG91YmxlLAogICAgICAgIC8qKiB0YXJnZXQg4oiSIGFjaGlldmVkLiBQb3NpdGl2ZSB3aGVuIHRoZSB0YXJnZXQgY2FuJ3QgYmUgaGl0IGV4YWN0bHkgd2l0aCB0aGlzIHBsYXRlIHNldC4gKi8KICAgICAgICB2YWwgc2hvcnRmYWxsS2c6IERvdWJsZSwKICAgICkgewogICAgICAgIHZhbCBpc0V4YWN0OiBCb29sZWFuIGdldCgpID0gc2hvcnRmYWxsS2cgPT0gMC4wCiAgICB9CgogICAgZnVuIGNhbGN1bGF0ZSh0YXJnZXRXZWlnaHRLZzogRG91YmxlLCBiYXJXZWlnaHRLZzogRG91YmxlID0gREVGQVVMVF9CQVJfS0cpOiBQbGF0ZUxvYWQgewogICAgICAgIHJlcXVpcmUodGFyZ2V0V2VpZ2h0S2cgPiAwKSB7ICJUYXJnZXQgd2VpZ2h0IG11c3QgYmUgcG9zaXRpdmUsIHdhcyAkdGFyZ2V0V2VpZ2h0S2ciIH0KICAgICAgICByZXF1aXJlKGJhcldlaWdodEtnID49IDApIHsgIkJhciB3ZWlnaHQgY2Fubm90IGJlIG5lZ2F0aXZlLCB3YXMgJGJhcldlaWdodEtnIiB9CgogICAgICAgIGlmICh0YXJnZXRXZWlnaHRLZyA8PSBiYXJXZWlnaHRLZykgewogICAgICAgICAgICAvLyBFbXB0eSBiYXIgaXMgdGhlIGNsb3Nlc3QgbG9hZGFibGUgd2VpZ2h0LgogICAgICAgICAgICByZXR1cm4gUGxhdGVMb2FkKAogICAgICAgICAgICAgICAgdGFyZ2V0V2VpZ2h0S2cgPSB0YXJnZXRXZWlnaHRLZywKICAgICAgICAgICAgICAgIGJhcldlaWdodEtnID0gYmFyV2VpZ2h0S2csCiAgICAgICAgICAgICAgICBwbGF0ZXNQZXJTaWRlID0gZW1wdHlMaXN0KCksCiAgICAgICAgICAgICAgICBhY2hpZXZlZFdlaWdodEtnID0gYmFyV2VpZ2h0S2csCiAgICAgICAgICAgICAgICBzaG9ydGZhbGxLZyA9IHRhcmdldFdlaWdodEtnIC0gYmFyV2VpZ2h0S2csCiAgICAgICAgICAgICkKICAgICAgICB9CgogICAgICAgIHZhciByZW1haW5pbmdQZXJTaWRlID0gKHRhcmdldFdlaWdodEtnIC0gYmFyV2VpZ2h0S2cpIC8gMi4wCiAgICAgICAgdmFsIHBsYXRlcyA9IG11dGFibGVMaXN0T2Y8RG91YmxlPigpCiAgICAgICAgZm9yIChwbGF0ZSBpbiBQTEFURVNfS0cpIHsKICAgICAgICAgICAgd2hpbGUgKHJlbWFpbmluZ1BlclNpZGUgPj0gcGxhdGUpIHsKICAgICAgICAgICAgICAgIHBsYXRlcyArPSBwbGF0ZQogICAgICAgICAgICAgICAgcmVtYWluaW5nUGVyU2lkZSAtPSBwbGF0ZQogICAgICAgICAgICB9CiAgICAgICAgfQoKICAgICAgICB2YWwgYWNoaWV2ZWQgPSBiYXJXZWlnaHRLZyArIDIuMCAqIHBsYXRlcy5zdW0oKQogICAgICAgIHJldHVybiBQbGF0ZUxvYWQoCiAgICAgICAgICAgIHRhcmdldFdlaWdodEtnID0gdGFyZ2V0V2VpZ2h0S2csCiAgICAgICAgICAgIGJhcldlaWdodEtnID0gYmFyV2VpZ2h0S2csCiAgICAgICAgICAgIHBsYXRlc1BlclNpZGUgPSBwbGF0ZXMsCiAgICAgICAgICAgIGFjaGlldmVkV2VpZ2h0S2cgPSBhY2hpZXZlZCwKICAgICAgICAgICAgc2hvcnRmYWxsS2cgPSB0YXJnZXRXZWlnaHRLZyAtIGFjaGlldmVkLAogICAgICAgICkKICAgIH0KfQo=
+package com.forge.core.training
+
+/**
+ * Plate calculator (blueprint 3.1): given a target total weight and a bar weight,
+ * work out the plates to load per side from the gym's kg plate set.
+ *
+ * Loading is greedy, heaviest plate first — which is also how a human loads a bar.
+ * All plate denominations are exact binary fractions/integers, so Double math here
+ * is exact; no rounding fudge is needed.
+ */
+object PlateCalculator {
+
+    /** Available plate denominations in kg, heaviest first (blueprint 3.1). */
+    val PLATES_KG: List<Double> = listOf(25.0, 20.0, 15.0, 10.0, 5.0, 2.5, 1.25)
+
+    const val DEFAULT_BAR_KG = 20.0
+
+    data class PlateLoad(
+        val targetWeightKg: Double,
+        val barWeightKg: Double,
+        /** Plates for ONE side of the bar, heaviest first. */
+        val platesPerSide: List<Double>,
+        /** The weight actually loaded (bar + both sides). */
+        val achievedWeightKg: Double,
+        /** target − achieved. Positive when the target can't be hit exactly with this plate set. */
+        val shortfallKg: Double,
+    ) {
+        val isExact: Boolean get() = shortfallKg == 0.0
+    }
+
+    fun calculate(targetWeightKg: Double, barWeightKg: Double = DEFAULT_BAR_KG): PlateLoad {
+        require(targetWeightKg > 0) { "Target weight must be positive, was $targetWeightKg" }
+        require(barWeightKg >= 0) { "Bar weight cannot be negative, was $barWeightKg" }
+
+        if (targetWeightKg <= barWeightKg) {
+            // Empty bar is the closest loadable weight.
+            return PlateLoad(
+                targetWeightKg = targetWeightKg,
+                barWeightKg = barWeightKg,
+                platesPerSide = emptyList(),
+                achievedWeightKg = barWeightKg,
+                shortfallKg = targetWeightKg - barWeightKg,
+            )
+        }
+
+        var remainingPerSide = (targetWeightKg - barWeightKg) / 2.0
+        val plates = mutableListOf<Double>()
+        for (plate in PLATES_KG) {
+            while (remainingPerSide >= plate) {
+                plates += plate
+                remainingPerSide -= plate
+            }
+        }
+
+        val achieved = barWeightKg + 2.0 * plates.sum()
+        return PlateLoad(
+            targetWeightKg = targetWeightKg,
+            barWeightKg = barWeightKg,
+            platesPerSide = plates,
+            achievedWeightKg = achieved,
+            shortfallKg = targetWeightKg - achieved,
+        )
+    }
+}
