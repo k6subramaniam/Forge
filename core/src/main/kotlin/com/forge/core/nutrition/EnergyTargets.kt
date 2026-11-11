@@ -6,6 +6,7 @@ import com.forge.core.model.GoalType
 import com.forge.core.model.Sex
 import kotlin.math.ceil
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /** One day's nutrition targets: calories plus macro split, in whole grams. */
@@ -15,6 +16,13 @@ data class MacroTargets(
     val fatGrams: Int,
     val carbGrams: Int,
     val fibreGrams: Int,
+    /**
+     * True when protein was reduced below its g/kg dose so that protein and the
+     * fat floor fit the calorie target. At very high bodyweight on a floored
+     * target, the full dose plus fat can exceed the day's energy. The plan then
+     * stays consistent and says so, rather than promising both.
+     */
+    val proteinCappedToFit: Boolean = false,
 )
 
 /**
@@ -208,17 +216,28 @@ object EnergyTargets {
      * 14 g per 1,000 kcal. Protein and fat are rounded first and carbs absorb
      * the rounding, so the split always sums back to the calorie target
      * (±2 kcal of carb rounding).
+     *
+     * Feasibility: when the protein dose plus fat would exceed the calories,
+     * protein is capped to what the calories allow after fat, carbs are 0, and
+     * [MacroTargets.proteinCappedToFit] is set. Fat keeps its floor: it is the
+     * smaller, essential allocation, and the cap only binds at very high
+     * bodyweight on a floored target.
      */
     fun macroTargets(caloriesKcal: Int, weightKg: Double, goal: GoalType): MacroTargets {
         require(caloriesKcal > 0) { "caloriesKcal must be positive" }
         require(weightKg > 0.0) { "weightKg must be positive" }
-        val proteinGrams = (proteinGramsPerKg(goal) * weightKg).roundToInt()
+        val dosedProteinGrams = (proteinGramsPerKg(goal) * weightKg).roundToInt()
         val fatGrams = max(
             FAT_CALORIE_SHARE * caloriesKcal / KCAL_PER_G_FAT,
             FAT_FLOOR_GRAMS_PER_KG * weightKg,
         ).roundToInt()
-        return splitAround(caloriesKcal, proteinGrams, fatGrams)
+        val proteinGrams = min(dosedProteinGrams, proteinThatFits(caloriesKcal, fatGrams))
+        return splitAround(caloriesKcal, proteinGrams, fatGrams, capped = proteinGrams < dosedProteinGrams)
     }
+
+    /** The most protein (g) that fits [caloriesKcal] after [fatGrams] of fat, never negative. */
+    private fun proteinThatFits(caloriesKcal: Int, fatGrams: Int): Int =
+        max(0, (caloriesKcal - fatGrams * KCAL_PER_G_FAT) / KCAL_PER_G_PROTEIN)
 
     /**
      * The full target plan for [profile] at a [maintenanceKcal] estimate
@@ -233,7 +252,9 @@ object EnergyTargets {
      * grams are identical on both day types — the swing lands entirely on
      * carbohydrate, fuelling training days. If the rest day would fall below
      * the BMR floor it is clamped to the floor and the training day
-     * rebalances instead ([EnergyPlan.daySplitFloorApplied]).
+     * rebalances instead ([EnergyPlan.daySplitFloorApplied]). If the protein
+     * cap binds on any day (see [macroTargets]), the lowest day's cap applies
+     * to all of them, so protein stays identical across day types.
      */
     fun dailyTargets(profile: GoalProfile, maintenanceKcal: Double): EnergyPlan {
         val target = calorieTarget(profile, maintenanceKcal)
@@ -253,12 +274,17 @@ object EnergyTargets {
             trainingKcal = ((weeklyTotal - restDays * restKcal).toDouble() / trainDays).roundToInt()
             splitFloorApplied = true
         }
+        val dosedProteinGrams = (proteinGramsPerKg(profile.goal) * profile.weightKg).roundToInt()
+        val proteinGrams = listOf(target.caloriesKcal, trainingKcal, restKcal)
+            .minOf { proteinThatFits(it, average.fatGrams) }
+            .coerceAtMost(dosedProteinGrams)
+        val capped = proteinGrams < dosedProteinGrams
         return EnergyPlan(
             bmrKcal = bmrKcal,
             target = target,
-            averageDay = average,
-            trainingDay = splitAround(trainingKcal, average.proteinGrams, average.fatGrams),
-            restDay = splitAround(restKcal, average.proteinGrams, average.fatGrams),
+            averageDay = splitAround(target.caloriesKcal, proteinGrams, average.fatGrams, capped),
+            trainingDay = splitAround(trainingKcal, proteinGrams, average.fatGrams, capped),
+            restDay = splitAround(restKcal, proteinGrams, average.fatGrams, capped),
             daySplitFloorApplied = splitFloorApplied,
         )
     }
@@ -268,7 +294,12 @@ object EnergyTargets {
      * energy remains (never negative — at extreme targets they floor at 0
      * rather than reporting a nonsense negative), fibre scales with the day.
      */
-    private fun splitAround(caloriesKcal: Int, proteinGrams: Int, fatGrams: Int): MacroTargets {
+    private fun splitAround(
+        caloriesKcal: Int,
+        proteinGrams: Int,
+        fatGrams: Int,
+        capped: Boolean = false,
+    ): MacroTargets {
         val remaining = caloriesKcal -
             proteinGrams * KCAL_PER_G_PROTEIN -
             fatGrams * KCAL_PER_G_FAT
@@ -278,6 +309,7 @@ object EnergyTargets {
             fatGrams = fatGrams,
             carbGrams = max(0, (remaining.toDouble() / KCAL_PER_G_CARB).roundToInt()),
             fibreGrams = (caloriesKcal * FIBRE_GRAMS_PER_1000_KCAL / 1000.0).roundToInt(),
+            proteinCappedToFit = capped,
         )
     }
 }
