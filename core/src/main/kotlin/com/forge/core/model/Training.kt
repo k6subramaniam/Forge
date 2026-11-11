@@ -1,1 +1,58 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS5tb2RlbAoKLyoqIE11c2NsZSBncm91cHMgZm9yIHRoZSBleGVyY2lzZSBsaWJyYXJ5IChibHVlcHJpbnQgMy4yKS4gKi8KZW51bSBjbGFzcyBNdXNjbGVHcm91cCB7CiAgICBDSEVTVCwKICAgIEJBQ0ssCiAgICBTSE9VTERFUlMsCiAgICBCSUNFUFMsCiAgICBUUklDRVBTLAogICAgUVVBRFMsCiAgICBIQU1TVFJJTkdTLAogICAgR0xVVEVTLAogICAgQ0FMVkVTLAogICAgQ09SRSwKICAgIEZVTExfQk9EWTsKCiAgICAvKiogTG93ZXItYm9keSBncm91cHMgZ2V0IHRoZSArNSBrZyBvdmVybG9hZCBpbmNyZW1lbnQ7IGV2ZXJ5dGhpbmcgZWxzZSArMi41IGtnIChibHVlcHJpbnQgMy4yKS4gKi8KICAgIHZhbCBpc0xvd2VyQm9keTogQm9vbGVhbgogICAgICAgIGdldCgpID0gdGhpcyA9PSBRVUFEUyB8fCB0aGlzID09IEhBTVNUUklOR1MgfHwgdGhpcyA9PSBHTFVURVMgfHwgdGhpcyA9PSBDQUxWRVMKfQoKZW51bSBjbGFzcyBFcXVpcG1lbnQgewogICAgQkFSQkVMTCwKICAgIERVTUJCRUxMLAogICAgTUFDSElORSwKICAgIENBQkxFLAogICAgS0VUVExFQkVMTCwKICAgIEJPRFlXRUlHSFQsCn0KCi8qKiBCbHVlcHJpbnQgwqc1OiBFeGVyY2lzZSDigJQgbmFtZSwgbXVzY2xlIGdyb3VwLCBlcXVpcG1lbnQsIGN1c3RvbSBmbGFnLiAqLwpkYXRhIGNsYXNzIEV4ZXJjaXNlKAogICAgdmFsIGlkOiBTdHJpbmcsCiAgICB2YWwgbmFtZTogU3RyaW5nLAogICAgdmFsIG11c2NsZUdyb3VwOiBNdXNjbGVHcm91cCwKICAgIHZhbCBlcXVpcG1lbnQ6IEVxdWlwbWVudCwKICAgIHZhbCBpc0N1c3RvbTogQm9vbGVhbiA9IGZhbHNlLAopCgovKiogQmx1ZXByaW50IMKnNTogYW4gZXhlcmNpc2UgYXMgcHJlc2NyaWJlZCBpbnNpZGUgYSByb3V0aW5lLiAqLwpkYXRhIGNsYXNzIFJvdXRpbmVFeGVyY2lzZSgKICAgIHZhbCBleGVyY2lzZTogRXhlcmNpc2UsCiAgICB2YWwgdGFyZ2V0U2V0czogSW50LAogICAgdmFsIHJlcFJhbmdlOiBJbnRSYW5nZSwKICAgIHZhbCB0YXJnZXRXZWlnaHRLZzogRG91YmxlLAogICAgdmFsIHJlc3RTZWNvbmRzOiBJbnQgPSBERUZBVUxUX1JFU1RfU0VDT05EUywKKSB7CiAgICBjb21wYW5pb24gb2JqZWN0IHsKICAgICAgICBjb25zdCB2YWwgREVGQVVMVF9SRVNUX1NFQ09ORFMgPSA5MAogICAgfQp9CgovKiogQmx1ZXByaW50IMKnNTogUm91dGluZSDigJQgbmFtZSArIG9yZGVyZWQgbGlzdCBvZiBwcmVzY3JpYmVkIGV4ZXJjaXNlcy4gKi8KZGF0YSBjbGFzcyBSb3V0aW5lKAogICAgdmFsIGlkOiBTdHJpbmcsCiAgICB2YWwgbmFtZTogU3RyaW5nLAogICAgdmFsIGV4ZXJjaXNlczogTGlzdDxSb3V0aW5lRXhlcmNpc2U+LAopCg==
+package com.forge.core.model
+
+/** Muscle groups for the exercise library (blueprint 3.2). */
+enum class MuscleGroup {
+    CHEST,
+    BACK,
+    SHOULDERS,
+    BICEPS,
+    TRICEPS,
+    QUADS,
+    HAMSTRINGS,
+    GLUTES,
+    CALVES,
+    CORE,
+    FULL_BODY;
+
+    /** Lower-body groups get the +5 kg overload increment; everything else +2.5 kg (blueprint 3.2). */
+    val isLowerBody: Boolean
+        get() = this == QUADS || this == HAMSTRINGS || this == GLUTES || this == CALVES
+}
+
+enum class Equipment {
+    BARBELL,
+    DUMBBELL,
+    MACHINE,
+    CABLE,
+    KETTLEBELL,
+    BODYWEIGHT,
+}
+
+/** Blueprint §5: Exercise — name, muscle group, equipment, custom flag. */
+data class Exercise(
+    val id: String,
+    val name: String,
+    val muscleGroup: MuscleGroup,
+    val equipment: Equipment,
+    val isCustom: Boolean = false,
+)
+
+/** Blueprint §5: an exercise as prescribed inside a routine. */
+data class RoutineExercise(
+    val exercise: Exercise,
+    val targetSets: Int,
+    val repRange: IntRange,
+    val targetWeightKg: Double,
+    val restSeconds: Int = DEFAULT_REST_SECONDS,
+) {
+    companion object {
+        const val DEFAULT_REST_SECONDS = 90
+    }
+}
+
+/** Blueprint §5: Routine — name + ordered list of prescribed exercises. */
+data class Routine(
+    val id: String,
+    val name: String,
+    val exercises: List<RoutineExercise>,
+)
