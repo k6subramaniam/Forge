@@ -1,1 +1,25 @@
-IyBHcmFkbGUKLmdyYWRsZS8KYnVpbGQvCm91dC8KCiMgQW5kcm9pZApsb2NhbC5wcm9wZXJ0aWVzCiouaW1sCi5pZGVhLwpjYXB0dXJlcy8KLmV4dGVybmFsTmF0aXZlQnVpbGQvCi5jeHgvCgojIEdlbmVyYXRlZCBBUEtzIC8gYnVuZGxlcwoqLmFwawoqLmFhYgoKIyBLZXlzdG9yZXMg4oCUIG5ldmVyIGNvbW1pdCBzaWduaW5nIG1hdGVyaWFsCiouamtzCioua2V5c3RvcmUKa2V5c3RvcmUucHJvcGVydGllcwoKIyBPUyAvIGVkaXRvciBub2lzZQouRFNfU3RvcmUKKi5zd3AK
+# Gradle
+.gradle/
+build/
+out/
+
+# Android
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Generated APKs / bundles
+*.apk
+*.aab
+
+# Keystores — never commit signing material
+*.jks
+*.keystore
+keystore.properties
+
+# OS / editor noise
+.DS_Store
+*.swp
