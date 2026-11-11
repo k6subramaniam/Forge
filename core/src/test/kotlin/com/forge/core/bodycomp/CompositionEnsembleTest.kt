@@ -158,6 +158,20 @@ class CompositionEnsembleTest {
     }
 
     @Test
+    fun `only the requested day's readings are fused`() {
+        // Codex P2 (#6): yesterday's 30% must not pull today's 20% to a "25% today".
+        val readings = listOf(
+            est(CompositionMethod.WRIST_BIA, 30.0, day.minusDays(1)),
+            est(CompositionMethod.WRIST_BIA, 20.0, day),
+        )
+        val today = CompositionEnsemble.combine(day, readings)!!
+        assertEquals(20.0, today.estimate.fatPercent, 1e-9)
+        assertEquals(1, today.members.size)
+
+        assertNull(CompositionEnsemble.combine(day.plusDays(1), readings))
+    }
+
+    @Test
     fun `fat mass split rejects impossible inputs`() {
         assertThrows<IllegalArgumentException> { FatMassSplit.of(0.0, 20.0) }
         assertThrows<IllegalArgumentException> { FatMassSplit.of(80.0, 100.0) }
