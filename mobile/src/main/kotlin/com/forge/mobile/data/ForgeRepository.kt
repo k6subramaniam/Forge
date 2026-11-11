@@ -1,107 +1,127 @@
 package com.forge.mobile.data
 
+import com.forge.core.bodycomp.BiaReading
+import com.forge.core.bodycomp.DexaScan
+import com.forge.core.bodycomp.TapeMeasurement
 import com.forge.core.data.SampleData
 import com.forge.core.model.GoalProfile
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.Routine
 import com.forge.core.model.SetEntry
 import com.forge.core.model.WorkoutSession
+import com.forge.core.nutrition.WeighIn
+import com.forge.mobile.data.db.ForgeDatabase
+import com.forge.mobile.data.db.toEntity
+import com.forge.mobile.data.db.toModel
+import com.forge.mobile.data.secure.HealthProfileStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import java.time.DayOfWeek
-import java.time.Instant
 import java.time.LocalDate
 
+/** One past session with its sets, for History. */
+data class SessionHistoryItem(
+    val session: WorkoutSession,
+    /** In set order. */
+    val sets: List<SetEntry>,
+)
+
 /**
- * Phase 1 in-memory repository stub. Everything is process-local: kill the app and
- * onboarding/history reset. That is deliberate for the scaffold — the shape of the
- * API is what the UI is wired against.
+ * The phone's data, persisted (blueprint §4: the phone is the source of truth).
  *
- * TODO(Phase 2): back this with Room on the phone (blueprint §4: phone is the source
- * of truth). The HealthProfile must live in an encrypted store (SQLCipher or
- * EncryptedFile + Android Keystore) and stay out of exports unless Kumar opts in
- * (blueprint 3.0/3.6).
- * TODO(Phase 1.5): merge watch sessions arriving over the Wearable Data Layer into
- * [addSession], then write completed sessions out via HealthConnectWriter.
+ * Training data (sessions, sets, goal profile, weigh-ins, body-composition
+ * inputs) is stored in [ForgeDatabase]. The health screen answers are stored in
+ * [HealthProfileStore], an encrypted file kept out of the database and out of
+ * backups (blueprint 3.0/3.6).
+ *
+ * Reads that the UI shows live are Flows; everything else suspends. Routines
+ * and the weekly schedule are still the built-in templates.
+ *
+ * TODO(Phase 2): merge sessions arriving from the watch over the Wearable Data
+ * Layer into [addSession], then write completed ones out via HealthConnectWriter.
+ * TODO(Phase 2): user-built routines move into the database with the routine builder.
  */
-class ForgeRepository {
-
-    var goalProfile: GoalProfile? = null
-        private set
-
-    var healthProfile: HealthProfile? = null
-        private set
-
-    private val sessions = mutableListOf<WorkoutSession>()
-    private val sets = mutableListOf<SetEntry>()
-
+class ForgeRepository(
+    private val database: ForgeDatabase,
+    private val healthProfileStore: HealthProfileStore,
+) {
     val routines: List<Routine> = SampleData.routines
     val schedule: Map<DayOfWeek, String> = SampleData.schedule
-
-    fun saveOnboarding(goal: GoalProfile, health: HealthProfile) {
-        goalProfile = goal
-        healthProfile = health
-    }
-
-    fun updateHealthProfile(health: HealthProfile) {
-        healthProfile = health
-    }
-
-    fun addSession(session: WorkoutSession, sessionSets: List<SetEntry>) {
-        sessions += session
-        sets += sessionSets
-    }
-
-    fun allSessions(): List<WorkoutSession> = sessions.sortedByDescending { it.startTime }
-
-    fun setsFor(sessionId: String): List<SetEntry> =
-        sets.filter { it.sessionId == sessionId }.sortedBy { it.setNumber }
 
     /** The routine scheduled for [date], per the weekly schedule (blueprint 3.2). */
     fun routineFor(date: LocalDate): Routine? =
         schedule[date.dayOfWeek]?.let { id -> routines.firstOrNull { it.id == id } }
 
-    /** Most recent completed performance of an exercise — the watch's "ghost target" source. */
-    fun lastPerformance(exerciseId: String): SetEntry? =
-        sets.filter { it.exerciseId == exerciseId && it.completed }
-            .maxByOrNull { it.timestamp }
+    suspend fun goalProfile(): GoalProfile? = database.goalProfileDao().get()?.toModel()
 
-    init {
-        seedSampleHistory()
+    suspend fun healthProfile(): HealthProfile? = healthProfileStore.read()
+
+    /**
+     * Saves both onboarding profiles. The goal profile is written first, so the
+     * onboarding-complete flag (carried by the health profile) never lands
+     * without its goal.
+     */
+    suspend fun saveOnboarding(goal: GoalProfile, health: HealthProfile) {
+        database.goalProfileDao().upsert(goal.toEntity())
+        healthProfileStore.write(health)
     }
 
-    /** Two past sessions so History and ghost targets demonstrate real data flow in Phase 1. */
-    private fun seedSampleHistory() {
-        val now = Instant.now()
-        val pushSession = WorkoutSession(
-            id = "seed-session-push",
-            routineId = SampleData.pushA.id,
-            routineName = SampleData.pushA.name,
-            startTime = now.minusSeconds(3 * 24 * 3600),
-            endTime = now.minusSeconds(3 * 24 * 3600 - 2700),
-            avgHeartRateBpm = 118,
-            maxHeartRateBpm = 152,
-        )
-        val pushSets = listOf(
-            SetEntry("seed-s1", pushSession.id, SampleData.benchPress.id, SampleData.benchPress.name, 1, 60.0, 8, true, pushSession.startTime),
-            SetEntry("seed-s2", pushSession.id, SampleData.benchPress.id, SampleData.benchPress.name, 2, 60.0, 8, true, pushSession.startTime),
-            SetEntry("seed-s3", pushSession.id, SampleData.benchPress.id, SampleData.benchPress.name, 3, 60.0, 7, true, pushSession.startTime),
-            SetEntry("seed-s4", pushSession.id, SampleData.benchPress.id, SampleData.benchPress.name, 4, 60.0, 7, true, pushSession.startTime),
-            SetEntry("seed-s5", pushSession.id, SampleData.overheadPress.id, SampleData.overheadPress.name, 1, 40.0, 9, true, pushSession.startTime),
-        )
-        val legsSession = WorkoutSession(
-            id = "seed-session-legs",
-            routineId = SampleData.legsA.id,
-            routineName = SampleData.legsA.name,
-            startTime = now.minusSeconds(24 * 3600),
-            endTime = now.minusSeconds(24 * 3600 - 3300),
-            avgHeartRateBpm = 124,
-            maxHeartRateBpm = 161,
-        )
-        val legsSets = listOf(
-            SetEntry("seed-s6", legsSession.id, SampleData.squat.id, SampleData.squat.name, 1, 80.0, 6, true, legsSession.startTime),
-            SetEntry("seed-s7", legsSession.id, SampleData.squat.id, SampleData.squat.name, 2, 80.0, 6, true, legsSession.startTime),
-            SetEntry("seed-s8", legsSession.id, SampleData.deadlift.id, SampleData.deadlift.name, 1, 100.0, 5, true, legsSession.startTime),
-        )
-        addSession(pushSession, pushSets)
-        addSession(legsSession, legsSets)
+    suspend fun updateHealthProfile(health: HealthProfile) {
+        healthProfileStore.write(health)
     }
+
+    /** Stores a session and its sets in one transaction; re-adding a session updates it. */
+    suspend fun addSession(session: WorkoutSession, sets: List<SetEntry>) {
+        require(sets.all { it.sessionId == session.id }) { "Every set must belong to session ${session.id}" }
+        database.sessionDao().upsertSessionWithSets(session.toEntity(), sets.map { it.toEntity() })
+    }
+
+    /** Every session, newest first, each with its sets in order. Re-emits on change. */
+    fun observeHistory(): Flow<List<SessionHistoryItem>> =
+        database.sessionDao().observeSessionsWithSets().map { rows ->
+            rows.map { row ->
+                SessionHistoryItem(
+                    session = row.session.toModel(),
+                    sets = row.sets.sortedBy { it.setNumber }.map { it.toModel() },
+                )
+            }
+        }
+
+    suspend fun setsFor(sessionId: String): List<SetEntry> =
+        database.sessionDao().setsFor(sessionId).map { it.toModel() }
+
+    /** Most recent completed performance of an exercise: the watch's ghost-target source. */
+    suspend fun lastPerformance(exerciseId: String): SetEntry? =
+        database.sessionDao().lastCompletedSet(exerciseId)?.toModel()
+
+    /** Logs a weigh-in. A second one on the same day replaces the first. */
+    suspend fun logWeighIn(weighIn: WeighIn) {
+        database.weighInDao().upsert(weighIn.toEntity())
+    }
+
+    fun observeWeighIns(): Flow<List<WeighIn>> =
+        database.weighInDao().observeAll().map { rows -> rows.map { it.toModel() } }
+
+    /**
+     * Stores a watch BIA reading exactly as taken. QC ([com.forge.core.bodycomp.BiaProtocol])
+     * runs on read, so a failed reading is kept with its reasons.
+     */
+    suspend fun logBiaReading(reading: BiaReading) {
+        database.bodyCompositionDao().insertBia(reading.toEntity())
+    }
+
+    suspend fun logTapeMeasurement(measurement: TapeMeasurement) {
+        database.bodyCompositionDao().insertTape(measurement.toEntity())
+    }
+
+    suspend fun logDexaScan(scan: DexaScan) {
+        database.bodyCompositionDao().insertDexa(scan.toEntity())
+    }
+
+    suspend fun biaReadings(): List<BiaReading> = database.bodyCompositionDao().allBia().map { it.toModel() }
+
+    suspend fun tapeMeasurements(): List<TapeMeasurement> =
+        database.bodyCompositionDao().allTape().map { it.toModel() }
+
+    suspend fun dexaScans(): List<DexaScan> = database.bodyCompositionDao().allDexa().map { it.toModel() }
 }

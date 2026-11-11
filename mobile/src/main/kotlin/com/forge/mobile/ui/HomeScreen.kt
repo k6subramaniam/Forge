@@ -17,9 +17,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.forge.core.model.HealthProfile
 import com.forge.core.onboarding.OnboardingGate
 import com.forge.mobile.data.ForgeRepository
 import java.time.LocalDate
@@ -37,9 +40,10 @@ fun HomeScreen(
 ) {
     val today = remember { LocalDate.now() }
     val routine = remember(today) { repository.routineFor(today) }
-    val gate = remember(repository.healthProfile) {
-        repository.healthProfile?.let { OnboardingGate.evaluate(it) }
+    val healthProfile by produceState<HealthProfile?>(initialValue = null, repository) {
+        value = repository.healthProfile()
     }
+    val gate = remember(healthProfile) { healthProfile?.let { OnboardingGate.evaluate(it) } }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Forge") }) },

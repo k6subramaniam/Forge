@@ -27,13 +27,27 @@ jobs:
       - name: Unit tests (:core)
         run: gradle :core:test --stacktrace
 
+      # Robolectric downloads Android framework jars (~350 MB) on first use; keep them
+      # between runs so storage tests don't re-fetch them from Maven Central each time.
+      - name: Cache Robolectric framework jars
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository/org/robolectric
+          key: robolectric-${{ hashFiles('gradle/libs.versions.toml') }}
+          restore-keys: robolectric-
+
+      - name: Unit tests (:mobile storage, Robolectric)
+        run: gradle :mobile:testDebugUnitTest --stacktrace
+
       - name: Assemble debug (:mobile and :wear)
         run: gradle :mobile:assembleDebug :wear:assembleDebug --stacktrace
 
-      - name: Upload test report
+      - name: Upload test reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: core-test-report
-          path: core/build/reports/tests/test
+          name: test-reports
+          path: |
+            core/build/reports/tests/test
+            mobile/build/reports/tests/testDebugUnitTest
           if-no-files-found: ignore
