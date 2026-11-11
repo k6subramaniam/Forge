@@ -271,10 +271,21 @@ object SessionEngine {
         return state.copy(exercises = exercises, currentExerciseIndex = index)
     }
 
-    private fun nextExerciseIndex(exercises: List<SessionExerciseState>, fromIndex: Int): Int? =
-        ((fromIndex + 1) until exercises.size).firstOrNull { i ->
-            exercises[i].isAvailable && !exercises[i].isComplete
-        }
+    /**
+     * The next exercise with prescribed work left: the first available,
+     * uncompleted exercise after [fromIndex], wrapping around to the ones
+     * before it. The wrap matters when the user advanced early — finishing or
+     * skipping the last exercise must land back on an unfinished earlier one,
+     * not strand the session with no current exercise. The exercise at
+     * [fromIndex] itself is never a candidate: callers invoke this because it
+     * just completed, was skipped, or was pain-removed, and each of those also
+     * fails the availability/completion checks below.
+     */
+    private fun nextExerciseIndex(exercises: List<SessionExerciseState>, fromIndex: Int): Int? {
+        fun hasWorkLeft(i: Int) = exercises[i].isAvailable && !exercises[i].isComplete
+        return ((fromIndex + 1) until exercises.size).firstOrNull { hasWorkLeft(it) }
+            ?: (0 until fromIndex).firstOrNull { hasWorkLeft(it) }
+    }
 
     // -- Session controls ------------------------------------------------------
 
@@ -293,7 +304,9 @@ object SessionEngine {
     /**
      * Ends the session (blueprint 3.1): produces the completed [WorkoutSession] —
      * the same model the phone persists and writes to Health Connect — plus the
-     * summary, with PRs detected per exercise against [existingPrs] via [PrDetector].
+     * summary, with PRs detected per exercise against [existingPrs] via
+     * [PrDetector] (see [detectSessionPrs] for how duplicate entries of one
+     * exercise are handled).
      *
      * [date] is the user's local date for the PR records; the engine takes it as a
      * parameter rather than reading a clock or a timezone.
@@ -342,9 +355,7 @@ object SessionEngine {
             totalSets = state.exercises.sumOf { it.completedSets.size },
             durationSeconds = Duration.between(state.session.startTime, endTime).seconds,
             exercises = exerciseSummaries,
-            newPrs = state.exercises.flatMap { ex ->
-                PrDetector.detectNewPrs(ex.completedSets, existingPrs, date)
-            },
+            newPrs = detectSessionPrs(state, existingPrs, date),
             substitutions = state.exercises.mapNotNull { ex ->
                 ex.substitutedFor?.let { original ->
                     Substitution(
@@ -363,6 +374,35 @@ object SessionEngine {
             sets = state.allSets,
             summary = summary,
         )
+    }
+
+    /**
+     * PR detection for a finished session (blueprint 3.1/3.3). Sets are grouped
+     * by exercise across the whole session — not checked entry by entry —
+     * because the same exercise can appear twice (a repeated block in the
+     * routine, or an exercise added again freeform): checking each entry
+     * against the same history in isolation let a weaker set in a later entry
+     * be reported as a PR the session itself had already beaten. Within an
+     * exercise, sets are checked in logging order (per
+     * [LiveSessionState.setHistory]) and [PrDetector] carries its bests
+     * forward, so records established earlier in this session count when later
+     * sets are compared. The result is ordered by each exercise's first
+     * appearance in the session, then by the order its records were set.
+     */
+    private fun detectSessionPrs(
+        state: LiveSessionState,
+        existingPrs: List<PRRecord>,
+        date: LocalDate,
+    ): List<PRRecord> {
+        val logOrder = state.setHistory.withIndex().associate { (position, setId) -> setId to position }
+        return state.exercises
+            .flatMap { it.completedSets }
+            .groupBy { it.exerciseId }
+            .values
+            .flatMap { sets ->
+                val inLogOrder = sets.sortedBy { logOrder[it.id] ?: Int.MAX_VALUE }
+                PrDetector.detectNewPrs(inLogOrder, existingPrs, date)
+            }
     }
 
     // -- Constraints (blueprint 3.0) -------------------------------------------
