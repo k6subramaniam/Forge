@@ -1,6 +1,6 @@
 package com.forge.core.readiness
 
-import com.forge.core.data.SampleData
+import com.forge.core.testing.TestRoutines
 import com.forge.core.model.MovementPattern
 import com.forge.core.model.SetEntry
 import com.forge.core.model.WorkoutSession
@@ -106,7 +106,7 @@ class LoadAdjustmentTest {
 
     @Test
     fun `pain in a pattern trained today forces a technique swap`() {
-        val pain = PainSignal(setOf(SampleData.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(2))
+        val pain = PainSignal(setOf(TestRoutines.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(2))
         val adj = LoadAdjuster.recommend(
             readiness(ReadinessBand.NORMAL), unflagged, pain,
             sessionPatterns = setOf(MovementPattern.SQUAT, MovementPattern.HORIZONTAL_PRESS),
@@ -118,7 +118,7 @@ class LoadAdjustmentTest {
 
     @Test
     fun `pain forces the conservative path even on a PRIMED day`() {
-        val pain = PainSignal(setOf(SampleData.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(1))
+        val pain = PainSignal(setOf(TestRoutines.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(1))
         val adj = LoadAdjuster.recommend(
             readiness(ReadinessBand.PRIMED), unflagged, pain,
             sessionPatterns = setOf(MovementPattern.SQUAT),
@@ -129,7 +129,7 @@ class LoadAdjustmentTest {
 
     @Test
     fun `pain with unknown session patterns caps the day at a volume reduction`() {
-        val pain = PainSignal(setOf(SampleData.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(3))
+        val pain = PainSignal(setOf(TestRoutines.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(3))
         val adj = LoadAdjuster.recommend(readiness(ReadinessBand.NORMAL), unflagged, pain)
         assertEquals(SessionAdjustmentKind.REDUCE_VOLUME, adj.kind)
         assertTrue(adj.painForcedConservative)
@@ -137,7 +137,7 @@ class LoadAdjustmentTest {
 
     @Test
     fun `pain in patterns not trained today changes nothing`() {
-        val pain = PainSignal(setOf(SampleData.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(1))
+        val pain = PainSignal(setOf(TestRoutines.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(1))
         val adj = LoadAdjuster.recommend(
             readiness(ReadinessBand.NORMAL), unflagged, pain,
             sessionPatterns = setOf(MovementPattern.HORIZONTAL_PRESS),
@@ -154,8 +154,8 @@ class LoadAdjustmentTest {
                 session = WorkoutSession(id = id, startTime = start, endTime = start.plusSeconds(3600)),
                 sets = listOf(
                     SetEntry(
-                        id = "$id-s1", sessionId = id, exerciseId = SampleData.squat.id,
-                        exerciseName = SampleData.squat.name, setNumber = 1,
+                        id = "$id-s1", sessionId = id, exerciseId = TestRoutines.squat.id,
+                        exerciseName = TestRoutines.squat.name, setNumber = 1,
                         weightKg = 100.0, reps = 5, timestamp = start, painReported = pain,
                     ),
                 ),
@@ -167,7 +167,7 @@ class LoadAdjustmentTest {
             session("clean", "2026-11-09T09:00:00Z", pain = false),
         )
         val signal = LoadAdjuster.recentPain(history, today, zone)
-        assertEquals(setOf(SampleData.squat.id), signal.exerciseIds)
+        assertEquals(setOf(TestRoutines.squat.id), signal.exerciseIds)
         assertEquals(setOf(MovementPattern.SQUAT), signal.patterns)
         assertEquals(LocalDate.of(2026, 11, 8), signal.mostRecentDate)
 
