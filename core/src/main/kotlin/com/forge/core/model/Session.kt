@@ -30,6 +30,16 @@ data class SetEntry(
     val reps: Int,
     val completed: Boolean = true,
     val timestamp: Instant,
+    /** Optional perceived exertion for the set, 0–10 (blueprint 3.15: RPE/RIR autoregulation). */
+    val rpe: Double? = null,
+    /** Optional reps in reserve for the set (blueprint 3.15). */
+    val rir: Int? = null,
+    /**
+     * The user reported pain on this set (blueprint 3.0's in-workout feedback loop:
+     * the session engine swaps the exercise out for the rest of the session, and the
+     * UI asks whether to record a standing limitation in the profile).
+     */
+    val painReported: Boolean = false,
 ) {
     /** Set volume in kg (weight × reps). */
     val volumeKg: Double get() = weightKg * reps
