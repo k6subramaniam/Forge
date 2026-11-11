@@ -461,4 +461,88 @@ class SessionEngineTest {
         assertEquals(0.0, finished.summary.totalVolumeKg, 0.0)
         assertTrue(finished.summary.newPrs.isEmpty())
     }
+
+    // -- Regression: navigation wrap-around (Codex review) -----------------------
+
+    @Test
+    fun `finishing the last exercise wraps back to an unfinished earlier one`() {
+        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        // Advance early twice, leaving bench and overhead press untouched.
+        state = SessionEngine.moveToNext(state)
+        state = SessionEngine.moveToNext(state)
+        assertEquals(2, state.currentExerciseIndex)
+        assertEquals("Tricep Pushdown", state.currentExercise?.exercise?.name)
+
+        // Completing the last exercise must land back on the bench press, not
+        // strand the session with no current exercise.
+        val twoSets = logSets(state, 2, 25.0, 12)
+        val completing = log(twoSets, 25.0, 12, minute = 20)
+        assertTrue(completing.exerciseJustCompleted)
+        assertFalse(completing.allWorkComplete)
+        assertNotNull(completing.rest)
+        assertEquals(0, completing.state.currentExerciseIndex)
+        assertEquals("Bench Press", completing.state.currentExercise?.exercise?.name)
+
+        // And logging works again from there.
+        val back = log(completing.state, 60.0, 8, minute = 21)
+        assertEquals(1, back.state.exercises[0].loggedSets.size)
+        assertEquals(0, back.state.currentExerciseIndex)
+    }
+
+    @Test
+    fun `skipping the last exercise wraps back to an unfinished earlier one`() {
+        var state = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start)
+        state = SessionEngine.moveToNext(state)
+        state = SessionEngine.moveToNext(state)
+        state = SessionEngine.skipExercise(state)
+        assertTrue(state.exercises[2].skipped)
+        assertEquals(0, state.currentExerciseIndex)
+        assertEquals("Bench Press", state.currentExercise?.exercise?.name)
+    }
+
+    // -- Regression: PR detection across duplicate entries (Codex review) --------
+
+    /** The same exercise prescribed twice in one routine (a repeated block). */
+    private fun benchTwiceRoutine(): Routine = Routine(
+        id = "r-bench-twice",
+        name = "Bench Twice",
+        exercises = listOf(
+            RoutineExercise(SampleData.benchPress, targetSets = 1, repRange = 5..5, targetWeightKg = 100.0),
+            RoutineExercise(SampleData.benchPress, targetSets = 1, repRange = 5..5, targetWeightKg = 80.0),
+        ),
+    )
+
+    @Test
+    fun `a weaker second entry of the same exercise does not produce false PRs`() {
+        var state = SessionEngine.start(benchTwiceRoutine(), sessionId = "s1", startTime = start)
+        state = logSets(state, 1, 100.0, 5) // first entry: 100 kg, no history to beat
+        assertEquals(1, state.currentExerciseIndex) // advanced to the repeated entry
+        state = logSets(state, 1, 80.0, 5) // second entry: weaker in every dimension
+
+        val finished = SessionEngine.finish(state, endTime = at(30), date = date)
+        val benchPrs = finished.summary.newPrs.filter { it.exerciseId == "ex-bench-press" }
+        // Only the 100 kg set earns records — one per PR type. The 80 kg set,
+        // checked against the session's own 100 kg rather than history alone,
+        // earns nothing.
+        assertEquals(3, benchPrs.size)
+        assertEquals(100.0, benchPrs.first { it.type == PrType.MAX_WEIGHT }.value, 0.0)
+        assertTrue(benchPrs.none { it.sourceSet?.weightKg == 80.0 })
+    }
+
+    @Test
+    fun `a stronger second entry of the same exercise is reported once, in order`() {
+        var state = SessionEngine.start(benchTwiceRoutine(), sessionId = "s1", startTime = start)
+        state = logSets(state, 1, 80.0, 5) // first entry sets the marks
+        state = logSets(state, 1, 100.0, 5) // second entry breaks them
+
+        val finished = SessionEngine.finish(state, endTime = at(30), date = date)
+        val benchPrs = finished.summary.newPrs.filter { it.exerciseId == "ex-bench-press" }
+        // Each improvement is recorded exactly once, in logging order.
+        assertEquals(
+            listOf(80.0, 100.0),
+            benchPrs.filter { it.type == PrType.MAX_WEIGHT }.map { it.value },
+        )
+        assertEquals(1, benchPrs.count { it.type == PrType.MAX_WEIGHT && it.value == 100.0 })
+        assertEquals(6, benchPrs.size) // three PR types, each improved twice
+    }
 }
