@@ -1,6 +1,6 @@
 package com.forge.core.readiness
 
-import com.forge.core.data.SampleData
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.model.Exercise
 import com.forge.core.model.MuscleGroup
 import com.forge.core.training.CompletedSession
@@ -117,7 +117,7 @@ object VolumeLandmarks {
         history: List<CompletedSession>,
         anyDateInWeek: LocalDate,
         zone: ZoneId,
-        library: List<Exercise> = SampleData.exercises,
+        library: List<Exercise> = ExerciseLibrary.all,
     ): List<MuscleGroupVolume> {
         val weekStart = weekStartOf(anyDateInWeek)
         val weekEnd = weekStart.plusDays(6)
