@@ -55,8 +55,9 @@ Phase 1's verification (run them with `:core:test`).
 
 ## Building
 
-Requirements: JDK 17 and Gradle 8.10.2+, plus the Android SDK (compileSdk 35)
-for the two app modules. `:core` needs only a JDK.
+Requirements: JDK 17 and Gradle 8.11.1+ (needed by AGP 8.9), plus the Android SDK
+(compileSdk 36, which Health Connect 1.1.0 requires) for the two app modules. `:core`
+needs only a JDK.
 
 ```bash
 gradle :core:test                 # unit tests — the Phase 1 verification

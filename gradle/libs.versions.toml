@@ -1,9 +1,11 @@
 [versions]
 # Conservative, mutually compatible set (verified against Maven/Google Maven metadata):
-# AGP 8.7.x pairs with Gradle 8.9+ and JDK 17; Kotlin 2.0.21 ships the Compose compiler plugin;
+# AGP 8.9.1 is the floor set by Health Connect 1.1.0's AAR metadata (minAndroidGradlePluginVersion
+# 8.9.1, minCompileSdk 36); AGP 8.9.x needs Gradle 8.11.1+ and JDK 17, and supports compileSdk 36.
+# Kotlin 2.0.21 ships the Compose compiler plugin (and matches Health Connect 1.1.0's kotlin-stdlib);
 # Compose BOM 2024.12.01 = Compose 1.7.x; Wear Compose 1.4.1 and Horologist 0.6.23 are
 # contemporaneous (Horologist 0.6.23's POM targets Wear Compose 1.4.1 exactly).
-agp = "8.7.3"
+agp = "8.9.1"
 kotlin = "2.0.21"
 coreKtx = "1.15.0"
 activityCompose = "1.9.3"
