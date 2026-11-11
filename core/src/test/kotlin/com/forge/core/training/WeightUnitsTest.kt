@@ -1,6 +1,6 @@
 package com.forge.core.training
 
-import com.forge.core.data.SampleData
+import com.forge.core.testing.TestRoutines
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -85,10 +85,10 @@ class WeightUnitsTest {
     @Test
     fun `overload increments per unit system`() {
         // kg: the original rule, unchanged.
-        assertEquals(2.5, ProgressiveOverload.incrementFor(SampleData.benchPress, WeightUnit.KG), 0.0)
-        assertEquals(5.0, ProgressiveOverload.incrementFor(SampleData.squat, WeightUnit.KG), 0.0)
+        assertEquals(2.5, ProgressiveOverload.incrementFor(TestRoutines.benchPress, WeightUnit.KG), 0.0)
+        assertEquals(5.0, ProgressiveOverload.incrementFor(TestRoutines.squat, WeightUnit.KG), 0.0)
         // lb: +5 upper / +10 lower (decided 2026-11-11).
-        assertEquals(5.0, ProgressiveOverload.incrementFor(SampleData.benchPress, WeightUnit.LB), 0.0)
-        assertEquals(10.0, ProgressiveOverload.incrementFor(SampleData.squat, WeightUnit.LB), 0.0)
+        assertEquals(5.0, ProgressiveOverload.incrementFor(TestRoutines.benchPress, WeightUnit.LB), 0.0)
+        assertEquals(10.0, ProgressiveOverload.incrementFor(TestRoutines.squat, WeightUnit.LB), 0.0)
     }
 }
