@@ -15,9 +15,8 @@ import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.Text
 import androidx.wear.compose.material.TimeText
-import com.google.android.horologist.annotations.ExperimentalHorologistApi
-import com.google.android.horologist.compose.layout.ScalingLazyColumn
-import com.google.android.horologist.compose.layout.rememberColumnState
+import androidx.wear.compose.foundation.lazy.ScalingLazyColumn
+import androidx.wear.compose.foundation.lazy.rememberScalingLazyListState
 
 /**
  * Watch set logger (blueprint 3.1): exercise name, ghost target from last time,
@@ -27,7 +26,6 @@ import com.google.android.horologist.compose.layout.rememberColumnState
  * TODO(Phase 1): live heart rate row via Health Services ExerciseClient, and keep
  * the screen awake during the session (ambient/always-on handling).
  */
-@OptIn(ExperimentalHorologistApi::class)
 @Composable
 fun SetLoggerScreen(
     exerciseName: String,
@@ -40,11 +38,11 @@ fun SetLoggerScreen(
     onRepsChange: (Int) -> Unit,
     onCompleteSet: () -> Unit,
 ) {
-    val columnState = rememberColumnState()
+    val listState = rememberScalingLazyListState()
 
     Scaffold(timeText = { TimeText() }) {
         ScalingLazyColumn(
-            columnState = columnState,
+            state = listState,
             modifier = Modifier.fillMaxSize(),
         ) {
             item {
