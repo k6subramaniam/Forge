@@ -1,5 +1,6 @@
 package com.forge.core.training
 
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.data.SampleData
 import com.forge.core.model.Exercise
 import com.forge.core.model.PRRecord
@@ -51,14 +52,17 @@ object SessionEngine {
      *
      * [library] resolves substitution names (e.g. "Leg press") to real exercises when
      * they exist in the library; unmatched substitution names become generated
-     * exercises that keep the original's muscle group and equipment.
+     * exercises that keep the original's muscle group and equipment. It defaults to
+     * the full tagged [ExerciseLibrary]: a substitute resolved to its tagged entry
+     * is checked against the restrictions, while a generated, untagged one could
+     * slip past them.
      */
     fun start(
         routine: Routine,
         sessionId: String,
         startTime: Instant,
         constraints: FunctionalConstraints = NO_CONSTRAINTS,
-        library: List<Exercise> = SampleData.exercises,
+        library: List<Exercise> = ExerciseLibrary.all,
     ): LiveSessionState {
         val exercises = mutableListOf<SessionExerciseState>()
         val dropped = mutableListOf<DroppedExercise>()
@@ -104,7 +108,7 @@ object SessionEngine {
         state: LiveSessionState,
         prescription: RoutineExercise,
         constraints: FunctionalConstraints = NO_CONSTRAINTS,
-        library: List<Exercise> = SampleData.exercises,
+        library: List<Exercise> = ExerciseLibrary.all,
     ): LiveSessionState {
         requireActive(state)
         return when (val outcome = applyConstraints(prescription, constraints, library)) {

@@ -1,5 +1,6 @@
 package com.forge.core.training
 
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.data.SampleData
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.JointArea
@@ -225,7 +226,8 @@ class SessionEngineTest {
 
         assertEquals(3, state.exercises.size)
         val overhead = state.exercises[1]
-        assertEquals("Landmine press", overhead.exercise.name) // first shoulder substitution
+        // First shoulder substitution, resolved to its tagged library entry (the default library).
+        assertEquals(ExerciseLibrary.landminePress, overhead.exercise)
         assertEquals(SampleData.overheadPress, overhead.substitutedFor)
         assertNotNull(overhead.adjustmentReason)
         assertTrue(overhead.adjustmentReason!!.contains("Overhead Press"))
@@ -244,9 +246,9 @@ class SessionEngineTest {
         )
         val state = SessionEngine.start(SampleData.legsA, sessionId = "s1", startTime = start, constraints = constraints)
         val squatSlot = state.exercises[0]
-        assertEquals("Box squat to comfortable depth", squatSlot.exercise.name)
+        // "Box squat to comfortable depth" resolves to the tagged library box squat.
+        assertEquals(ExerciseLibrary.boxSquat, squatSlot.exercise)
         assertEquals(SampleData.squat, squatSlot.substitutedFor)
-        assertTrue(squatSlot.exercise.id.startsWith("substitute-"))
         // Neighbours are unaffected.
         assertEquals(SampleData.deadlift, state.exercises[1].exercise)
         assertEquals(SampleData.legPress, state.exercises[2].exercise)
@@ -315,7 +317,7 @@ class SessionEngineTest {
             RoutineExercise(SampleData.squat, targetSets = 3, repRange = 5..6, targetWeightKg = 80.0),
             constraints = constraints,
         )
-        assertEquals("Box squat to comfortable depth", state.exercises.single().exercise.name)
+        assertEquals(ExerciseLibrary.boxSquat, state.exercises.single().exercise)
         assertEquals(SampleData.squat, state.exercises.single().substitutedFor)
     }
 
