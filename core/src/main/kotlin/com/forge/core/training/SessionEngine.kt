@@ -7,6 +7,7 @@ import com.forge.core.model.Routine
 import com.forge.core.model.RoutineExercise
 import com.forge.core.model.SetEntry
 import com.forge.core.model.WorkoutSession
+import com.forge.core.onboarding.ExerciseExclusion
 import com.forge.core.onboarding.FunctionalConstraints
 import java.time.Duration
 import java.time.Instant
@@ -381,58 +382,97 @@ object SessionEngine {
         constraints: FunctionalConstraints,
         library: List<Exercise>,
     ): ConstraintOutcome {
-        val exclusion = constraints.exerciseExclusions.firstOrNull { ex ->
-            ex.excludedMovements.any { movement -> nameMatches(prescribed.exercise.name, movement) }
-        } ?: return ConstraintOutcome.Kept(prescribed)
+        val (exclusion, matched) = matchExclusion(prescribed.exercise, constraints)
+            ?: return ConstraintOutcome.Kept(prescribed)
 
-        val movement = exclusion.excludedMovements.first { nameMatches(prescribed.exercise.name, it) }
-
-        // First substitution that is not itself excluded under any active constraint.
+        // First substitution that is not itself excluded under any active
+        // constraint. Candidates are resolved against the library before being
+        // vetted, so a substitute that only *sounds* safe is still rejected when
+        // its tags carry a restricted trait.
         val substituteName = exclusion.substitutions.firstOrNull { candidate ->
-            constraints.exerciseExclusions.none { ex ->
-                ex.excludedMovements.any { nameMatches(candidate, it) }
-            }
+            matchExclusion(resolveCandidate(candidate, prescribed.exercise, library), constraints) == null
         } ?: return ConstraintOutcome.Dropped(
             original = prescribed.exercise,
-            reason = "'${prescribed.exercise.name}' is an excluded movement ('$movement'). " +
+            reason = "'${prescribed.exercise.name}' is excluded ($matched). " +
                 "${exclusion.reason} No safe substitution is available, so it was dropped from the session.",
         )
 
-        val substitute = resolveSubstitute(substituteName, prescribed.exercise, library)
+        val substitute = resolveCandidate(substituteName, prescribed.exercise, library)
         return ConstraintOutcome.Substituted(
             prescription = prescribed.copy(exercise = substitute),
             original = prescribed.exercise,
-            reason = "'${prescribed.exercise.name}' is an excluded movement ('$movement'). " +
+            reason = "'${prescribed.exercise.name}' is excluded ($matched). " +
                 "${exclusion.reason} Substituted with '${substitute.name}'.",
         )
     }
 
     /**
-     * Substitution names come from the constraint data as plain language. A name that
-     * matches a library exercise (exact normalized match) resolves to that exercise;
-     * anything else becomes a generated exercise carrying the original's muscle group
-     * and equipment, with the prescription (sets, rep range, weight, rest) unchanged —
-     * the weight is a starting point the user adjusts on the watch steppers.
+     * Finds the first active exclusion covering [exercise], paired with what
+     * matched it: the restriction's plain-language description for a tag match,
+     * or the excluded movement's name (quoted) for a name match.
+     *
+     * Matching runs on tags first (blueprint 3.0): an exercise that carries
+     * [com.forge.core.model.ExerciseTags] is judged by its movement pattern and
+     * loading traits, which is what separates a barbell row (unsupported) from a
+     * chest-supported row — same pattern, different traits, opposite verdicts.
+     * The name matcher below remains as the fallback for exercises without tags:
+     * user-created exercises start untagged, and free-text limitations a user
+     * types in onboarding can only ever be expressed as names.
      */
-    private fun resolveSubstitute(name: String, original: Exercise, library: List<Exercise>): Exercise =
-        library.firstOrNull { normalize(it.name) == normalize(name) }
-            ?: Exercise(
-                id = "substitute-" + slug(name),
-                name = name,
-                muscleGroup = original.muscleGroup,
-                equipment = original.equipment,
-                isCustom = false,
-            )
+    private fun matchExclusion(
+        exercise: Exercise,
+        constraints: FunctionalConstraints,
+    ): Pair<ExerciseExclusion, String>? {
+        for (exclusion in constraints.exerciseExclusions) {
+            val tags = exercise.tags
+            if (tags != null) {
+                val rule = exclusion.restrictions.firstOrNull { it.matches(tags) }
+                if (rule != null) return exclusion to rule.description
+            }
+            val movement = exclusion.excludedMovements.firstOrNull { nameMatches(exercise.name, it) }
+            if (movement != null) return exclusion to "'$movement'"
+        }
+        return null
+    }
 
     /**
-     * Name matching for the onboarding exclusions (blueprint 3.0). The exclusion data
-     * names movements in plain language ("Deep squat", "Overhead press") while the
-     * library names exercises ("Squat", "Overhead Press"), so an exercise counts as
-     * excluded when either name's words are a subset of the other's: "Squat" matches
-     * "Deep squat", "Overhead Press" matches "Overhead press". Deliberately
-     * conservative in the other direction — "Barbell Row" does not match "Heavy
-     * unsupported row", because name alone cannot tell a supported row from an
-     * unsupported one; that gap belongs to richer exercise metadata, not this matcher.
+     * Resolves a substitution name from the constraint data (plain language) to
+     * an exercise. Resolution order:
+     * 1. Exact normalized name match in [library] ("Leg press" → Leg Press).
+     * 2. The library exercise whose name appears inside a descriptive phrase
+     *    ("Box squat to comfortable depth", "Box squat above parallel" → Box
+     *    Squat); the longest such name wins, and single-word names never
+     *    resolve this way — "Squat" inside a phrase is too ambiguous to trust.
+     * 3. Otherwise a generated exercise carrying the original's muscle group
+     *    and equipment, with the prescription (sets, rep range, weight, rest)
+     *    unchanged — the weight is a starting point the user adjusts on the
+     *    watch steppers.
+     */
+    private fun resolveCandidate(name: String, original: Exercise, library: List<Exercise>): Exercise {
+        library.firstOrNull { normalize(it.name) == normalize(name) }?.let { return it }
+        val candidateTokens = nameTokens(name)
+        library.filter { ex ->
+            val tokens = nameTokens(ex.name)
+            tokens.size >= 2 && candidateTokens.containsAll(tokens)
+        }.maxByOrNull { nameTokens(it.name).size }?.let { return it }
+        return Exercise(
+            id = "substitute-" + slug(name),
+            name = name,
+            muscleGroup = original.muscleGroup,
+            equipment = original.equipment,
+            isCustom = false,
+        )
+    }
+
+    /**
+     * Name matching for the onboarding exclusions (blueprint 3.0) — the fallback
+     * path, used for untagged exercises and for the exclusion data's plain-
+     * language movement names. An exercise counts as excluded when either
+     * name's words are a subset of the other's: "Squat" matches "Deep squat",
+     * "Overhead Press" matches "Overhead press". Deliberately conservative:
+     * "Barbell Row" does not match "Heavy unsupported row", because a name alone
+     * cannot tell a supported row from an unsupported one. Tagged exercises
+     * never depend on that guess — the UNSUPPORTED_ROW trait decides it.
      */
     private fun nameMatches(exerciseName: String, movementName: String): Boolean {
         val a = nameTokens(exerciseName)
