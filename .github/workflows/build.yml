@@ -22,7 +22,7 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.10.2'
+          gradle-version: '8.11.1' # minimum for AGP 8.9.x
 
       - name: Unit tests (:core)
         run: gradle :core:test --stacktrace
