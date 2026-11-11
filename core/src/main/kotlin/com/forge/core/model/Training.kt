@@ -35,6 +35,15 @@ data class Exercise(
     val muscleGroup: MuscleGroup,
     val equipment: Equipment,
     val isCustom: Boolean = false,
+    /** Muscles worked beyond the primary [muscleGroup] (blueprint 3.12: "muscles worked"). */
+    val secondaryMuscleGroups: Set<MuscleGroup> = emptySet(),
+    /**
+     * Structured movement metadata (pattern, joints loaded, risk traits) that
+     * constraint matching runs on (blueprint 3.0/3.2). Null for exercises that
+     * have not been tagged — user-created exercises start untagged and fall back
+     * to name-based exclusion matching in the session engine.
+     */
+    val tags: ExerciseTags? = null,
 )
 
 /** Blueprint §5: an exercise as prescribed inside a routine. */
