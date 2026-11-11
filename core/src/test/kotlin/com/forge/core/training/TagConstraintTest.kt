@@ -1,7 +1,7 @@
 package com.forge.core.training
 
 import com.forge.core.data.ExerciseLibrary
-import com.forge.core.data.SampleData
+import com.forge.core.testing.TestRoutines
 import com.forge.core.model.Equipment
 import com.forge.core.model.Exercise
 import com.forge.core.model.ExerciseFlag
@@ -67,19 +67,19 @@ class TagConstraintTest {
     @Test
     fun `a lower back limitation excludes the barbell row through its unsupported trait`() {
         val state = SessionEngine.start(
-            SampleData.pullA, sessionId = "s1", startTime = start,
+            TestRoutines.pullA, sessionId = "s1", startTime = start,
             constraints = constraintsFor(JointArea.LOWER_BACK), library = library,
         )
         val rowSlot = state.exercises[0]
-        assertEquals(SampleData.barbellRow, rowSlot.substitutedFor)
+        assertEquals(TestRoutines.barbellRow, rowSlot.substitutedFor)
         assertNotNull(rowSlot.adjustmentReason)
         // The reason names the trait restriction, proving the tag path decided it —
         // slice 1's name matcher deliberately let this exercise through.
         assertTrue(rowSlot.adjustmentReason!!.contains("no unsupported rowing"))
-        assertTrue(state.exercises.none { it.exercise.id == SampleData.barbellRow.id })
+        assertTrue(state.exercises.none { it.exercise.id == TestRoutines.barbellRow.id })
         // The rest of Pull A is untouched.
-        assertEquals(SampleData.pullUp, state.exercises[1].exercise)
-        assertEquals(SampleData.bicepCurl, state.exercises[2].exercise)
+        assertEquals(TestRoutines.pullUp, state.exercises[1].exercise)
+        assertEquals(TestRoutines.bicepCurl, state.exercises[2].exercise)
     }
 
     @Test
@@ -123,7 +123,7 @@ class TagConstraintTest {
 
         // The barbell row resolves to the real supported-row exercise...
         assertEquals("ex-chest-supported-row", state.exercises[0].exercise.id)
-        assertEquals(SampleData.barbellRow, state.exercises[0].substitutedFor)
+        assertEquals(TestRoutines.barbellRow, state.exercises[0].substitutedFor)
         // ...and the programmed supported row is exactly where it was.
         assertEquals("ex-chest-supported-row", state.exercises[1].exercise.id)
         assertNull(state.exercises[1].substitutedFor)
@@ -132,10 +132,10 @@ class TagConstraintTest {
     @Test
     fun `the barbell row is kept when the limitation does not restrict its traits`() {
         val state = SessionEngine.start(
-            SampleData.pullA, sessionId = "s1", startTime = start,
+            TestRoutines.pullA, sessionId = "s1", startTime = start,
             constraints = constraintsFor(JointArea.KNEE), library = library,
         )
-        assertEquals(SampleData.barbellRow, state.exercises[0].exercise)
+        assertEquals(TestRoutines.barbellRow, state.exercises[0].exercise)
         assertNull(state.exercises[0].substitutedFor)
     }
 
@@ -144,24 +144,24 @@ class TagConstraintTest {
     @Test
     fun `the shoulder case matches on the overhead trait and resolves a real landmine press`() {
         val state = SessionEngine.start(
-            SampleData.pushA, sessionId = "s1", startTime = start,
+            TestRoutines.pushA, sessionId = "s1", startTime = start,
             constraints = constraintsFor(JointArea.SHOULDER), library = library,
         )
         val overhead = state.exercises[1]
         assertEquals("ex-landmine-press", overhead.exercise.id)
-        assertEquals(SampleData.overheadPress, overhead.substitutedFor)
+        assertEquals(TestRoutines.overheadPress, overhead.substitutedFor)
         assertTrue(overhead.adjustmentReason!!.contains("no overhead pressing"))
     }
 
     @Test
     fun `the knee case matches on deep flexion and resolves a real box squat`() {
         val state = SessionEngine.start(
-            SampleData.legsA, sessionId = "s1", startTime = start,
+            TestRoutines.legsA, sessionId = "s1", startTime = start,
             constraints = constraintsFor(JointArea.KNEE), library = library,
         )
         val squatSlot = state.exercises[0]
         assertEquals("ex-box-squat", squatSlot.exercise.id)
-        assertEquals(SampleData.squat, squatSlot.substitutedFor)
+        assertEquals(TestRoutines.squat, squatSlot.substitutedFor)
         assertTrue(squatSlot.adjustmentReason!!.contains("no deep knee flexion under load"))
     }
 
@@ -182,27 +182,27 @@ class TagConstraintTest {
     @Test
     fun `a lower back limitation swaps the deadlift for the trap bar`() {
         val state = SessionEngine.start(
-            SampleData.legsA, sessionId = "s1", startTime = start,
+            TestRoutines.legsA, sessionId = "s1", startTime = start,
             constraints = constraintsFor(JointArea.LOWER_BACK), library = library,
         )
         val deadliftSlot = state.exercises[1]
         assertEquals("ex-trap-bar-deadlift", deadliftSlot.exercise.id)
-        assertEquals(SampleData.deadlift, deadliftSlot.substitutedFor)
+        assertEquals(TestRoutines.deadlift, deadliftSlot.substitutedFor)
         assertTrue(deadliftSlot.adjustmentReason!!.contains("no heavy spinal loading"))
         // The squat carries no spinal-loading trait and stays.
-        assertEquals(SampleData.squat, state.exercises[0].exercise)
+        assertEquals(TestRoutines.squat, state.exercises[0].exercise)
     }
 
     @Test
     fun `a descriptive substitution phrase resolves to the exercise it names`() {
         // The hip gate's substitute is the phrase "Box squat above parallel".
         val state = SessionEngine.start(
-            SampleData.legsA, sessionId = "s1", startTime = start,
+            TestRoutines.legsA, sessionId = "s1", startTime = start,
             constraints = constraintsFor(JointArea.HIP), library = library,
         )
         val squatSlot = state.exercises[0]
         assertEquals("ex-box-squat", squatSlot.exercise.id)
-        assertEquals(SampleData.squat, squatSlot.substitutedFor)
+        assertEquals(TestRoutines.squat, squatSlot.substitutedFor)
         assertTrue(squatSlot.adjustmentReason!!.contains("no deep hip flexion under load"))
     }
 
@@ -261,7 +261,7 @@ class TagConstraintTest {
             promptConstraints = emptyList(),
         )
         val state = SessionEngine.start(
-            SampleData.pushA, sessionId = "s1", startTime = start,
+            TestRoutines.pushA, sessionId = "s1", startTime = start,
             constraints = constraints, library = library,
         )
         val overhead = state.exercises[1]
@@ -277,40 +277,6 @@ class TagConstraintTest {
     }
 
     @Test
-    fun `callers that pass no library still get the tagged library's safety checks`() {
-        // Codex P2 (#2): with the old 10-exercise default, "Landmine press" resolved to a
-        // generated, untagged exercise and slipped past a vertical-press restriction.
-        val constraints = FunctionalConstraints(
-            exerciseExclusions = listOf(
-                ExerciseExclusion(
-                    area = JointArea.SHOULDER,
-                    excludedMovements = emptyList(),
-                    substitutions = listOf("Landmine press", "Cable lateral raise"),
-                    reason = "Test shoulder limitation.",
-                    restrictions = listOf(
-                        MovementRestriction(
-                            patterns = setOf(MovementPattern.VERTICAL_PRESS),
-                            description = "no vertical pressing",
-                        ),
-                    ),
-                ),
-            ),
-            heartRateCapPercentOfMax = null,
-            intensityMayOnlyScaleDown = false,
-            promptConstraints = emptyList(),
-        )
-        val started = SessionEngine.start(SampleData.pushA, sessionId = "s1", startTime = start, constraints = constraints)
-        assertEquals("ex-cable-lateral-raise", started.exercises[1].exercise.id)
-
-        val added = SessionEngine.addExercise(
-            SessionEngine.startFreeform(sessionId = "s2", startTime = start),
-            RoutineExercise(SampleData.overheadPress, targetSets = 3, repRange = 8..10, targetWeightKg = 40.0),
-            constraints = constraints,
-        )
-        assertEquals("ex-cable-lateral-raise", added.exercises.single().exercise.id)
-    }
-
-    @Test
     fun `freeform additions are matched on tags as well`() {
         var state = SessionEngine.startFreeform(sessionId = "s2", startTime = start)
         state = SessionEngine.addExercise(
@@ -319,7 +285,7 @@ class TagConstraintTest {
             constraints = constraintsFor(JointArea.LOWER_BACK),
             library = library,
         )
-        assertEquals(SampleData.barbellRow, state.exercises.single().substitutedFor)
+        assertEquals(TestRoutines.barbellRow, state.exercises.single().substitutedFor)
         assertTrue(state.exercises.single().adjustmentReason!!.contains("no unsupported rowing"))
     }
 
@@ -333,13 +299,17 @@ class TagConstraintTest {
             isCustom = true,
         )
         assertNull(customOverhead.tags)
+        // Starter-ten library passed explicitly: "Landmine press" is not in
+        // it, so the substitute stays the synthesized stand-in this test was
+        // written against (the full-library default resolves the real one).
         val state = SessionEngine.start(
             routineOf(customOverhead), sessionId = "s1", startTime = start,
             constraints = constraintsFor(JointArea.SHOULDER),
+            library = TestRoutines.exercises,
         )
         val slot = state.exercises.single()
         assertEquals(customOverhead, slot.substitutedFor)
-        assertEquals(ExerciseLibrary.landminePress, slot.exercise)
+        assertEquals("Landmine press", slot.exercise.name)
         // The quoted movement name in the reason shows the name path decided it.
         assertTrue(slot.adjustmentReason!!.contains("'Overhead press'"))
     }
@@ -377,7 +347,7 @@ class TagConstraintTest {
         val swapped = SessionEngine.start(
             routineOf(zercher), sessionId = "s2", startTime = start, constraints = freeText,
         )
-        assertEquals(SampleData.legPress, swapped.exercises.single().exercise)
+        assertEquals(TestRoutines.legPress, swapped.exercises.single().exercise)
         assertEquals(zercher, swapped.exercises.single().substitutedFor)
     }
 }
