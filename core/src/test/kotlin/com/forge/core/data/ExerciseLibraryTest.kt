@@ -34,9 +34,17 @@ class ExerciseLibraryTest {
     }
 
     @Test
-    fun `the starter ten keep their ids and are the library instances`() {
-        assertEquals(10, SampleData.exercises.size)
-        for (exercise in SampleData.exercises) {
+    fun `the original ten starter exercises keep their ids in the library`() {
+        // The ten exercises the scaffold started with, as the library's own
+        // named entries — ids stable since the scaffold.
+        val starterTen = listOf(
+            ExerciseLibrary.benchPress, ExerciseLibrary.overheadPress, ExerciseLibrary.tricepPushdown,
+            ExerciseLibrary.barbellRow, ExerciseLibrary.pullUp, ExerciseLibrary.bicepCurl,
+            ExerciseLibrary.squat, ExerciseLibrary.deadlift, ExerciseLibrary.legPress,
+            ExerciseLibrary.calfRaise,
+        )
+        assertEquals(10, starterTen.size)
+        for (exercise in starterTen) {
             assertSame(exercise, ExerciseLibrary.byId(exercise.id))
         }
         // The exact scaffold ids, unchanged.
@@ -46,7 +54,7 @@ class ExerciseLibraryTest {
                 "ex-barbell-row", "ex-pull-up", "ex-bicep-curl",
                 "ex-squat", "ex-deadlift", "ex-leg-press", "ex-calf-raise",
             ),
-            SampleData.exercises.map { it.id }.toSet(),
+            starterTen.map { it.id }.toSet(),
         )
     }
 
