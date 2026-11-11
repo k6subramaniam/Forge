@@ -1,1 +1,100 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS5tb2RlbAoKZW51bSBjbGFzcyBHb2FsVHlwZSB7CiAgICBCVUlMRF9NVVNDTEUsCiAgICBMT1NFX0ZBVCwKICAgIFJFQ09NUCwKICAgIE1BSU5UQUlOLAp9CgplbnVtIGNsYXNzIEV4cGVyaWVuY2VMZXZlbCB7CiAgICBCRUdJTk5FUiwKICAgIElOVEVSTUVESUFURSwKICAgIEFEVkFOQ0VELAp9CgplbnVtIGNsYXNzIEVxdWlwbWVudEFjY2VzcyB7CiAgICBGVUxMX0dZTSwKICAgIERVTUJCRUxMU19PTkxZLAogICAgSE9NRV9NSU5JTUFMLAp9CgplbnVtIGNsYXNzIEFjdGl2aXR5TGV2ZWwgewogICAgU0VERU5UQVJZLAogICAgTElHSFQsCiAgICBNT0RFUkFURSwKICAgIEhJR0gsCiAgICBBVEhMRVRFLAp9CgplbnVtIGNsYXNzIFNleCB7CiAgICBNQUxFLAogICAgRkVNQUxFLAp9CgovKioKICogQmx1ZXByaW50IMKnNTogdGhlIGdvYWwgcHJvZmlsZSBjb2xsZWN0ZWQgaW4gb25ib2FyZGluZyBzdGVwcyAx4oCTMiBhbmQgNSDigJQKICogZ29hbCwgYm9keSBzdGF0cywgY2Fsb3JpZS9tYWNybyB0YXJnZXRzLCBkaWV0YXJ5IHByZWZlcmVuY2VzIGFuZCByZXN0cmljdGlvbnMuCiAqIENhbG9yaWUvcHJvdGVpbiB0YXJnZXRzIGFyZSBjb21wdXRlZCBmcm9tIGZvcm11bGFzIGluIGxhdGVyIHBoYXNlcyAoYmx1ZXByaW50IDMuNyk7CiAqIGluIFBoYXNlIDEgdGhleSBhcmUgY2FycmllZCBhcyBvcHRpb25hbCwgdXNlci1jb25maXJtZWQgdmFsdWVzLgogKi8KZGF0YSBjbGFzcyBHb2FsUHJvZmlsZSgKICAgIHZhbCBnb2FsOiBHb2FsVHlwZSwKICAgIHZhbCBhZ2VZZWFyczogSW50LAogICAgdmFsIHNleDogU2V4LAogICAgdmFsIGhlaWdodENtOiBEb3VibGUsCiAgICB2YWwgd2VpZ2h0S2c6IERvdWJsZSwKICAgIHZhbCB0cmFpbmluZ0RheXNQZXJXZWVrOiBJbnQsCiAgICB2YWwgZXhwZXJpZW5jZUxldmVsOiBFeHBlcmllbmNlTGV2ZWwsCiAgICB2YWwgZXF1aXBtZW50QWNjZXNzOiBFcXVpcG1lbnRBY2Nlc3MsCiAgICB2YWwgYWN0aXZpdHlMZXZlbDogQWN0aXZpdHlMZXZlbCwKICAgIHZhbCBjYWxvcmllVGFyZ2V0S2NhbDogSW50PyA9IG51bGwsCiAgICB2YWwgcHJvdGVpblRhcmdldEdyYW1zOiBJbnQ/ID0gbnVsbCwKICAgIHZhbCBjYXJiVGFyZ2V0R3JhbXM6IEludD8gPSBudWxsLAogICAgdmFsIGZhdFRhcmdldEdyYW1zOiBJbnQ/ID0gbnVsbCwKICAgIC8qKiBlLmcuICJ2ZWdldGFyaWFuIi4gRnJlZSB0ZXh0IGluIHYxLCBtYXRjaGluZyB0aGUgYmx1ZXByaW50J3MgZGlldCBzY3JlZW4uICovCiAgICB2YWwgZGlldGFyeVBhdHRlcm46IFN0cmluZz8gPSBudWxsLAogICAgdmFsIGRpc2xpa2VzOiBMaXN0PFN0cmluZz4gPSBlbXB0eUxpc3QoKSwKICAgIC8qKiBIYXJkIGNvbnN0cmFpbnRzIOKAlCBnZW5lcmF0ZWQgbWVhbCBwbGFucyBtdXN0IG5ldmVyIGluY2x1ZGUgdGhlc2UgKGJsdWVwcmludCAzLjApLiAqLwogICAgdmFsIGFsbGVyZ2llczogTGlzdDxTdHJpbmc+ID0gZW1wdHlMaXN0KCksCikKCi8qKiBKb2ludC9ib25lIHByb2JsZW0gYXJlYXMgYXNrZWQgYWJvdXQgb24gdGhlIFBBUi1RLXN0eWxlIGhlYWx0aCBzY3JlZW4gKGJsdWVwcmludCAzLjApLiAqLwplbnVtIGNsYXNzIEpvaW50QXJlYSB7CiAgICBLTkVFLAogICAgU0hPVUxERVIsCiAgICBMT1dFUl9CQUNLLAogICAgRUxCT1csCiAgICBXUklTVCwKICAgIEhJUCwKICAgIEFOS0xFLAogICAgTkVDSywKfQoKLyoqIFJlZC1mbGFnIGNsZWFyYW5jZSBsaWZlY3ljbGU6IGEgcmVkLWZsYWcgcHJvZmlsZSBpcyBSRVFVSVJFRCB0byBnZXQgY2xlYXJhbmNlLCB0aGVuIE9CVEFJTkVELiAqLwplbnVtIGNsYXNzIENsZWFyYW5jZVN0YXRlIHsKICAgIE5PVF9SRVFVSVJFRCwKICAgIFJFUVVJUkVELAogICAgT0JUQUlORUQsCn0KCi8qKgogKiBCbHVlcHJpbnQgwqc1OiB0aGUgb25ib2FyZGluZyBoZWFsdGggc2NyZWVuLiBTdG9yZWQgZW5jcnlwdGVkIG9uLWRldmljZSBvbmx5IGluIHRoZQogKiByZWFsIGFwcCAoVE9ETyBtYXJrZXIgbGl2ZXMgaW4gdGhlIG1vYmlsZSByZXBvc2l0b3J5IHN0dWIpOyB0aGUgb25ib2FyZGluZy1jb21wbGV0ZQogKiBmbGFnIGdhdGVzIGFsbCBwbGFuIGdlbmVyYXRpb24gKHNlZSBjb20uZm9yZ2UuY29yZS5vbmJvYXJkaW5nLk9uYm9hcmRpbmdHYXRlKS4KICovCmRhdGEgY2xhc3MgSGVhbHRoUHJvZmlsZSgKICAgIHZhbCBoYXNEaWFnbm9zZWRIZWFydENvbmRpdGlvbjogQm9vbGVhbiA9IGZhbHNlLAogICAgdmFsIGhhc0hpZ2hCbG9vZFByZXNzdXJlOiBCb29sZWFuID0gZmFsc2UsCiAgICB2YWwgaGFzRXhlcnRpb25hbENoZXN0UGFpbjogQm9vbGVhbiA9IGZhbHNlLAogICAgdmFsIGRvY3RvckFkdmlzZWRBZ2FpbnN0RXhlcmNpc2U6IEJvb2xlYW4gPSBmYWxzZSwKICAgIHZhbCBoYXNBc3RobWE6IEJvb2xlYW4gPSBmYWxzZSwKICAgIHZhbCBoYXNEaWFiZXRlczogQm9vbGVhbiA9IGZhbHNlLAogICAgLyoqIGUuZy4gYmV0YSBibG9ja2VycyDigJQgY2FwcyBzdWdnZXN0ZWQgSFIgem9uZXMgKGJsdWVwcmludCAzLjApLiAqLwogICAgdmFsIHRha2VzSGVhcnRSYXRlQWZmZWN0aW5nTWVkaWNhdGlvbjogQm9vbGVhbiA9IGZhbHNlLAogICAgdmFsIGpvaW50TGltaXRhdGlvbnM6IFNldDxKb2ludEFyZWE+ID0gZW1wdHlTZXQoKSwKICAgIHZhbCBpbmp1cmllc09yU3VyZ2VyaWVzOiBTdHJpbmcgPSAiIiwKICAgIHZhbCBmcmVlVGV4dExpbWl0YXRpb25zOiBTdHJpbmcgPSAiIiwKICAgIHZhbCBjbGVhcmFuY2VTdGF0ZTogQ2xlYXJhbmNlU3RhdGUgPSBDbGVhcmFuY2VTdGF0ZS5OT1RfUkVRVUlSRUQsCiAgICB2YWwgb25ib2FyZGluZ0NvbXBsZXRlOiBCb29sZWFuID0gZmFsc2UsCikK
+package com.forge.core.model
+
+enum class GoalType {
+    BUILD_MUSCLE,
+    LOSE_FAT,
+    RECOMP,
+    MAINTAIN,
+}
+
+enum class ExperienceLevel {
+    BEGINNER,
+    INTERMEDIATE,
+    ADVANCED,
+}
+
+enum class EquipmentAccess {
+    FULL_GYM,
+    DUMBBELLS_ONLY,
+    HOME_MINIMAL,
+}
+
+enum class ActivityLevel {
+    SEDENTARY,
+    LIGHT,
+    MODERATE,
+    HIGH,
+    ATHLETE,
+}
+
+enum class Sex {
+    MALE,
+    FEMALE,
+}
+
+/**
+ * Blueprint §5: the goal profile collected in onboarding steps 1–2 and 5 —
+ * goal, body stats, calorie/macro targets, dietary preferences and restrictions.
+ * Calorie/protein targets are computed from formulas in later phases (blueprint 3.7);
+ * in Phase 1 they are carried as optional, user-confirmed values.
+ */
+data class GoalProfile(
+    val goal: GoalType,
+    val ageYears: Int,
+    val sex: Sex,
+    val heightCm: Double,
+    val weightKg: Double,
+    val trainingDaysPerWeek: Int,
+    val experienceLevel: ExperienceLevel,
+    val equipmentAccess: EquipmentAccess,
+    val activityLevel: ActivityLevel,
+    val calorieTargetKcal: Int? = null,
+    val proteinTargetGrams: Int? = null,
+    val carbTargetGrams: Int? = null,
+    val fatTargetGrams: Int? = null,
+    /** e.g. "vegetarian". Free text in v1, matching the blueprint's diet screen. */
+    val dietaryPattern: String? = null,
+    val dislikes: List<String> = emptyList(),
+    /** Hard constraints — generated meal plans must never include these (blueprint 3.0). */
+    val allergies: List<String> = emptyList(),
+)
+
+/** Joint/bone problem areas asked about on the PAR-Q-style health screen (blueprint 3.0). */
+enum class JointArea {
+    KNEE,
+    SHOULDER,
+    LOWER_BACK,
+    ELBOW,
+    WRIST,
+    HIP,
+    ANKLE,
+    NECK,
+}
+
+/** Red-flag clearance lifecycle: a red-flag profile is REQUIRED to get clearance, then OBTAINED. */
+enum class ClearanceState {
+    NOT_REQUIRED,
+    REQUIRED,
+    OBTAINED,
+}
+
+/**
+ * Blueprint §5: the onboarding health screen. Stored encrypted on-device only in the
+ * real app (TODO marker lives in the mobile repository stub); the onboarding-complete
+ * flag gates all plan generation (see com.forge.core.onboarding.OnboardingGate).
+ */
+data class HealthProfile(
+    val hasDiagnosedHeartCondition: Boolean = false,
+    val hasHighBloodPressure: Boolean = false,
+    val hasExertionalChestPain: Boolean = false,
+    val doctorAdvisedAgainstExercise: Boolean = false,
+    val hasAsthma: Boolean = false,
+    val hasDiabetes: Boolean = false,
+    /** e.g. beta blockers — caps suggested HR zones (blueprint 3.0). */
+    val takesHeartRateAffectingMedication: Boolean = false,
+    val jointLimitations: Set<JointArea> = emptySet(),
+    val injuriesOrSurgeries: String = "",
+    val freeTextLimitations: String = "",
+    val clearanceState: ClearanceState = ClearanceState.NOT_REQUIRED,
+    val onboardingComplete: Boolean = false,
+)
