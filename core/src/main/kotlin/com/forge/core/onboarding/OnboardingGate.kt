@@ -1,1 +1,162 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS5vbmJvYXJkaW5nCgppbXBvcnQgY29tLmZvcmdlLmNvcmUubW9kZWwuQ2xlYXJhbmNlU3RhdGUKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLkhlYWx0aFByb2ZpbGUKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLkpvaW50QXJlYQoKLyoqCiAqIEEgbW92ZW1lbnQgcGF0dGVybiByZW1vdmVkIGZyb20gZ2VuZXJhdGVkIHBsYW5zIGJlY2F1c2Ugb2YgYSBsaW1pdGF0aW9uLCB0b2dldGhlcgogKiB3aXRoIHRoZSBzYWZlciB2YXJpYW50cyB0aGF0IHJlcGxhY2UgaXQgKGJsdWVwcmludCAzLjA6IHN3YXBzIGFyZSBzaG93biBhbmQgZXhwbGFpbmVkLAogKiBhbmQgYSBwZXItc3dhcCBvdmVycmlkZSBpcyBwb3NzaWJsZSBpbiB0aGUgVUkg4oCUIHRoZSBvdmVycmlkZSBpcyBhIFVJIGNvbmNlcm4sIG5vdCBhIGdhdGUgb25lKS4KICovCmRhdGEgY2xhc3MgRXhlcmNpc2VFeGNsdXNpb24oCiAgICB2YWwgYXJlYTogSm9pbnRBcmVhLAogICAgdmFsIGV4Y2x1ZGVkTW92ZW1lbnRzOiBMaXN0PFN0cmluZz4sCiAgICB2YWwgc3Vic3RpdHV0aW9uczogTGlzdDxTdHJpbmc+LAogICAgdmFsIHJlYXNvbjogU3RyaW5nLAopCgovKioKICogVGhlIGZ1bmN0aW9uYWwgKG5vbi1kaWFnbm9zdGljKSBjb25zdHJhaW50cyBkZXJpdmVkIGZyb20gYSBbSGVhbHRoUHJvZmlsZV0uCiAqIFRoZXNlIGFyZSB3aGF0IGdldCBlbWJlZGRlZCBpbnRvIEFJIENvYWNoIHByb21wdHMg4oCUIG5ldmVyIHRoZSBkaWFnbm9zZXMgdGhlbXNlbHZlcwogKiAoYmx1ZXByaW50IDMuMCwgcHJvcGFnYXRpb24gcnVsZSAzKS4KICovCmRhdGEgY2xhc3MgRnVuY3Rpb25hbENvbnN0cmFpbnRzKAogICAgdmFsIGV4ZXJjaXNlRXhjbHVzaW9uczogTGlzdDxFeGVyY2lzZUV4Y2x1c2lvbj4sCiAgICAvKioKICAgICAqIENhcCBvbiBzdWdnZXN0ZWQgd29ya2luZyBoZWFydCByYXRlIGFzIGEgcGVyY2VudGFnZSBvZiBtYXggSFIsIG9yIG51bGwgd2hlbiB1bmNhcHBlZC4KICAgICAqIFdoZW4gc2V0LCBwbGFucyBhbmQgcmVhZGluZXNzIG1heSBvbmx5IHNjYWxlIGludGVuc2l0eSBET1dOIGZyb20gdGhlIHByZXNjcmlwdGlvbiwKICAgICAqIG5ldmVyIHVwIChibHVlcHJpbnQgMy4wLCBwcm9wYWdhdGlvbiBydWxlIDIpLgogICAgICovCiAgICB2YWwgaGVhcnRSYXRlQ2FwUGVyY2VudE9mTWF4OiBJbnQ/LAogICAgdmFsIGludGVuc2l0eU1heU9ubHlTY2FsZURvd246IEJvb2xlYW4sCiAgICAvKiogUGxhaW4tbGFuZ3VhZ2UgZnVuY3Rpb25hbCBsaW1pdGF0aW9uIHN0YXRlbWVudHMsIHNhZmUgdG8gc2VuZCB0byB0aGUgQUkgQ29hY2guICovCiAgICB2YWwgcHJvbXB0Q29uc3RyYWludHM6IExpc3Q8U3RyaW5nPiwKKQoKZGF0YSBjbGFzcyBPbmJvYXJkaW5nR2F0ZVJlc3VsdCgKICAgIC8qKiBIdW1hbi1yZWFkYWJsZSBuYW1lcyBvZiB0aGUgcmVkIGZsYWdzIHRoYXQgZmlyZWQgKGVtcHR5IHdoZW4gbm9uZSkuICovCiAgICB2YWwgcmVkRmxhZ3NQcmVzZW50OiBMaXN0PFN0cmluZz4sCiAgICAvKiogVHJ1ZSB3aGlsZSBhIHJlZCBmbGFnIGV4aXN0cyBhbmQgbWVkaWNhbCBjbGVhcmFuY2UgaGFzIG5vdCBiZWVuIHJlY29yZGVkLiAqLwogICAgdmFsIHBsYW5HZW5lcmF0aW9uQmxvY2tlZDogQm9vbGVhbiwKICAgIC8qKiBUaGUgc2luZ2xlIGdhdGUgZXZlcnkgcGxhbi93b3Jrb3V0L2RpZXQgZ2VuZXJhdG9yIG11c3QgY2hlY2sgZmlyc3QgKGJsdWVwcmludCAzLjApLiAqLwogICAgdmFsIGNhbkdlbmVyYXRlUGxhbnM6IEJvb2xlYW4sCiAgICB2YWwgY29uc3RyYWludHM6IEZ1bmN0aW9uYWxDb25zdHJhaW50cywKKQoKLyoqCiAqIEJsdWVwcmludCAzLjAgYXMgZXhlY3V0YWJsZSBydWxlcy4gUHVyZSBmdW5jdGlvbnMgb3ZlciBbSGVhbHRoUHJvZmlsZV0gc28gdGhlIHNhZmV0eQogKiBnYXRlIGlzIHVuaXQtdGVzdGVkIGluZGVwZW5kZW50bHkgb2YgYW55IFVJLgogKi8Kb2JqZWN0IE9uYm9hcmRpbmdHYXRlIHsKCiAgICAvKiogV29ya2luZy1IUiBjZWlsaW5nIGFwcGxpZWQgd2hlbiBhbnkgY2FyZGlvdmFzY3VsYXIgZmxhZyBpcyBwcmVzZW50LiAqLwogICAgY29uc3QgdmFsIENBUkRJT19IUl9DQVBfUEVSQ0VOVF9PRl9NQVggPSA4NQoKICAgIHByaXZhdGUgZnVuIGV4Y2x1c2lvbigKICAgICAgICBhcmVhOiBKb2ludEFyZWEsCiAgICAgICAgZXhjbHVkZWQ6IExpc3Q8U3RyaW5nPiwKICAgICAgICBzdWJzdGl0dXRpb25zOiBMaXN0PFN0cmluZz4sCiAgICApID0gRXhlcmNpc2VFeGNsdXNpb24oCiAgICAgICAgYXJlYSA9IGFyZWEsCiAgICAgICAgZXhjbHVkZWRNb3ZlbWVudHMgPSBleGNsdWRlZCwKICAgICAgICBzdWJzdGl0dXRpb25zID0gc3Vic3RpdHV0aW9ucywKICAgICAgICByZWFzb24gPSAiRGVjbGFyZWQgJHthcmVhLm5hbWUubG93ZXJjYXNlKCkucmVwbGFjZSgnXycsICcgJyl9IGxpbWl0YXRpb24gaW4gdGhlIG9uYm9hcmRpbmcgaGVhbHRoIHNjcmVlbi4iLAogICAgKQoKICAgIHByaXZhdGUgdmFsIEVYQ0xVU0lPTlM6IE1hcDxKb2ludEFyZWEsIEV4ZXJjaXNlRXhjbHVzaW9uPiA9IGxpc3RPZigKICAgICAgICBleGNsdXNpb24oCiAgICAgICAgICAgIEpvaW50QXJlYS5LTkVFLAogICAgICAgICAgICBleGNsdWRlZCA9IGxpc3RPZigiRGVlcCBzcXVhdCIsICJMdW5nZSIsICJKdW1waW5nIG1vdmVtZW50cyIpLAogICAgICAgICAgICBzdWJzdGl0dXRpb25zID0gbGlzdE9mKCJCb3ggc3F1YXQgdG8gY29tZm9ydGFibGUgZGVwdGgiLCAiTGVnIHByZXNzIiwgIlN0ZXAtdXAiKSwKICAgICAgICApLAogICAgICAgIGV4Y2x1c2lvbigKICAgICAgICAgICAgSm9pbnRBcmVhLlNIT1VMREVSLAogICAgICAgICAgICBleGNsdWRlZCA9IGxpc3RPZigiT3ZlcmhlYWQgcHJlc3MiLCAiQmVoaW5kLW5lY2sgcHJlc3MiLCAiVXByaWdodCByb3ciKSwKICAgICAgICAgICAgc3Vic3RpdHV0aW9ucyA9IGxpc3RPZigiTGFuZG1pbmUgcHJlc3MiLCAiTmV1dHJhbC1ncmlwIGR1bWJiZWxsIHByZXNzIiwgIkNhYmxlIGxhdGVyYWwgcmFpc2UiKSwKICAgICAgICApLAogICAgICAgIGV4Y2x1c2lvbigKICAgICAgICAgICAgSm9pbnRBcmVhLkxPV0VSX0JBQ0ssCiAgICAgICAgICAgIGV4Y2x1ZGVkID0gbGlzdE9mKCJNYXgtZWZmb3J0IGNvbnZlbnRpb25hbCBkZWFkbGlmdCIsICJHb29kIG1vcm5pbmciLCAiSGVhdnkgdW5zdXBwb3J0ZWQgcm93IiksCiAgICAgICAgICAgIHN1YnN0aXR1dGlvbnMgPSBsaXN0T2YoIlRyYXAtYmFyIGRlYWRsaWZ0IiwgIkhpcCB0aHJ1c3QiLCAiQ2hlc3Qtc3VwcG9ydGVkIHJvdyIpLAogICAgICAgICksCiAgICAgICAgZXhjbHVzaW9uKAogICAgICAgICAgICBKb2ludEFyZWEuRUxCT1csCiAgICAgICAgICAgIGV4Y2x1ZGVkID0gbGlzdE9mKCJTa3VsbCBjcnVzaGVyIiwgIkhlYXZ5IGNsb3NlLWdyaXAgcHJlc3MiLCAiU3RyYWlnaHQtYmFyIGN1cmwiKSwKICAgICAgICAgICAgc3Vic3RpdHV0aW9ucyA9IGxpc3RPZigiQ2FibGUgcHVzaGRvd24iLCAiRVotYmFyIGN1cmwiLCAiSGFtbWVyIGN1cmwiKSwKICAgICAgICApLAogICAgICAgIGV4Y2x1c2lvbigKICAgICAgICAgICAgSm9pbnRBcmVhLldSSVNULAogICAgICAgICAgICBleGNsdWRlZCA9IGxpc3RPZigiU3RyYWlnaHQtYmFyIGN1cmwiLCAiQmFyYmVsbCBmcm9udCByYWNrIHBvc2l0aW9uIiwgIldyaXN0LWxvYWRlZCBwcmVzc2luZyIpLAogICAgICAgICAgICBzdWJzdGl0dXRpb25zID0gbGlzdE9mKCJFWi1iYXIgY3VybCIsICJEdW1iYmVsbCBwcmVzcyIsICJTYWZldHktYmFyIHNxdWF0IiksCiAgICAgICAgKSwKICAgICAgICBleGNsdXNpb24oCiAgICAgICAgICAgIEpvaW50QXJlYS5ISVAsCiAgICAgICAgICAgIGV4Y2x1ZGVkID0gbGlzdE9mKCJEZWVwIGhpcC1mbGV4aW9uIHNxdWF0IiwgIlN1bW8gZGVhZGxpZnQgYXQgbWF4IGxvYWQiKSwKICAgICAgICAgICAgc3Vic3RpdHV0aW9ucyA9IGxpc3RPZigiQm94IHNxdWF0IGFib3ZlIHBhcmFsbGVsIiwgIkhpcCB0aHJ1c3QiLCAiU3RlcC11cCIpLAogICAgICAgICksCiAgICAgICAgZXhjbHVzaW9uKAogICAgICAgICAgICBKb2ludEFyZWEuQU5LTEUsCiAgICAgICAgICAgIGV4Y2x1ZGVkID0gbGlzdE9mKCJKdW1waW5nIG1vdmVtZW50cyIsICJEZWVwLXN0YW5jZSBsdW5nZSIpLAogICAgICAgICAgICBzdWJzdGl0dXRpb25zID0gbGlzdE9mKCJIZWVsLWVsZXZhdGVkIHNxdWF0IiwgIkxlZyBwcmVzcyIsICJTZWF0ZWQgY2FsZiByYWlzZSIpLAogICAgICAgICksCiAgICAgICAgZXhjbHVzaW9uKAogICAgICAgICAgICBKb2ludEFyZWEuTkVDSywKICAgICAgICAgICAgZXhjbHVkZWQgPSBsaXN0T2YoIkJlaGluZC1uZWNrIHByZXNzIiwgIkhlYXZ5IHNocnVnIiwgIk5lY2sgaGFybmVzcyB3b3JrIiksCiAgICAgICAgICAgIHN1YnN0aXR1dGlvbnMgPSBsaXN0T2YoIkZyb250IHByZXNzIiwgIkNhYmxlIGxhdGVyYWwgcmFpc2UiLCAiRmFybWVyJ3MgY2FycnkiKSwKICAgICAgICApLAogICAgKS5hc3NvY2lhdGVCeSB7IGl0LmFyZWEgfQoKICAgIGZ1biBldmFsdWF0ZShwcm9maWxlOiBIZWFsdGhQcm9maWxlKTogT25ib2FyZGluZ0dhdGVSZXN1bHQgewogICAgICAgIHZhbCByZWRGbGFncyA9IGJ1aWxkTGlzdCB7CiAgICAgICAgICAgIGlmIChwcm9maWxlLmhhc0RpYWdub3NlZEhlYXJ0Q29uZGl0aW9uKSBhZGQoIkRpYWdub3NlZCBoZWFydCBjb25kaXRpb24iKQogICAgICAgICAgICBpZiAocHJvZmlsZS5oYXNFeGVydGlvbmFsQ2hlc3RQYWluKSBhZGQoIkNoZXN0IHBhaW4gZHVyaW5nIGFjdGl2aXR5IikKICAgICAgICAgICAgaWYgKHByb2ZpbGUuZG9jdG9yQWR2aXNlZEFnYWluc3RFeGVyY2lzZSkgYWRkKCJEb2N0b3IgaGFzIGFkdmlzZWQgYWdhaW5zdCBleGVyY2lzZSIpCiAgICAgICAgfQoKICAgICAgICAvLyBBIHJlZCBmbGFnIGJsb2NrcyBnZW5lcmF0aW9uIHVudGlsIGNsZWFyYW5jZSBpcyByZWNvcmRlZCBhcyBPQlRBSU5FRC4KICAgICAgICAvLyAoVGhlIFVJIHNldHMgY2xlYXJhbmNlU3RhdGUgPSBSRVFVSVJFRCB3aGVuIGEgcmVkIGZsYWcgaXMgZmlyc3QgYW5zd2VyZWQuKQogICAgICAgIHZhbCBibG9ja2VkID0gcmVkRmxhZ3MuaXNOb3RFbXB0eSgpICYmIHByb2ZpbGUuY2xlYXJhbmNlU3RhdGUgIT0gQ2xlYXJhbmNlU3RhdGUuT0JUQUlORUQKICAgICAgICB2YWwgY2FuR2VuZXJhdGUgPSBwcm9maWxlLm9uYm9hcmRpbmdDb21wbGV0ZSAmJiAhYmxvY2tlZAoKICAgICAgICB2YWwgY2FyZGlvdmFzY3VsYXJGbGFnID0gcHJvZmlsZS5oYXNEaWFnbm9zZWRIZWFydENvbmRpdGlvbiB8fAogICAgICAgICAgICBwcm9maWxlLmhhc0hpZ2hCbG9vZFByZXNzdXJlIHx8CiAgICAgICAgICAgIHByb2ZpbGUudGFrZXNIZWFydFJhdGVBZmZlY3RpbmdNZWRpY2F0aW9uCgogICAgICAgIHZhbCBleGNsdXNpb25zID0gcHJvZmlsZS5qb2ludExpbWl0YXRpb25zLm1hcE5vdE51bGwgeyBFWENMVVNJT05TW2l0XSB9CgogICAgICAgIHZhbCBwcm9tcHRDb25zdHJhaW50cyA9IGJ1aWxkTGlzdCB7CiAgICAgICAgICAgIGV4Y2x1c2lvbnMuZm9yRWFjaCB7IGV4IC0+CiAgICAgICAgICAgICAgICBhZGQoCiAgICAgICAgICAgICAgICAgICAgIkF2b2lkICR7ZXguZXhjbHVkZWRNb3ZlbWVudHMuam9pblRvU3RyaW5nKCIsICIpLmxvd2VyY2FzZSgpfSAiICsKICAgICAgICAgICAgICAgICAgICAgICAgIigke2V4LmFyZWEubmFtZS5sb3dlcmNhc2UoKS5yZXBsYWNlKCdfJywgJyAnKX0gbGltaXRhdGlvbik7ICIgKwogICAgICAgICAgICAgICAgICAgICAgICAicHJlZmVyICR7ZXguc3Vic3RpdHV0aW9ucy5qb2luVG9TdHJpbmcoIiwgIikubG93ZXJjYXNlKCl9LiIsCiAgICAgICAgICAgICAgICApCiAgICAgICAgICAgIH0KICAgICAgICAgICAgaWYgKGNhcmRpb3Zhc2N1bGFyRmxhZykgewogICAgICAgICAgICAgICAgYWRkKCJLZWVwIHdvcmtpbmcgaGVhcnQgcmF0ZSBhdCBvciBiZWxvdyAkQ0FSRElPX0hSX0NBUF9QRVJDRU5UX09GX01BWCUgb2YgbWF4OyBzY2FsZSBpbnRlbnNpdHkgZG93biBvbmx5LCBuZXZlciB1cC4iKQogICAgICAgICAgICB9CiAgICAgICAgICAgIGlmIChwcm9maWxlLmhhc0FzdGhtYSkgewogICAgICAgICAgICAgICAgYWRkKCJCcmVhdGhpbmcgbGltaXRhdGlvbiBkZWNsYXJlZDsgZmF2b3VyIGxvbmdlciByZXN0IGludGVydmFscyBhbmQgYXZvaWQgbWF4aW1hbCBicmVhdGgtaG9sZCBlZmZvcnRzLiIpCiAgICAgICAgICAgIH0KICAgICAgICAgICAgaWYgKHByb2ZpbGUuZnJlZVRleHRMaW1pdGF0aW9ucy5pc05vdEJsYW5rKCkpIHsKICAgICAgICAgICAgICAgIGFkZCgiVXNlci1kZWNsYXJlZCBsaW1pdGF0aW9uOiAke3Byb2ZpbGUuZnJlZVRleHRMaW1pdGF0aW9ucy50cmltKCl9IikKICAgICAgICAgICAgfQogICAgICAgICAgICBpZiAocHJvZmlsZS5pbmp1cmllc09yU3VyZ2VyaWVzLmlzTm90QmxhbmsoKSkgewogICAgICAgICAgICAgICAgYWRkKCJJbmp1cnkvc3VyZ2VyeSBoaXN0b3J5IGRlY2xhcmVkOiAke3Byb2ZpbGUuaW5qdXJpZXNPclN1cmdlcmllcy50cmltKCl9IikKICAgICAgICAgICAgfQogICAgICAgIH0KCiAgICAgICAgcmV0dXJuIE9uYm9hcmRpbmdHYXRlUmVzdWx0KAogICAgICAgICAgICByZWRGbGFnc1ByZXNlbnQgPSByZWRGbGFncywKICAgICAgICAgICAgcGxhbkdlbmVyYXRpb25CbG9ja2VkID0gYmxvY2tlZCwKICAgICAgICAgICAgY2FuR2VuZXJhdGVQbGFucyA9IGNhbkdlbmVyYXRlLAogICAgICAgICAgICBjb25zdHJhaW50cyA9IEZ1bmN0aW9uYWxDb25zdHJhaW50cygKICAgICAgICAgICAgICAgIGV4ZXJjaXNlRXhjbHVzaW9ucyA9IGV4Y2x1c2lvbnMsCiAgICAgICAgICAgICAgICBoZWFydFJhdGVDYXBQZXJjZW50T2ZNYXggPSBpZiAoY2FyZGlvdmFzY3VsYXJGbGFnKSBDQVJESU9fSFJfQ0FQX1BFUkNFTlRfT0ZfTUFYIGVsc2UgbnVsbCwKICAgICAgICAgICAgICAgIGludGVuc2l0eU1heU9ubHlTY2FsZURvd24gPSBjYXJkaW92YXNjdWxhckZsYWcsCiAgICAgICAgICAgICAgICBwcm9tcHRDb25zdHJhaW50cyA9IHByb21wdENvbnN0cmFpbnRzLAogICAgICAgICAgICApLAogICAgICAgICkKICAgIH0KfQo=
+package com.forge.core.onboarding
+
+import com.forge.core.model.ClearanceState
+import com.forge.core.model.HealthProfile
+import com.forge.core.model.JointArea
+
+/**
+ * A movement pattern removed from generated plans because of a limitation, together
+ * with the safer variants that replace it (blueprint 3.0: swaps are shown and explained,
+ * and a per-swap override is possible in the UI — the override is a UI concern, not a gate one).
+ */
+data class ExerciseExclusion(
+    val area: JointArea,
+    val excludedMovements: List<String>,
+    val substitutions: List<String>,
+    val reason: String,
+)
+
+/**
+ * The functional (non-diagnostic) constraints derived from a [HealthProfile].
+ * These are what get embedded into AI Coach prompts — never the diagnoses themselves
+ * (blueprint 3.0, propagation rule 3).
+ */
+data class FunctionalConstraints(
+    val exerciseExclusions: List<ExerciseExclusion>,
+    /**
+     * Cap on suggested working heart rate as a percentage of max HR, or null when uncapped.
+     * When set, plans and readiness may only scale intensity DOWN from the prescription,
+     * never up (blueprint 3.0, propagation rule 2).
+     */
+    val heartRateCapPercentOfMax: Int?,
+    val intensityMayOnlyScaleDown: Boolean,
+    /** Plain-language functional limitation statements, safe to send to the AI Coach. */
+    val promptConstraints: List<String>,
+)
+
+data class OnboardingGateResult(
+    /** Human-readable names of the red flags that fired (empty when none). */
+    val redFlagsPresent: List<String>,
+    /** True while a red flag exists and medical clearance has not been recorded. */
+    val planGenerationBlocked: Boolean,
+    /** The single gate every plan/workout/diet generator must check first (blueprint 3.0). */
+    val canGeneratePlans: Boolean,
+    val constraints: FunctionalConstraints,
+)
+
+/**
+ * Blueprint 3.0 as executable rules. Pure functions over [HealthProfile] so the safety
+ * gate is unit-tested independently of any UI.
+ */
+object OnboardingGate {
+
+    /** Working-HR ceiling applied when any cardiovascular flag is present. */
+    const val CARDIO_HR_CAP_PERCENT_OF_MAX = 85
+
+    private fun exclusion(
+        area: JointArea,
+        excluded: List<String>,
+        substitutions: List<String>,
+    ) = ExerciseExclusion(
+        area = area,
+        excludedMovements = excluded,
+        substitutions = substitutions,
+        reason = "Declared ${area.name.lowercase().replace('_', ' ')} limitation in the onboarding health screen.",
+    )
+
+    private val EXCLUSIONS: Map<JointArea, ExerciseExclusion> = listOf(
+        exclusion(
+            JointArea.KNEE,
+            excluded = listOf("Deep squat", "Lunge", "Jumping movements"),
+            substitutions = listOf("Box squat to comfortable depth", "Leg press", "Step-up"),
+        ),
+        exclusion(
+            JointArea.SHOULDER,
+            excluded = listOf("Overhead press", "Behind-neck press", "Upright row"),
+            substitutions = listOf("Landmine press", "Neutral-grip dumbbell press", "Cable lateral raise"),
+        ),
+        exclusion(
+            JointArea.LOWER_BACK,
+            excluded = listOf("Max-effort conventional deadlift", "Good morning", "Heavy unsupported row"),
+            substitutions = listOf("Trap-bar deadlift", "Hip thrust", "Chest-supported row"),
+        ),
+        exclusion(
+            JointArea.ELBOW,
+            excluded = listOf("Skull crusher", "Heavy close-grip press", "Straight-bar curl"),
+            substitutions = listOf("Cable pushdown", "EZ-bar curl", "Hammer curl"),
+        ),
+        exclusion(
+            JointArea.WRIST,
+            excluded = listOf("Straight-bar curl", "Barbell front rack position", "Wrist-loaded pressing"),
+            substitutions = listOf("EZ-bar curl", "Dumbbell press", "Safety-bar squat"),
+        ),
+        exclusion(
+            JointArea.HIP,
+            excluded = listOf("Deep hip-flexion squat", "Sumo deadlift at max load"),
+            substitutions = listOf("Box squat above parallel", "Hip thrust", "Step-up"),
+        ),
+        exclusion(
+            JointArea.ANKLE,
+            excluded = listOf("Jumping movements", "Deep-stance lunge"),
+            substitutions = listOf("Heel-elevated squat", "Leg press", "Seated calf raise"),
+        ),
+        exclusion(
+            JointArea.NECK,
+            excluded = listOf("Behind-neck press", "Heavy shrug", "Neck harness work"),
+            substitutions = listOf("Front press", "Cable lateral raise", "Farmer's carry"),
+        ),
+    ).associateBy { it.area }
+
+    fun evaluate(profile: HealthProfile): OnboardingGateResult {
+        val redFlags = buildList {
+            if (profile.hasDiagnosedHeartCondition) add("Diagnosed heart condition")
+            if (profile.hasExertionalChestPain) add("Chest pain during activity")
+            if (profile.doctorAdvisedAgainstExercise) add("Doctor has advised against exercise")
+        }
+
+        // A red flag blocks generation until clearance is recorded as OBTAINED.
+        // (The UI sets clearanceState = REQUIRED when a red flag is first answered.)
+        val blocked = redFlags.isNotEmpty() && profile.clearanceState != ClearanceState.OBTAINED
+        val canGenerate = profile.onboardingComplete && !blocked
+
+        val cardiovascularFlag = profile.hasDiagnosedHeartCondition ||
+            profile.hasHighBloodPressure ||
+            profile.takesHeartRateAffectingMedication
+
+        val exclusions = profile.jointLimitations.mapNotNull { EXCLUSIONS[it] }
+
+        val promptConstraints = buildList {
+            exclusions.forEach { ex ->
+                add(
+                    "Avoid ${ex.excludedMovements.joinToString(", ").lowercase()} " +
+                        "(${ex.area.name.lowercase().replace('_', ' ')} limitation); " +
+                        "prefer ${ex.substitutions.joinToString(", ").lowercase()}.",
+                )
+            }
+            if (cardiovascularFlag) {
+                add("Keep working heart rate at or below $CARDIO_HR_CAP_PERCENT_OF_MAX% of max; scale intensity down only, never up.")
+            }
+            if (profile.hasAsthma) {
+                add("Breathing limitation declared; favour longer rest intervals and avoid maximal breath-hold efforts.")
+            }
+            if (profile.freeTextLimitations.isNotBlank()) {
+                add("User-declared limitation: ${profile.freeTextLimitations.trim()}")
+            }
+            if (profile.injuriesOrSurgeries.isNotBlank()) {
+                add("Injury/surgery history declared: ${profile.injuriesOrSurgeries.trim()}")
+            }
+        }
+
+        return OnboardingGateResult(
+            redFlagsPresent = redFlags,
+            planGenerationBlocked = blocked,
+            canGeneratePlans = canGenerate,
+            constraints = FunctionalConstraints(
+                exerciseExclusions = exclusions,
+                heartRateCapPercentOfMax = if (cardiovascularFlag) CARDIO_HR_CAP_PERCENT_OF_MAX else null,
+                intensityMayOnlyScaleDown = cardiovascularFlag,
+                promptConstraints = promptConstraints,
+            ),
+        )
+    }
+}
