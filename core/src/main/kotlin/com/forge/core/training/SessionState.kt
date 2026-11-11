@@ -23,21 +23,15 @@ data class SessionExerciseState(
 ) {
     val exercise: Exercise get() = prescription.exercise
 
-    /** True once any set in this exercise was logged with a pain flag (blueprint 3.0). */
-    val painReported: Boolean get() = loggedSets.any { it.painReported }
-
     /**
-     * Pain removes the exercise for the remainder of the session (blueprint 3.0's
-     * in-workout feedback loop). Derived from the logged sets, so undoing the pain
-     * set restores the exercise.
+     * True once any set in THIS entry was logged with a pain flag (blueprint 3.0).
+     * Pain removal applies to the exercise across the whole session, not just this
+     * entry: see [LiveSessionState.isRemovedForPain].
      */
-    val removedForPain: Boolean get() = painReported
+    val painReported: Boolean get() = loggedSets.any { it.painReported }
 
     /** All prescribed sets are logged. Extra sets beyond the target remain loggable. */
     val isComplete: Boolean get() = loggedSets.size >= prescription.targetSets
-
-    /** The engine will prescribe and log against this exercise (not skipped, not pain-removed). */
-    val isAvailable: Boolean get() = !skipped && !removedForPain
 
     /** Completed sets only — the ones that count toward volume and PRs. */
     val completedSets: List<SetEntry> get() = loggedSets.filter { it.completed }
@@ -77,8 +71,25 @@ data class LiveSessionState(
 
     val totalVolumeKg: Double get() = exercises.sumOf { it.totalVolumeKg }
 
+    /**
+     * Exercises removed for the rest of the session after a pain report (blueprint
+     * 3.0's in-workout feedback loop). Removal is by exercise, not by entry: when a
+     * routine has the same exercise twice, or it is added again mid-session, pain
+     * in one entry removes every entry of it. Derived from the logged sets, so
+     * undoing the pain set restores them all.
+     */
+    val painRemovedExerciseIds: Set<String>
+        get() = exercises.filter { it.painReported }.mapTo(HashSet()) { it.exercise.id }
+
+    /** The exercise at [index] was removed after a pain report in any entry of it. */
+    fun isRemovedForPain(index: Int): Boolean = exercises[index].exercise.id in painRemovedExerciseIds
+
+    /** The engine will prescribe and log against the exercise at [index]: not skipped, not pain-removed. */
+    fun isAvailable(index: Int): Boolean = !exercises[index].skipped && !isRemovedForPain(index)
+
     /** True when every available exercise has all its prescribed sets logged. */
-    val allWorkComplete: Boolean get() = exercises.all { !it.isAvailable || it.isComplete }
+    val allWorkComplete: Boolean
+        get() = exercises.indices.all { !isAvailable(it) || exercises[it].isComplete }
 
     val isFinished: Boolean get() = session.endTime != null
 }
