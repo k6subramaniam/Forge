@@ -1,1 +1,76 @@
-IyBGb3JnZQoKQSBwZXJzb25hbCwgc3RyZW5ndGgtZmlyc3QgdHJhaW5pbmcgYXBwIGZvciBXZWFyIE9TICsgQW5kcm9pZCwgYnVpbHQgZm9yIG9uZSB1c2VyOgp0aGUgR2FsYXh5IFdhdGNoIHJ1bnMgdGhlIHdvcmtvdXQgaW4gdGhlIGd5bSwgdGhlIHBob25lIGhvbGRzIHRoZSBwbGFuLCB0aGUKaGlzdG9yeSwgdGhlIG51dHJpdGlvbiBhbmQgdGhlIEFJIGNvYWNoLiBObyBhY2NvdW50LCBubyBzdWJzY3JpcHRpb24sIG5vIGNsb3VkIGluCnYxIOKAlCBkYXRhIGxpdmVzIG9uIHRoZSBkZXZpY2VzIGFuZCBjb21wbGV0ZWQgd29ya291dHMgYXJlIHdyaXR0ZW4gdG8gSGVhbHRoCkNvbm5lY3Qgc28gdGhleSBzaG93IHVwIGluIFNhbXN1bmcgSGVhbHRoLgoKVGhlIGZ1bGwgcHJvZHVjdCBibHVlcHJpbnQgaXMgYH4vd29ya3NwYWNlL0ZpdG5lc3NfQXBwX0JsdWVwcmludF8yMDI2LTExLTEwLm1kYAooU2VjdGlvbnMgMy4w4oCTMy4xNiwgYXJjaGl0ZWN0dXJlIGluIMKnNCwgZGF0YSBtb2RlbCBpbiDCpzUsIHBoYXNlcyBpbiDCpzYpLiBUaGlzCnJlcG8gaXMgdGhlICoqUGhhc2UgMSBzY2FmZm9sZCoqOiB0aGUgYXJjaGl0ZWN0dXJlIHByb3ZlbiBlbmQgdG8gZW5kIOKAlCBgOmNvcmVgCmRvbWFpbiBsb2dpYyB3aXRoIHJlYWwgdW5pdCB0ZXN0cywgYSBwaG9uZSBvbmJvYXJkaW5nIGdhdGUsIGEgd2F0Y2ggc2V0IGxvZ2dlcgphbmQgcmVzdCB0aW1lciDigJQgd2l0aCBkZWVwZXIgZmVhdHVyZXMgKFJvb20gc3RvcmFnZSwgc3luYywgQUkgY29hY2gsIHZpc3VhbAphc3Nlc3NtZW50KSBhcnJpdmluZyBpbiB0aGVpciBwaGFzZXMgYmVoaW5kIGNsZWFyIGBUT0RPYCBtYXJrZXJzLgoKIyMgTW9kdWxlcwoKfCBNb2R1bGUgfCBXaGF0IGl0IGlzIHwKfC0tLXwtLS18CnwgYDpjb3JlYCB8IFB1cmUgS290bGluL0pWTSwgKipubyBBbmRyb2lkIGRlcGVuZGVuY2llcyoqIOKAlCBzbyBhbGwgd29ya291dC9wbGFuIGxvZ2ljIGlzIHVuaXQtdGVzdGFibGUgYW55d2hlcmUuIERhdGEgbW9kZWxzLCBvbmJvYXJkaW5nIGdhdGUsIHBsYXRlIGNhbGN1bGF0b3IsIDFSTS9QUiBkZXRlY3Rpb24sIHByb2dyZXNzaXZlIG92ZXJsb2FkLCByZXN0LXRpbWVyIHN0YXRlIG1hY2hpbmUsIHNhbXBsZSBkYXRhLiB8CnwgYDptb2JpbGVgIHwgVGhlIHBob25lIGFwcCAoYGFwcGxpY2F0aW9uSWQgY29tLmZvcmdlLmZpdG5lc3NgKTogQ29tcG9zZSBNYXRlcmlhbCAzLCBkYXJrIHRoZW1lIHdpdGggdGhlIGFtYmVyIGFjY2VudCAoI2YyYTkzYikgZnJvbSB0aGUgZGVzaWduIG1vY2t1cHMuIE9uYm9hcmRpbmcgZmxvdywgVG9kYXksIEhpc3RvcnksIEhlYWx0aCBDb25uZWN0IHdyaXRlci4gfAp8IGA6d2VhcmAgfCBUaGUgd2F0Y2ggYXBwIChzYW1lIGBhcHBsaWNhdGlvbklkYCDigJQgcmVxdWlyZWQgZm9yIHRoZSBXZWFyYWJsZSBEYXRhIExheWVyIHRvIHBhaXIgdGhlIHR3byk6IENvbXBvc2UgZm9yIFdlYXIgT1MgKyBIb3JvbG9naXN0LiBTZXQgbG9nZ2VyIHdpdGggZ2hvc3QgdGFyZ2V0cyBhbmQgYmlnIHN0ZXBwZXJzLCByZXN0IHRpbWVyIHNjcmVlbi4gfAoKUGhvbmUgaXMgdGhlIHNvdXJjZSBvZiB0cnV0aDsgdGhlIHdhdGNoIGNhY2hlcyB0aGUgYWN0aXZlIHBsYW4gYW5kIHRoZSBpbi1wcm9ncmVzcwpzZXNzaW9uLCB0aGVuIHN5bmNzIGNvbXBsZXRlZCBzZXRzIGJhY2sgb3ZlciB0aGUgRGF0YSBMYXllciAoYmx1ZXByaW50IMKnNCkuCgojIyBQaGFzZSAxIOKGlCBibHVlcHJpbnQgbWFwCgp8IEJsdWVwcmludCB8IFdoZXJlIGluIHRoaXMgcmVwbyB8CnwtLS18LS0tfAp8IMKnNSBkYXRhIG1vZGVsIChFeGVyY2lzZSwgUm91dGluZSwgV29ya291dFNlc3Npb24sIFNldEVudHJ5LCBQUiwgQm9keUVudHJ5LCBwcm9maWxlcykgfCBgY29yZS8uLi4vbW9kZWwvYCB8CnwgMy4wIG9uYm9hcmRpbmcgZ2F0ZSDigJQgcmVkLWZsYWcgYmxvY2tpbmcsIGZ1bmN0aW9uYWwgY29uc3RyYWludHMsIEhSIGNhcCB0aGF0IG9ubHkgc2NhbGVzIGRvd24gfCBgY29yZS8uLi4vb25ib2FyZGluZy9PbmJvYXJkaW5nR2F0ZS5rdGAsIGBtb2JpbGUvLi4uL3VpL09uYm9hcmRpbmdTY3JlZW4ua3RgIHwKfCBQbGF0ZSBjYWxjdWxhdG9yIHwgYGNvcmUvLi4uL3RyYWluaW5nL1BsYXRlQ2FsY3VsYXRvci5rdGAgfAp8IEVwbGV5IDFSTSArIFBSIGRldGVjdGlvbiB8IGBjb3JlLy4uLi90cmFpbmluZy9PbmVSZXBNYXgua3RgIChgT25lUmVwTWF4YCwgYFByRGV0ZWN0b3JgKSB8CnwgUHJvZ3Jlc3NpdmUgb3ZlcmxvYWQgKCsyLjUga2cgdXBwZXIgLyArNSBrZyBsb3dlcikgfCBgY29yZS8uLi4vdHJhaW5pbmcvUHJvZ3Jlc3NpdmVPdmVybG9hZC5rdGAgfAp8IFJlc3QgdGltZXIgKHBlci1leGVyY2lzZSBkZWZhdWx0LCArMTVzL3NraXApIHwgYGNvcmUvLi4uL3RyYWluaW5nL1Jlc3RUaW1lci5rdGAsIGB3ZWFyLy4uLi91aS9SZXN0VGltZXJTY3JlZW4ua3RgIHwKfCAzLjEgd2F0Y2ggc2V0IGxvZ2dlciB8IGB3ZWFyLy4uLi91aS9TZXRMb2dnZXJTY3JlZW4ua3RgIHwKfCAzLjMgcGhvbmUgaGlzdG9yeSB8IGBtb2JpbGUvLi4uL3VpL0hpc3RvcnlTY3JlZW4ua3RgLCBgbW9iaWxlLy4uLi9kYXRhL0ZvcmdlUmVwb3NpdG9yeS5rdGAgfAp8IDMuNiBIZWFsdGggQ29ubmVjdCB3cml0ZSBvZiBjb21wbGV0ZWQgd29ya291dHMgfCBgbW9iaWxlLy4uLi9oZWFsdGgvSGVhbHRoQ29ubmVjdFdyaXRlci5rdGAgfAp8IFNhbXBsZSBwbGFuIChQdXNoIEEgLyBQdWxsIEEgLyBMZWdzIEEpIHwgYGNvcmUvLi4uL2RhdGEvU2FtcGxlRGF0YS5rdGAgfAoKRXZlcnkgYDpjb3JlYCBiZWhhdmlvdXIgYWJvdmUgaGFzIEpVbml0IDUgdGVzdHMgdW5kZXIgYGNvcmUvc3JjL3Rlc3QvYCDigJQgdGhleSBhcmUKUGhhc2UgMSdzIHZlcmlmaWNhdGlvbiAocnVuIHRoZW0gd2l0aCBgOmNvcmU6dGVzdGApLgoKIyMgS25vd24gUGhhc2UgMSBzaW1wbGlmaWNhdGlvbnMgKGFsbCBtYXJrZWQgd2l0aCBUT0RPcyBpbiBjb2RlKQoKLSAqKlN0b3JhZ2UgaXMgaW4tbWVtb3J5IHN0dWJzLioqIGBGb3JnZVJlcG9zaXRvcnlgIHNlZWRzIGRlbW8gZGF0YTsgUm9vbQogIChwaG9uZSA9IHNvdXJjZSBvZiB0cnV0aCwgd2F0Y2ggY2FjaGUpLCBvbi1kZXZpY2UgZW5jcnlwdGlvbiBvZiB0aGUgaGVhbHRoCiAgcHJvZmlsZSwgYW5kIERhdGEgTGF5ZXIgc3luYyBhcmUgdGhlIG5leHQgYnVpbGQgc3RlcC4KLSAqKkhlYWx0aCBDb25uZWN0Kiogd3JpdGUgcGF0aCBpcyBpbXBsZW1lbnRlZCBhZ2FpbnN0IHRoZSBzdGFibGUgMS4xLjAgQVBJOwogIHRoZSBwZXJtaXNzaW9uLXJlcXVlc3QgVVggYW5kIHRoZSBjYWxsIHNpdGUgbGFuZCB3aXRoIHJlYWwgc2Vzc2lvbiBmbG93LgogIFJlYWRzIChzbGVlcC9IUlYgZm9yIHJlYWRpbmVzcykgYXJlIFBoYXNlIDIuCi0gKipUaGUgd2F0Y2ggZGVtbyBmbG93KiogbG9ncyBzZXRzIGZvciBvbmUgZXhlcmNpc2UgKFB1c2ggQSBvcGVuZXIpIHdpdGggYQogIGhhcmQtY29kZWQgZ2hvc3QgdGFyZ2V0OyBmdWxsIHNlc3Npb24gZmxvdyBmb2xsb3dzIHdpdGggRGF0YSBMYXllciBzeW5jLgoKIyMgQnVpbGRpbmcKClJlcXVpcmVtZW50czogSkRLIDE3IGFuZCBHcmFkbGUgOC4xMC4yKywgcGx1cyB0aGUgQW5kcm9pZCBTREsgKGNvbXBpbGVTZGsgMzUpCmZvciB0aGUgdHdvIGFwcCBtb2R1bGVzLiBgOmNvcmVgIG5lZWRzIG9ubHkgYSBKREsuCgpgYGBiYXNoCmdyYWRsZSA6Y29yZTp0ZXN0ICAgICAgICAgICAgICAgICAjIHVuaXQgdGVzdHMg4oCUIHRoZSBQaGFzZSAxIHZlcmlmaWNhdGlvbgpncmFkbGUgOm1vYmlsZTphc3NlbWJsZURlYnVnICAgICAgIyBwaG9uZSBBUEsKZ3JhZGxlIDp3ZWFyOmFzc2VtYmxlRGVidWcgICAgICAgICMgd2F0Y2ggQVBLCmBgYAoKKElmIGEgR3JhZGxlIHdyYXBwZXIgaXMgcHJlc2VudCwgYC4vZ3JhZGxld2Agd29ya3MgaWRlbnRpY2FsbHkuKQoKQ0kgKGAuZ2l0aHViL3dvcmtmbG93cy9idWlsZC55bWxgKSBydW5zIGV4YWN0bHkgdGhlIHRocmVlIGNvbW1hbmRzIGFib3ZlIG9uIGV2ZXJ5CnB1c2ggYW5kIHB1bGwgcmVxdWVzdC4KCiMjIERlcGxveW1lbnQgKGRldmVsb3BlciBtb2RlLCBubyBQbGF5IFN0b3JlKQoKVGhlIHdhdGNoIEFQSyBpcyBzaWRlbG9hZGVkIG92ZXIgV2ktRmkgd2l0aCBgYWRiYCBhZnRlciBhIG9uZS10aW1lIFdpcmVsZXNzCkRlYnVnZ2luZyBwYWlyaW5nIGZyb20gdGhlIEdhbGF4eSBXYXRjaCdzIGRldmVsb3BlciBvcHRpb25zOyB0aGUgcGhvbmUgQVBLCmluc3RhbGxzIGRpcmVjdGx5LiBEZXRhaWxzIGluIGJsdWVwcmludCDCpzcuCg==
+# Forge
+
+A personal, strength-first training app for Wear OS + Android, built for one user:
+the Galaxy Watch runs the workout in the gym, the phone holds the plan, the
+history, the nutrition and the AI coach. No account, no subscription, no cloud in
+v1 — data lives on the devices and completed workouts are written to Health
+Connect so they show up in Samsung Health.
+
+The full product blueprint is `~/workspace/Fitness_App_Blueprint_2026-11-10.md`
+(Sections 3.0–3.16, architecture in §4, data model in §5, phases in §6). This
+repo is the **Phase 1 scaffold**: the architecture proven end to end — `:core`
+domain logic with real unit tests, a phone onboarding gate, a watch set logger
+and rest timer — with deeper features (Room storage, sync, AI coach, visual
+assessment) arriving in their phases behind clear `TODO` markers.
+
+## Modules
+
+| Module | What it is |
+|---|---|
+| `:core` | Pure Kotlin/JVM, **no Android dependencies** — so all workout/plan logic is unit-testable anywhere. Data models, onboarding gate, plate calculator, 1RM/PR detection, progressive overload, rest-timer state machine, sample data. |
+| `:mobile` | The phone app (`applicationId com.forge.fitness`): Compose Material 3, dark theme with the amber accent (#f2a93b) from the design mockups. Onboarding flow, Today, History, Health Connect writer. |
+| `:wear` | The watch app (same `applicationId` — required for the Wearable Data Layer to pair the two): Compose for Wear OS + Horologist. Set logger with ghost targets and big steppers, rest timer screen. |
+
+Phone is the source of truth; the watch caches the active plan and the in-progress
+session, then syncs completed sets back over the Data Layer (blueprint §4).
+
+## Phase 1 ↔ blueprint map
+
+| Blueprint | Where in this repo |
+|---|---|
+| §5 data model (Exercise, Routine, WorkoutSession, SetEntry, PR, BodyEntry, profiles) | `core/.../model/` |
+| 3.0 onboarding gate — red-flag blocking, functional constraints, HR cap that only scales down | `core/.../onboarding/OnboardingGate.kt`, `mobile/.../ui/OnboardingScreen.kt` |
+| Plate calculator | `core/.../training/PlateCalculator.kt` |
+| Epley 1RM + PR detection | `core/.../training/OneRepMax.kt` (`OneRepMax`, `PrDetector`) |
+| Progressive overload (+2.5 kg upper / +5 kg lower) | `core/.../training/ProgressiveOverload.kt` |
+| Rest timer (per-exercise default, +15s/skip) | `core/.../training/RestTimer.kt`, `wear/.../ui/RestTimerScreen.kt` |
+| 3.1 watch set logger | `wear/.../ui/SetLoggerScreen.kt` |
+| 3.3 phone history | `mobile/.../ui/HistoryScreen.kt`, `mobile/.../data/ForgeRepository.kt` |
+| 3.6 Health Connect write of completed workouts | `mobile/.../health/HealthConnectWriter.kt` |
+| Sample plan (Push A / Pull A / Legs A) | `core/.../data/SampleData.kt` |
+
+Every `:core` behaviour above has JUnit 5 tests under `core/src/test/` — they are
+Phase 1's verification (run them with `:core:test`).
+
+## Known Phase 1 simplifications (all marked with TODOs in code)
+
+- **Storage is in-memory stubs.** `ForgeRepository` seeds demo data; Room
+  (phone = source of truth, watch cache), on-device encryption of the health
+  profile, and Data Layer sync are the next build step.
+- **Health Connect** write path is implemented against the stable 1.1.0 API;
+  the permission-request UX and the call site land with real session flow.
+  Reads (sleep/HRV for readiness) are Phase 2.
+- **The watch demo flow** logs sets for one exercise (Push A opener) with a
+  hard-coded ghost target; full session flow follows with Data Layer sync.
+
+## Building
+
+Requirements: JDK 17 and Gradle 8.10.2+, plus the Android SDK (compileSdk 35)
+for the two app modules. `:core` needs only a JDK.
+
+```bash
+gradle :core:test                 # unit tests — the Phase 1 verification
+gradle :mobile:assembleDebug      # phone APK
+gradle :wear:assembleDebug        # watch APK
+```
+
+(If a Gradle wrapper is present, `./gradlew` works identically.)
+
+CI (`.github/workflows/build.yml`) runs exactly the three commands above on every
+push and pull request.
+
+## Deployment (developer mode, no Play Store)
+
+The watch APK is sideloaded over Wi-Fi with `adb` after a one-time Wireless
+Debugging pairing from the Galaxy Watch's developer options; the phone APK
+installs directly. Details in blueprint §7.
