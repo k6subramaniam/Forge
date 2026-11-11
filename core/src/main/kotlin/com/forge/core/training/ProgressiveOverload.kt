@@ -1,1 +1,53 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS50cmFpbmluZwoKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLkV4ZXJjaXNlCmltcG9ydCBjb20uZm9yZ2UuY29yZS5tb2RlbC5Sb3V0aW5lRXhlcmNpc2UKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLlNldEVudHJ5CgovKiogQSAic3VnZ2VzdGVkIG5leHQgd2VpZ2h0IiBmcm9tIHRoZSBvdmVybG9hZCBydWxlLiBTdWdnZXN0aW9uIG9ubHkg4oCUIHRoZSB1c2VyIGNvbmZpcm1zIChibHVlcHJpbnQgMy4yKS4gKi8KZGF0YSBjbGFzcyBPdmVybG9hZFN1Z2dlc3Rpb24oCiAgICB2YWwgZXhlcmNpc2VJZDogU3RyaW5nLAogICAgdmFsIGV4ZXJjaXNlTmFtZTogU3RyaW5nLAogICAgdmFsIGN1cnJlbnRUYXJnZXRXZWlnaHRLZzogRG91YmxlLAogICAgdmFsIHN1Z2dlc3RlZFdlaWdodEtnOiBEb3VibGUsCiAgICB2YWwgaW5jcmVtZW50S2c6IERvdWJsZSwKICAgIHZhbCByZWFzb246IFN0cmluZywKKQoKLyoqCiAqIFByb2dyZXNzaXZlIG92ZXJsb2FkIHJ1bGUgKGJsdWVwcmludCAzLjIpOiB3aGVuIGFsbCBwcmVzY3JpYmVkIHNldHMgb2YgYW4gZXhlcmNpc2UKICogaGl0IHRoZSB0b3Agb2YgdGhlIHJlcCByYW5nZSwgc3VnZ2VzdCArMi41IGtnICh1cHBlciBib2R5KSAvICs1IGtnIChsb3dlciBib2R5KQogKiBmb3IgdGhlIG5leHQgc2Vzc2lvbi4KICovCm9iamVjdCBQcm9ncmVzc2l2ZU92ZXJsb2FkIHsKCiAgICBjb25zdCB2YWwgVVBQRVJfSU5DUkVNRU5UX0tHID0gMi41CiAgICBjb25zdCB2YWwgTE9XRVJfSU5DUkVNRU5UX0tHID0gNS4wCgogICAgZnVuIGluY3JlbWVudEZvcihleGVyY2lzZTogRXhlcmNpc2UpOiBEb3VibGUgPQogICAgICAgIGlmIChleGVyY2lzZS5tdXNjbGVHcm91cC5pc0xvd2VyQm9keSkgTE9XRVJfSU5DUkVNRU5UX0tHIGVsc2UgVVBQRVJfSU5DUkVNRU5UX0tHCgogICAgLyoqCiAgICAgKiBAcGFyYW0gcGVyZm9ybWVkU2V0cyB0aGUgc2V0cyBsb2dnZWQgZm9yIFtleGVyY2lzZV0gaW4gdGhlIHNlc3Npb24gYmVpbmcganVkZ2VkCiAgICAgKiAoc2V0cyBiZWxvbmdpbmcgdG8gb3RoZXIgZXhlcmNpc2VzLCBhbmQgaW5jb21wbGV0ZSBzZXRzLCBhcmUgaWdub3JlZCkuCiAgICAgKiBAcmV0dXJuIHRoZSBzdWdnZXN0aW9uLCBvciBudWxsIHdoZW4gdGhlIHJ1bGUgZG9lc24ndCBmaXJlICh0b28gZmV3IHNldHMsIG9yIGFueQogICAgICogY29tcGxldGVkIHNldCBmZWxsIHNob3J0IG9mIHRoZSB0b3Agb2YgdGhlIHJlcCByYW5nZSkuCiAgICAgKi8KICAgIGZ1biBzdWdnZXN0KGV4ZXJjaXNlOiBFeGVyY2lzZSwgdGFyZ2V0OiBSb3V0aW5lRXhlcmNpc2UsIHBlcmZvcm1lZFNldHM6IExpc3Q8U2V0RW50cnk+KTogT3ZlcmxvYWRTdWdnZXN0aW9uPyB7CiAgICAgICAgdmFsIGNvbXBsZXRlZCA9IHBlcmZvcm1lZFNldHMuZmlsdGVyIHsgaXQuY29tcGxldGVkICYmIGl0LmV4ZXJjaXNlSWQgPT0gZXhlcmNpc2UuaWQgfQogICAgICAgIGlmIChjb21wbGV0ZWQuc2l6ZSA8IHRhcmdldC50YXJnZXRTZXRzKSByZXR1cm4gbnVsbAoKICAgICAgICB2YWwgdG9wT2ZSYW5nZSA9IHRhcmdldC5yZXBSYW5nZS5sYXN0CiAgICAgICAgaWYgKGNvbXBsZXRlZC5hbnkgeyBpdC5yZXBzIDwgdG9wT2ZSYW5nZSB9KSByZXR1cm4gbnVsbAoKICAgICAgICB2YWwgaW5jcmVtZW50ID0gaW5jcmVtZW50Rm9yKGV4ZXJjaXNlKQogICAgICAgIHJldHVybiBPdmVybG9hZFN1Z2dlc3Rpb24oCiAgICAgICAgICAgIGV4ZXJjaXNlSWQgPSBleGVyY2lzZS5pZCwKICAgICAgICAgICAgZXhlcmNpc2VOYW1lID0gZXhlcmNpc2UubmFtZSwKICAgICAgICAgICAgY3VycmVudFRhcmdldFdlaWdodEtnID0gdGFyZ2V0LnRhcmdldFdlaWdodEtnLAogICAgICAgICAgICBzdWdnZXN0ZWRXZWlnaHRLZyA9IHRhcmdldC50YXJnZXRXZWlnaHRLZyArIGluY3JlbWVudCwKICAgICAgICAgICAgaW5jcmVtZW50S2cgPSBpbmNyZW1lbnQsCiAgICAgICAgICAgIHJlYXNvbiA9ICJBbGwgJHt0YXJnZXQudGFyZ2V0U2V0c30gc2V0cyByZWFjaGVkICR0b3BPZlJhbmdlIHJlcHMg4oCUIGFkZCB3ZWlnaHQgbmV4dCBzZXNzaW9uLiIsCiAgICAgICAgKQogICAgfQp9Cg==
+package com.forge.core.training
+
+import com.forge.core.model.Exercise
+import com.forge.core.model.RoutineExercise
+import com.forge.core.model.SetEntry
+
+/** A "suggested next weight" from the overload rule. Suggestion only — the user confirms (blueprint 3.2). */
+data class OverloadSuggestion(
+    val exerciseId: String,
+    val exerciseName: String,
+    val currentTargetWeightKg: Double,
+    val suggestedWeightKg: Double,
+    val incrementKg: Double,
+    val reason: String,
+)
+
+/**
+ * Progressive overload rule (blueprint 3.2): when all prescribed sets of an exercise
+ * hit the top of the rep range, suggest +2.5 kg (upper body) / +5 kg (lower body)
+ * for the next session.
+ */
+object ProgressiveOverload {
+
+    const val UPPER_INCREMENT_KG = 2.5
+    const val LOWER_INCREMENT_KG = 5.0
+
+    fun incrementFor(exercise: Exercise): Double =
+        if (exercise.muscleGroup.isLowerBody) LOWER_INCREMENT_KG else UPPER_INCREMENT_KG
+
+    /**
+     * @param performedSets the sets logged for [exercise] in the session being judged
+     * (sets belonging to other exercises, and incomplete sets, are ignored).
+     * @return the suggestion, or null when the rule doesn't fire (too few sets, or any
+     * completed set fell short of the top of the rep range).
+     */
+    fun suggest(exercise: Exercise, target: RoutineExercise, performedSets: List<SetEntry>): OverloadSuggestion? {
+        val completed = performedSets.filter { it.completed && it.exerciseId == exercise.id }
+        if (completed.size < target.targetSets) return null
+
+        val topOfRange = target.repRange.last
+        if (completed.any { it.reps < topOfRange }) return null
+
+        val increment = incrementFor(exercise)
+        return OverloadSuggestion(
+            exerciseId = exercise.id,
+            exerciseName = exercise.name,
+            currentTargetWeightKg = target.targetWeightKg,
+            suggestedWeightKg = target.targetWeightKg + increment,
+            incrementKg = increment,
+            reason = "All ${target.targetSets} sets reached $topOfRange reps — add weight next session.",
+        )
+    }
+}
