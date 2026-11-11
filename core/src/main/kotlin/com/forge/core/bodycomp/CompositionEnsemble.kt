@@ -32,11 +32,12 @@ data class EnsembleEstimate(
  * independently. That doesn't hold for two methods reading the same input:
  * the Navy and RFM equations both read the tape, so a misplaced tape moves
  * both. Members are therefore first collapsed per [InputSource], and a source
- * counts as one witness. Inside a source, readings are averaged by
- * inverse variance, but the source keeps its best member's error, with no
- * narrowing from correlated readings. Independent sources then fuse
- * normally. The interval only narrows on independent evidence (Evidence
- * Base v3 §A3: honest interval widths).
+ * counts as one witness. Inside a source, readings are averaged with
+ * inverse-variance weights w, and their errors are treated as fully
+ * correlated, so the source's error is Σ wᵢ·SEᵢ: never narrower than its best
+ * member, and wider when a worse member pulls the average. Independent
+ * sources then fuse normally. The interval only narrows on independent
+ * evidence (Evidence Base v3 §A3: honest interval widths).
  */
 object CompositionEnsemble {
 
@@ -61,13 +62,14 @@ object CompositionEnsemble {
         // Collapse each input source to one witness.
         class Witness(val value: Double, val standardError: Double, val readings: List<Pair<BodyFatEstimate, Double>>)
         val witnesses = members.groupBy { it.method.source }.values.map { group ->
-            val weights = group.map { 1.0 / (it.standardErrorPp * it.standardErrorPp) }
-            val total = weights.sum()
-            val value = group.zip(weights).sumOf { (e, w) -> e.fatPercent * w } / total
+            val raw = group.map { 1.0 / (it.standardErrorPp * it.standardErrorPp) }
+            val total = raw.sum()
+            val shares = raw.map { it / total }
             Witness(
-                value = value,
-                standardError = group.minOf { it.standardErrorPp },
-                readings = group.zip(weights.map { it / total }),
+                value = group.zip(shares).sumOf { (e, w) -> e.fatPercent * w },
+                // Fully correlated errors add linearly: SE(Σ wᵢxᵢ) = Σ wᵢ·SEᵢ.
+                standardError = group.zip(shares).sumOf { (e, w) -> e.standardErrorPp * w },
+                readings = group.zip(shares),
             )
         }
 
