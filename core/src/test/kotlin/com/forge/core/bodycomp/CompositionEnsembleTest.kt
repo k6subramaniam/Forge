@@ -106,17 +106,78 @@ class CompositionEnsembleTest {
             scanDays.zip(listOf(17.0, 15.5, 15.5)).map { (d, fat) -> est(CompositionMethod.NAVY_TAPE, fat, d) }
         val calibration = DexaCalibration.calibrate(scans, history)
 
-        // Today: BIA 25 → 21, Navy 19 → 20. Fused 20.2, SE 0.516.
+        // Today: BIA 25 → 21, Navy 19 → 20. Weights 0.75 / 3 (shares 0.2 / 0.8),
+        // fused 20.2. Both offsets came from the same three scans, so they share
+        // those scans' error, σ²/3 with σ = DXA repeat precision. Treated as
+        // independent, the SE would be √(1/3.75) = 0.516. Keeping the shared part
+        // adds (1 − 0.2² − 0.8²)·σ²/3, for 0.543.
         val result = CompositionEnsemble.combine(
             day,
             listOf(est(CompositionMethod.WRIST_BIA, 25.0), est(CompositionMethod.NAVY_TAPE, 19.0)),
             calibration,
         )!!
         assertEquals(20.2, result.estimate.fatPercent, 1e-9)
-        assertEquals(sqrt(1.0 / (0.75 + 3.0)), result.estimate.standardErrorPp, 1e-9)
+        val dxa2 = MethodAccuracy.DXA_REPEAT_SE_PP * MethodAccuracy.DXA_REPEAT_SE_PP
+        val expected = sqrt(1.0 / (0.75 + 3.0) + (1.0 - 0.04 - 0.64) * dxa2 / 3)
+        assertEquals(expected, result.estimate.standardErrorPp, 1e-9)
+        assertTrue(result.estimate.standardErrorPp > sqrt(1.0 / (0.75 + 3.0)))
         assertTrue(result.estimate.calibrated)
         assertTrue(result.members.all { it.calibrated })
         assertFalse(CompositionCaveat.UNCALIBRATED in result.caveats)
+    }
+
+    @Test
+    fun `sources calibrated on the same scans keep those scans' shared error`() {
+        // Three sources, each calibrated on the same three scans with perfectly
+        // consistent gaps, so each sits at the DXA-repeat floor σ. Their offsets
+        // all carry the scans' error (σ²/3 apiece, the same σ²/3 for all), so it
+        // can't be averaged away: SE² = σ²/3 + (σ² − σ²/3)/3 = 5σ²/9, not σ²/3.
+        val clinic = DexaScanner(DexaBrand.HOLOGIC, "Liberty Village")
+        val scanDays = listOf(day.minusDays(240), day.minusDays(120), day.minusDays(1))
+        val scans = scanDays.map { DexaScan(it, clinic, 18.0) }
+        val history = scanDays.flatMap { d ->
+            listOf(
+                est(CompositionMethod.WRIST_BIA, 20.0, d),
+                est(CompositionMethod.NAVY_TAPE, 17.0, d),
+                est(CompositionMethod.PHOTO, 21.0, d),
+            )
+        }
+        val calibration = DexaCalibration.calibrate(scans, history)
+
+        val result = CompositionEnsemble.combine(
+            day,
+            listOf(
+                est(CompositionMethod.WRIST_BIA, 22.0),
+                est(CompositionMethod.NAVY_TAPE, 19.0),
+                est(CompositionMethod.PHOTO, 23.0),
+            ),
+            calibration,
+        )!!
+        val sigma = MethodAccuracy.DXA_REPEAT_SE_PP
+        assertEquals(20.0, result.estimate.fatPercent, 1e-9)
+        assertEquals(sigma * sqrt(5.0) / 3, result.estimate.standardErrorPp, 1e-9)
+        // Never below what the shared anchors alone leave.
+        assertTrue(result.estimate.standardErrorPp > sigma / sqrt(3.0))
+    }
+
+    @Test
+    fun `sources calibrated on different scans fuse as independent`() {
+        // BIA learned from scans 1–3, photo from scans 4–6 (same machine): no
+        // scan error in common, so two σ-floor sources fuse to σ/√2.
+        val clinic = DexaScanner(DexaBrand.HOLOGIC, "Liberty Village")
+        val scanDays = (1..6).map { day.minusDays(60L * (7 - it)) }
+        val scans = scanDays.map { DexaScan(it, clinic, 18.0) }
+        val history = scanDays.take(3).map { est(CompositionMethod.WRIST_BIA, 20.0, it) } +
+            scanDays.drop(3).map { est(CompositionMethod.PHOTO, 21.0, it) }
+        val calibration = DexaCalibration.calibrate(scans, history)
+
+        val result = CompositionEnsemble.combine(
+            day,
+            listOf(est(CompositionMethod.WRIST_BIA, 22.0), est(CompositionMethod.PHOTO, 23.0)),
+            calibration,
+        )!!
+        assertEquals(20.0, result.estimate.fatPercent, 1e-9)
+        assertEquals(MethodAccuracy.DXA_REPEAT_SE_PP / sqrt(2.0), result.estimate.standardErrorPp, 1e-9)
     }
 
     @Test
