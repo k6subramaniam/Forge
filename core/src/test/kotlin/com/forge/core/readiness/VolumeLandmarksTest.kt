@@ -1,7 +1,7 @@
 package com.forge.core.readiness
 
 import com.forge.core.data.ExerciseLibrary
-import com.forge.core.data.SampleData
+import com.forge.core.testing.TestRoutines
 import com.forge.core.model.Exercise
 import com.forge.core.model.MuscleGroup
 import com.forge.core.model.SetEntry
@@ -53,7 +53,7 @@ class VolumeLandmarksTest {
     @Test
     fun `sets are counted per primary group, with half credit for secondary`() {
         // Bench press: primary CHEST, secondary TRICEPS + SHOULDERS (library tags).
-        val history = listOf(workout("w1", "2026-11-03T09:00:00Z", SampleData.benchPress, sets = 4))
+        val history = listOf(workout("w1", "2026-11-03T09:00:00Z", TestRoutines.benchPress, sets = 4))
         val chest = volumeFor(history, MuscleGroup.CHEST)
         assertEquals(4, chest.primarySets)
         assertEquals(0, chest.secondarySets)
@@ -69,9 +69,9 @@ class VolumeLandmarksTest {
     @Test
     fun `sessions outside the week are not counted - Sunday counts, next Monday does not`() {
         val history = listOf(
-            workout("sun", "2026-11-08T09:00:00Z", SampleData.benchPress, sets = 3),  // Sunday of the week
-            workout("next", "2026-11-09T09:00:00Z", SampleData.benchPress, sets = 5), // next week
-            workout("prev", "2026-11-01T09:00:00Z", SampleData.benchPress, sets = 7), // previous week
+            workout("sun", "2026-11-08T09:00:00Z", TestRoutines.benchPress, sets = 3),  // Sunday of the week
+            workout("next", "2026-11-09T09:00:00Z", TestRoutines.benchPress, sets = 5), // next week
+            workout("prev", "2026-11-01T09:00:00Z", TestRoutines.benchPress, sets = 7), // previous week
         )
         assertEquals(3, volumeFor(history, MuscleGroup.CHEST).primarySets)
         // Asking from inside the next week sees only that week's session.
@@ -96,13 +96,14 @@ class VolumeLandmarksTest {
     fun `a realistic push week lands chest in the productive band`() {
         // Tuesday: bench 4 + incline dumbbell press 3 (both CHEST primary).
         // Friday: bench 4 + overhead press 3 (SHOULDERS primary).
-        // The incline press is outside the 10-exercise starter set, so the
-        // full library is passed explicitly — the default would skip it.
+        // The incline press is outside the 10-exercise starter set the other
+        // tests use; the full library is passed explicitly for clarity (it is
+        // also the production default now).
         val history = listOf(
-            workout("tue1", "2026-11-03T09:00:00Z", SampleData.benchPress, sets = 4),
+            workout("tue1", "2026-11-03T09:00:00Z", TestRoutines.benchPress, sets = 4),
             workout("tue2", "2026-11-03T10:00:00Z", ExerciseLibrary.inclineDumbbellPress, sets = 3),
-            workout("fri1", "2026-11-06T09:00:00Z", SampleData.benchPress, sets = 4),
-            workout("fri2", "2026-11-06T10:00:00Z", SampleData.overheadPress, sets = 3),
+            workout("fri1", "2026-11-06T09:00:00Z", TestRoutines.benchPress, sets = 4),
+            workout("fri2", "2026-11-06T10:00:00Z", TestRoutines.overheadPress, sets = 3),
         )
         val chest = VolumeLandmarks.weeklyVolume(history, monday, zone, ExerciseLibrary.all)
             .first { it.muscleGroup == MuscleGroup.CHEST }
@@ -116,14 +117,14 @@ class VolumeLandmarksTest {
         val done = CompletedSession(
             session = WorkoutSession(id = "done", startTime = start, endTime = start.plusSeconds(3600)),
             sets = listOf(
-                SetEntry("a", "done", SampleData.benchPress.id, "Bench Press", 1, 60.0, 8, completed = true, timestamp = start),
-                SetEntry("b", "done", SampleData.benchPress.id, "Bench Press", 2, 60.0, 8, completed = false, timestamp = start),
+                SetEntry("a", "done", TestRoutines.benchPress.id, "Bench Press", 1, 60.0, 8, completed = true, timestamp = start),
+                SetEntry("b", "done", TestRoutines.benchPress.id, "Bench Press", 2, 60.0, 8, completed = false, timestamp = start),
             ),
         )
         val inProgress = CompletedSession(
             session = WorkoutSession(id = "live", startTime = start, endTime = null),
             sets = listOf(
-                SetEntry("c", "live", SampleData.benchPress.id, "Bench Press", 1, 60.0, 8, timestamp = start),
+                SetEntry("c", "live", TestRoutines.benchPress.id, "Bench Press", 1, 60.0, 8, timestamp = start),
             ),
         )
         assertEquals(1, volumeFor(listOf(done, inProgress), MuscleGroup.CHEST).primarySets)
