@@ -52,6 +52,21 @@ class CompositionEnsembleTest {
     }
 
     @Test
+    fun `members of one source with different errors carry their correlated error`() {
+        // Navy SE 1 and RFM SE 2 (as after calibration): weights 0.8 / 0.2.
+        // Fully correlated errors give 0.8·1 + 0.2·2 = 1.2, not the best member's 1.0.
+        val result = CompositionEnsemble.combine(
+            day,
+            listOf(
+                BodyFatEstimate(CompositionMethod.NAVY_TAPE, day, 20.0, 1.0),
+                BodyFatEstimate(CompositionMethod.RFM_TAPE, day, 25.0, 2.0),
+            ),
+        )!!
+        assertEquals(21.0, result.estimate.fatPercent, 1e-9)
+        assertEquals(1.2, result.estimate.standardErrorPp, 1e-9)
+    }
+
+    @Test
     fun `an independent witness narrows the interval`() {
         // Tape (22, SE 4.0) + photo (26, SE 4.5): fused 23.766, SE 2.990 < 4.0.
         val result = CompositionEnsemble.combine(
