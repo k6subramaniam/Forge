@@ -35,7 +35,10 @@ data class AdaptiveTdeeResult(
     val formulaTdeeKcal: Int,
     /** The back-calculated maintenance, or null when data was insufficient. */
     val backCalculatedTdeeKcal: Int?,
-    /** Mean logged intake over the window's logged days (null: none logged). */
+    /**
+     * Mean logged intake over the logged days inside the weigh-in interval
+     * (first to last weigh-in in the window); null when none were logged.
+     */
     val averageIntakeKcal: Double?,
     /** Trend-weight change across the weigh-in span, kg (null: no rate knowable). */
     val trendChangeKg: Double?,
@@ -122,6 +125,12 @@ object AdaptiveTdee {
      * the regression rate × the weigh-in span (not the raw first-to-last
      * scale difference), so one heavy Monday can't fake a surplus.
      *
+     * Intake is averaged over the same interval the weight change was measured
+     * on: the window's first weigh-in to its last, not the whole window. A diet
+     * change before the first weigh-in belongs to a different energy balance
+     * and must not bias the measured maintenance. The intake-day minimum is
+     * checked on that interval too.
+     *
      * The back-calculated value is clamped to [BMR, 2 × formula TDEE] as a
      * corruption guard — a mis-logged feast day or a scale error shouldn't be
      * able to drag maintenance somewhere physiology can't be.
@@ -139,7 +148,16 @@ object AdaptiveTdee {
 
         val windowWeighIns = weighIns.filter { it.date in windowStart..endDate }
         val trend = BodyweightTrend.analyse(windowWeighIns)
-        val windowIntake = intakeDays.filter { it.date in windowStart..endDate }
+        // The interval the weight change was observed over. With fewer than two
+        // weigh-ins there is no interval (and no back-calculation); the window's
+        // intake is still reported for display.
+        val weighInDates = windowWeighIns.map { it.date }
+        val intakeRange = if (weighInDates.distinct().size >= 2) {
+            weighInDates.min()..weighInDates.max()
+        } else {
+            windowStart..endDate
+        }
+        val windowIntake = intakeDays.filter { it.date in windowStart..endDate && it.date in intakeRange }
         val averageIntake = if (windowIntake.isEmpty()) {
             null
         } else {
