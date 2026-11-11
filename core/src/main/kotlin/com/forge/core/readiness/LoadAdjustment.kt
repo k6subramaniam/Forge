@@ -1,6 +1,6 @@
 package com.forge.core.readiness
 
-import com.forge.core.data.SampleData
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.model.Exercise
 import com.forge.core.model.MovementPattern
 import com.forge.core.onboarding.FunctionalConstraints
@@ -125,7 +125,7 @@ object LoadAdjuster {
         history: List<CompletedSession>,
         today: LocalDate,
         zone: ZoneId,
-        library: List<Exercise> = SampleData.exercises,
+        library: List<Exercise> = ExerciseLibrary.all,
     ): PainSignal {
         val windowStart = today.minusDays(PAIN_RECENCY_DAYS)
         val byId = library.associateBy { it.id }
