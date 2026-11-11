@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.forge.wear"
-    compileSdk = 35
+    compileSdk = 36 // kept in lockstep with :mobile; targetSdk stays at 35
 
     defaultConfig {
         applicationId = "com.forge.fitness"
