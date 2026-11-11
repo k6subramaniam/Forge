@@ -9,7 +9,9 @@ plugins {
 
 android {
     namespace = "com.forge.mobile"
-    compileSdk = 35
+    // Health Connect 1.1.0 requires compiling against API 36. Compile-time only:
+    // targetSdk (runtime behaviour) stays at 35.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.forge.fitness"
