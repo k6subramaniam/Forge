@@ -24,8 +24,18 @@ object ProgressiveOverload {
     const val UPPER_INCREMENT_KG = 2.5
     const val LOWER_INCREMENT_KG = 5.0
 
+    /** Display increments for the lb unit system (decided 2026-11-11: +5 lb upper / +10 lb lower). */
+    const val UPPER_INCREMENT_LB = 5.0
+    const val LOWER_INCREMENT_LB = 10.0
+
     fun incrementFor(exercise: Exercise): Double =
         if (exercise.muscleGroup.isLowerBody) LOWER_INCREMENT_KG else UPPER_INCREMENT_KG
+
+    /** The overload increment for [exercise] expressed in [unit], for display. */
+    fun incrementFor(exercise: Exercise, unit: WeightUnit): Double = when (unit) {
+        WeightUnit.KG -> incrementFor(exercise)
+        WeightUnit.LB -> if (exercise.muscleGroup.isLowerBody) LOWER_INCREMENT_LB else UPPER_INCREMENT_LB
+    }
 
     /**
      * @param performedSets the sets logged for [exercise] in the session being judged
