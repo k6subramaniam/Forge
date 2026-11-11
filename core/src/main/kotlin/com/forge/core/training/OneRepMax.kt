@@ -1,1 +1,75 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS50cmFpbmluZwoKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLlBSUmVjb3JkCmltcG9ydCBjb20uZm9yZ2UuY29yZS5tb2RlbC5QclR5cGUKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLlNldEVudHJ5CmltcG9ydCBqYXZhLnRpbWUuTG9jYWxEYXRlCgovKiogRXN0aW1hdGVkIG9uZS1yZXAgbWF4IChibHVlcHJpbnQgMy4zOiBQUiBib2FyZCB1c2VzIHRoZSBFcGxleSBmb3JtdWxhKS4gKi8Kb2JqZWN0IE9uZVJlcE1heCB7CgogICAgLyoqCiAgICAgKiBFcGxleTogMVJNIOKJiCB3IMOXICgxICsgcmVwcy8zMCkuIEEgdHJ1ZSBzaW5nbGUgaXMgdGhlIHdlaWdodCBpdHNlbGYuCiAgICAgKiBOb3RlIHRoZSBibHVlcHJpbnQncyBob25lc3R5IHJ1bGUgKDMuMTUpOiBlc3RpbWF0ZXMgZnJvbSBoaWdoLXJlcCBzZXRzIGFyZQogICAgICogdW5yZWxpYWJsZSDigJQgY2FsbGVycyBzaG91bGQgdHJlYXQgdmFsdWVzIGZyb20gc2V0cyBhYm92ZSB+MTAgcmVwcyB3aXRoIGNhcmUuCiAgICAgKi8KICAgIGZ1biBlc3RpbWF0ZUVwbGV5KHdlaWdodEtnOiBEb3VibGUsIHJlcHM6IEludCk6IERvdWJsZSB7CiAgICAgICAgcmVxdWlyZSh3ZWlnaHRLZyA+PSAwKSB7ICJXZWlnaHQgY2Fubm90IGJlIG5lZ2F0aXZlLCB3YXMgJHdlaWdodEtnIiB9CiAgICAgICAgcmVxdWlyZShyZXBzID49IDEpIHsgIlJlcHMgbXVzdCBiZSBhdCBsZWFzdCAxLCB3YXMgJHJlcHMiIH0KICAgICAgICByZXR1cm4gaWYgKHJlcHMgPT0gMSkgd2VpZ2h0S2cgZWxzZSB3ZWlnaHRLZyAqICgxLjAgKyByZXBzIC8gMzAuMCkKICAgIH0KfQoKLyoqCiAqIERldGVjdHMgbmV3IHBlcnNvbmFsIHJlY29yZHMgaW4gYSBiYXRjaCBvZiBmcmVzaGx5IGxvZ2dlZCBzZXRzIChibHVlcHJpbnQgMy4xLzMuMykuCiAqCiAqIFRocmVlIFBSIHR5cGVzIGFyZSB0cmFja2VkIHBlciBleGVyY2lzZTogaGVhdmllc3Qgd2VpZ2h0LCBiZXN0IHNpbmdsZS1zZXQgdm9sdW1lLAogKiBhbmQgYmVzdCBFcGxleSBlc3RpbWF0ZWQgMVJNLiBFeGlzdGluZyBiZXN0cyBzZWVkIHRoZSBjb21wYXJpc29uLCBhbmQgYmVzdHMgYXJlCiAqIHVwZGF0ZWQgYXMgdGhlIGJhdGNoIGlzIHNjYW5uZWQsIHNvIHR3byBpbXByb3Zpbmcgc2V0cyBpbiBvbmUgc2Vzc2lvbiBlYWNoIGNvdW50LgogKi8Kb2JqZWN0IFByRGV0ZWN0b3IgewoKICAgIHByaXZhdGUgY29uc3QgdmFsIEVQU0lMT04gPSAxZS05CgogICAgZnVuIGRldGVjdE5ld1BycygKICAgICAgICBleGVyY2lzZVNldHM6IExpc3Q8U2V0RW50cnk+LAogICAgICAgIGV4aXN0aW5nUHJzOiBMaXN0PFBSUmVjb3JkPiwKICAgICAgICBkYXRlOiBMb2NhbERhdGUsCiAgICApOiBMaXN0PFBSUmVjb3JkPiB7CiAgICAgICAgaWYgKGV4ZXJjaXNlU2V0cy5pc0VtcHR5KCkpIHJldHVybiBlbXB0eUxpc3QoKQoKICAgICAgICB2YWwgZXhlcmNpc2VJZCA9IGV4ZXJjaXNlU2V0cy5maXJzdCgpLmV4ZXJjaXNlSWQKICAgICAgICB2YWwgZXhlcmNpc2VOYW1lID0gZXhlcmNpc2VTZXRzLmZpcnN0KCkuZXhlcmNpc2VOYW1lCgogICAgICAgIHZhbCBiZXN0cyA9IGV4aXN0aW5nUHJzCiAgICAgICAgICAgIC5maWx0ZXIgeyBpdC5leGVyY2lzZUlkID09IGV4ZXJjaXNlSWQgfQogICAgICAgICAgICAuZ3JvdXBCeSB7IGl0LnR5cGUgfQogICAgICAgICAgICAubWFwVmFsdWVzIHsgKF8sIHJlY29yZHMpIC0+IHJlY29yZHMubWF4T2YgeyBpdC52YWx1ZSB9IH0KICAgICAgICAgICAgLnRvTXV0YWJsZU1hcCgpCgogICAgICAgIHZhbCBuZXdQcnMgPSBtdXRhYmxlTGlzdE9mPFBSUmVjb3JkPigpCiAgICAgICAgZm9yIChzZXQgaW4gZXhlcmNpc2VTZXRzKSB7CiAgICAgICAgICAgIGlmICghc2V0LmNvbXBsZXRlZCkgY29udGludWUKICAgICAgICAgICAgdmFsIGNhbmRpZGF0ZXM6IExpc3Q8UGFpcjxQclR5cGUsIERvdWJsZT4+ID0gbGlzdE9mKAogICAgICAgICAgICAgICAgUHJUeXBlLk1BWF9XRUlHSFQgdG8gc2V0LndlaWdodEtnLAogICAgICAgICAgICAgICAgUHJUeXBlLk1BWF9WT0xVTUUgdG8gc2V0LnZvbHVtZUtnLAogICAgICAgICAgICAgICAgUHJUeXBlLkVTVElNQVRFRF8xUk0gdG8gT25lUmVwTWF4LmVzdGltYXRlRXBsZXkoc2V0LndlaWdodEtnLCBzZXQucmVwcyksCiAgICAgICAgICAgICkKICAgICAgICAgICAgZm9yICgodHlwZSwgdmFsdWUpIGluIGNhbmRpZGF0ZXMpIHsKICAgICAgICAgICAgICAgIHZhbCBjdXJyZW50QmVzdCA9IGJlc3RzW3R5cGVdCiAgICAgICAgICAgICAgICBpZiAoY3VycmVudEJlc3QgPT0gbnVsbCB8fCB2YWx1ZSA+IGN1cnJlbnRCZXN0ICsgRVBTSUxPTikgewogICAgICAgICAgICAgICAgICAgIG5ld1BycyArPSBQUlJlY29yZCgKICAgICAgICAgICAgICAgICAgICAgICAgZXhlcmNpc2VJZCA9IGV4ZXJjaXNlSWQsCiAgICAgICAgICAgICAgICAgICAgICAgIGV4ZXJjaXNlTmFtZSA9IGV4ZXJjaXNlTmFtZSwKICAgICAgICAgICAgICAgICAgICAgICAgdHlwZSA9IHR5cGUsCiAgICAgICAgICAgICAgICAgICAgICAgIHZhbHVlID0gdmFsdWUsCiAgICAgICAgICAgICAgICAgICAgICAgIGRhdGUgPSBkYXRlLAogICAgICAgICAgICAgICAgICAgICAgICBzb3VyY2VTZXQgPSBzZXQsCiAgICAgICAgICAgICAgICAgICAgKQogICAgICAgICAgICAgICAgICAgIGJlc3RzW3R5cGVdID0gdmFsdWUKICAgICAgICAgICAgICAgIH0KICAgICAgICAgICAgfQogICAgICAgIH0KICAgICAgICByZXR1cm4gbmV3UHJzCiAgICB9Cn0K
+package com.forge.core.training
+
+import com.forge.core.model.PRRecord
+import com.forge.core.model.PrType
+import com.forge.core.model.SetEntry
+import java.time.LocalDate
+
+/** Estimated one-rep max (blueprint 3.3: PR board uses the Epley formula). */
+object OneRepMax {
+
+    /**
+     * Epley: 1RM ≈ w × (1 + reps/30). A true single is the weight itself.
+     * Note the blueprint's honesty rule (3.15): estimates from high-rep sets are
+     * unreliable — callers should treat values from sets above ~10 reps with care.
+     */
+    fun estimateEpley(weightKg: Double, reps: Int): Double {
+        require(weightKg >= 0) { "Weight cannot be negative, was $weightKg" }
+        require(reps >= 1) { "Reps must be at least 1, was $reps" }
+        return if (reps == 1) weightKg else weightKg * (1.0 + reps / 30.0)
+    }
+}
+
+/**
+ * Detects new personal records in a batch of freshly logged sets (blueprint 3.1/3.3).
+ *
+ * Three PR types are tracked per exercise: heaviest weight, best single-set volume,
+ * and best Epley estimated 1RM. Existing bests seed the comparison, and bests are
+ * updated as the batch is scanned, so two improving sets in one session each count.
+ */
+object PrDetector {
+
+    private const val EPSILON = 1e-9
+
+    fun detectNewPrs(
+        exerciseSets: List<SetEntry>,
+        existingPrs: List<PRRecord>,
+        date: LocalDate,
+    ): List<PRRecord> {
+        if (exerciseSets.isEmpty()) return emptyList()
+
+        val exerciseId = exerciseSets.first().exerciseId
+        val exerciseName = exerciseSets.first().exerciseName
+
+        val bests = existingPrs
+            .filter { it.exerciseId == exerciseId }
+            .groupBy { it.type }
+            .mapValues { (_, records) -> records.maxOf { it.value } }
+            .toMutableMap()
+
+        val newPrs = mutableListOf<PRRecord>()
+        for (set in exerciseSets) {
+            if (!set.completed) continue
+            val candidates: List<Pair<PrType, Double>> = listOf(
+                PrType.MAX_WEIGHT to set.weightKg,
+                PrType.MAX_VOLUME to set.volumeKg,
+                PrType.ESTIMATED_1RM to OneRepMax.estimateEpley(set.weightKg, set.reps),
+            )
+            for ((type, value) in candidates) {
+                val currentBest = bests[type]
+                if (currentBest == null || value > currentBest + EPSILON) {
+                    newPrs += PRRecord(
+                        exerciseId = exerciseId,
+                        exerciseName = exerciseName,
+                        type = type,
+                        value = value,
+                        date = date,
+                        sourceSet = set,
+                    )
+                    bests[type] = value
+                }
+            }
+        }
+        return newPrs
+    }
+}
