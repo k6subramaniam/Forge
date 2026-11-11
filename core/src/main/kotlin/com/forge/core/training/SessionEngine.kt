@@ -124,14 +124,17 @@ object SessionEngine {
     }
 
     private fun appendExercise(state: LiveSessionState, exercise: SessionExerciseState): LiveSessionState {
-        val exercises = state.exercises + exercise
-        // Point at the new exercise when nothing else is left to do.
-        val current = if (state.currentExerciseIndex == null || state.allWorkComplete) {
-            exercises.size - 1
+        val grown = state.copy(exercises = state.exercises + exercise)
+        val newIndex = grown.exercises.lastIndex
+        // Point at the new exercise when nothing else is left to do, unless the
+        // exercise was already removed this session after a pain report. It is
+        // still appended, so undoing that pain set brings it back.
+        val current = if ((state.currentExerciseIndex == null || state.allWorkComplete) && grown.isAvailable(newIndex)) {
+            newIndex
         } else {
             state.currentExerciseIndex
         }
-        return state.copy(exercises = exercises, currentExerciseIndex = current)
+        return grown.copy(currentExerciseIndex = current)
     }
 
     // -- Logging -------------------------------------------------------------
@@ -166,7 +169,7 @@ object SessionEngine {
             "No current exercise to log against; add or select an exercise first"
         }
         val current = state.exercises[index]
-        require(current.isAvailable) {
+        require(state.isAvailable(index)) {
             "'${current.exercise.name}' is not available in this session (skipped, or removed after a pain report)"
         }
 
@@ -186,23 +189,23 @@ object SessionEngine {
         )
 
         val updated = current.copy(loggedSets = current.loggedSets + set)
-        val exercises = state.exercises.toMutableList().also { it[index] = updated }
+        val logged = state.copy(
+            exercises = state.exercises.toMutableList().also { it[index] = updated },
+            setHistory = state.setHistory + set.id,
+        )
         val exerciseJustCompleted = !current.isComplete && updated.isComplete
 
-        // Pain swaps the exercise out immediately; completing the prescription moves
-        // on as well. Either way the pointer lands on the next exercise with work
+        // Pain swaps the exercise out immediately (every entry of it, see
+        // LiveSessionState.isRemovedForPain); completing the prescription moves on
+        // as well. Either way the pointer lands on the next exercise with work
         // left, or nowhere when the session's work is done.
         val nextIndex = if (painReported || exerciseJustCompleted) {
-            nextExerciseIndex(exercises, fromIndex = index)
+            nextExerciseIndex(logged, fromIndex = index)
         } else {
             index
         }
 
-        val newState = state.copy(
-            exercises = exercises,
-            currentExerciseIndex = nextIndex,
-            setHistory = state.setHistory + set.id,
-        )
+        val newState = logged.copy(currentExerciseIndex = nextIndex)
         return LogSetResult(
             state = newState,
             loggedSet = set,
@@ -212,21 +215,34 @@ object SessionEngine {
         )
     }
 
-    /** Removes the most recently logged set, wherever it sits (blueprint 3.1: undo last set). */
+    /**
+     * Removes the most recently logged set, wherever it sits (blueprint 3.1: undo
+     * last set), and points the logger back at its exercise so the corrected set
+     * can be logged. Like [goToExercise], returning to a skipped exercise un-skips
+     * it. If the exercise is still pain-removed (another pain set remains), the
+     * pointer stays on available work instead.
+     */
     fun undoLastSet(state: LiveSessionState): LiveSessionState {
         requireActive(state)
         val lastSetId = state.setHistory.lastOrNull() ?: return state
         val exerciseIndex = state.exercises.indexOfFirst { ex -> ex.loggedSets.any { it.id == lastSetId } }
         if (exerciseIndex < 0) return state // defensive; history and sets are kept in sync
-        val exercises = state.exercises.toMutableList().also { list ->
-            val ex = list[exerciseIndex]
-            list[exerciseIndex] = ex.copy(loggedSets = ex.loggedSets.filterNot { it.id == lastSetId })
-        }
-        return state.copy(
-            exercises = exercises,
-            currentExerciseIndex = exerciseIndex,
+        val undone = state.copy(
+            exercises = state.exercises.toMutableList().also { list ->
+                val ex = list[exerciseIndex]
+                list[exerciseIndex] = ex.copy(
+                    loggedSets = ex.loggedSets.filterNot { it.id == lastSetId },
+                    skipped = false,
+                )
+            },
             setHistory = state.setHistory.dropLast(1),
         )
+        val current = when {
+            undone.isAvailable(exerciseIndex) -> exerciseIndex
+            state.currentExerciseIndex?.let { undone.isAvailable(it) } == true -> state.currentExerciseIndex
+            else -> nextExerciseIndex(undone, fromIndex = exerciseIndex)
+        }
+        return undone.copy(currentExerciseIndex = current)
     }
 
     // -- Navigation ----------------------------------------------------------
@@ -235,7 +251,7 @@ object SessionEngine {
     fun moveToNext(state: LiveSessionState): LiveSessionState {
         requireActive(state)
         val from = state.currentExerciseIndex ?: return state
-        val next = nextExerciseIndex(state.exercises, fromIndex = from) ?: return state
+        val next = nextExerciseIndex(state, fromIndex = from) ?: return state
         return state.copy(currentExerciseIndex = next)
     }
 
@@ -243,11 +259,10 @@ object SessionEngine {
     fun skipExercise(state: LiveSessionState): LiveSessionState {
         requireActive(state)
         val index = state.currentExerciseIndex ?: return state
-        val exercises = state.exercises.toMutableList().also { it[index] = it[index].copy(skipped = true) }
-        return state.copy(
-            exercises = exercises,
-            currentExerciseIndex = nextExerciseIndex(exercises, fromIndex = index),
+        val skipped = state.copy(
+            exercises = state.exercises.toMutableList().also { it[index] = it[index].copy(skipped = true) },
         )
+        return skipped.copy(currentExerciseIndex = nextExerciseIndex(skipped, fromIndex = index))
     }
 
     /**
@@ -259,7 +274,7 @@ object SessionEngine {
         requireActive(state)
         require(index in state.exercises.indices) { "No exercise at index $index" }
         val target = state.exercises[index]
-        require(!target.removedForPain) {
+        require(!state.isRemovedForPain(index)) {
             "'${target.exercise.name}' was removed from this session after a pain report"
         }
         val exercises = if (target.skipped) {
@@ -280,9 +295,9 @@ object SessionEngine {
      * just completed, was skipped, or was pain-removed, and each of those also
      * fails the availability/completion checks below.
      */
-    private fun nextExerciseIndex(exercises: List<SessionExerciseState>, fromIndex: Int): Int? {
-        fun hasWorkLeft(i: Int) = exercises[i].isAvailable && !exercises[i].isComplete
-        return ((fromIndex + 1) until exercises.size).firstOrNull { hasWorkLeft(it) }
+    private fun nextExerciseIndex(state: LiveSessionState, fromIndex: Int): Int? {
+        fun hasWorkLeft(i: Int) = state.isAvailable(i) && !state.exercises[i].isComplete
+        return ((fromIndex + 1) until state.exercises.size).firstOrNull { hasWorkLeft(it) }
             ?: (0 until fromIndex).firstOrNull { hasWorkLeft(it) }
     }
 
@@ -365,7 +380,7 @@ object SessionEngine {
                 }
             },
             droppedExercises = state.droppedExercises,
-            painExercises = state.exercises.filter { it.painReported }.map { it.exercise.name },
+            painExercises = state.exercises.filter { it.painReported }.map { it.exercise.name }.distinct(),
         )
 
         return FinishedSession(
