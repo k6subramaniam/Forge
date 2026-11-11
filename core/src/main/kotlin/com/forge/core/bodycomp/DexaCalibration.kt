@@ -45,7 +45,7 @@ data class DexaScan(
 data class MethodCalibration(
     val method: CompositionMethod,
     /** DEXA scans that had a reading of this method close enough to pair with. */
-    val anchorCount: Int,
+    val anchors: List<DexaScan>,
     /** Added to the method's reading to land on DEXA: the mean of (DEXA − method) over the anchors. */
     val offsetPp: Double,
     /**
@@ -54,7 +54,18 @@ data class MethodCalibration(
      * but the uncalibrated error is kept.
      */
     val calibratedStandardErrorPp: Double?,
-)
+) {
+    val anchorCount: Int get() = anchors.size
+
+    /**
+     * How much of each anchor scan's own measurement error the offset carries.
+     * The offset is the plain mean over anchors, so each scan's error enters it
+     * with weight 1/n. Every method calibrated on the same scan inherits the
+     * same error, so [CompositionEnsemble] keeps it as a shared term when fusing.
+     */
+    val anchorErrorLoadings: Map<DexaScan, Double>
+        get() = anchors.groupingBy { it }.eachCount().mapValues { (_, count) -> count.toDouble() / anchors.size }
+}
 
 /** A person's calibration: per-method corrections learned on one DEXA machine. */
 data class PersonalCalibration(
@@ -133,13 +144,15 @@ object DexaCalibration {
 
         val methods = homeEstimates.groupBy { it.method }.mapNotNull { (method, readings) ->
             // Per anchor: the gap (DEXA − reading) of every reading paired with it.
-            val gapsByAnchor = anchors.mapNotNull { scan ->
+            val paired = anchors.mapNotNull { scan ->
                 readings
                     .filter { abs(ChronoUnit.DAYS.between(scan.date, it.date)) <= PAIRING_WINDOW_DAYS }
                     .map { scan.fatPercent - it.fatPercent }
                     .ifEmpty { null }
+                    ?.let { scan to it }
             }
-            if (gapsByAnchor.isEmpty()) return@mapNotNull null
+            if (paired.isEmpty()) return@mapNotNull null
+            val gapsByAnchor = paired.map { it.second }
             val n = gapsByAnchor.size
             val anchorMeans = gapsByAnchor.map { it.average() }
             val offset = anchorMeans.average()
@@ -151,7 +164,7 @@ object DexaCalibration {
             } else {
                 null
             }
-            method to MethodCalibration(method, n, offset, calibratedSe)
+            method to MethodCalibration(method, paired.map { it.first }, offset, calibratedSe)
         }.toMap()
 
         return PersonalCalibration(scanner, methods, setAside)

@@ -119,6 +119,9 @@ class DexaCalibrationTest {
         val readings = (0..2).map { navy(d0.plusDays(100L * it), 20.0) }
         val navyCal = DexaCalibration.calibrate(scans, readings).methods.getValue(CompositionMethod.NAVY_TAPE)
         assertEquals(MethodAccuracy.DXA_REPEAT_SE_PP, navyCal.calibratedStandardErrorPp!!, 1e-12)
+        // The offset is the mean over three scans, so each scan's error enters it at 1/3.
+        assertEquals(scans, navyCal.anchors)
+        assertEquals(scans.associateWith { 1.0 / 3 }, navyCal.anchorErrorLoadings)
     }
 
     @Test
@@ -136,6 +139,7 @@ class DexaCalibrationTest {
         assertEquals(2, calibration.setAsideScans.size)
         val biaCal = calibration.methods.getValue(CompositionMethod.WRIST_BIA)
         assertEquals(1, biaCal.anchorCount)
+        assertEquals(listOf(scans.last()), biaCal.anchors)
         assertEquals(-3.0, biaCal.offsetPp, 1e-9)
     }
 

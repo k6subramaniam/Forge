@@ -38,6 +38,14 @@ data class EnsembleEstimate(
  * member, and wider when a worse member pulls the average. Independent
  * sources then fuse normally. The interval only narrows on independent
  * evidence (Evidence Base v3 §A3: honest interval widths).
+ *
+ * Personal calibration couples sources again. Every method calibrated on the
+ * same DEXA scans inherits those scans' measurement error through its offset
+ * ([MethodCalibration.anchorErrorLoadings]). So each witness's error splits
+ * into that shared part and an independent remainder. Weights stay
+ * inverse-variance, but the reported error is that weighted mean's true
+ * error: independent parts shrink as sources are added, and the shared part
+ * doesn't. No number of home methods can average away the anchors' own error.
  */
 object CompositionEnsemble {
 
@@ -62,26 +70,41 @@ object CompositionEnsemble {
         if (todays.isEmpty()) return null
 
         val members = todays.map(calibration::apply)
+        // Each member's share of every anchor scan's error (none when uncalibrated).
+        val loadings = todays.map { calibration.methods[it.method]?.anchorErrorLoadings.orEmpty() }
 
         // Collapse each input source to one witness.
-        class Witness(val value: Double, val standardError: Double, val readings: List<Pair<BodyFatEstimate, Double>>)
-        val witnesses = members.groupBy { it.method.source }.values.map { group ->
-            val raw = group.map { 1.0 / (it.standardErrorPp * it.standardErrorPp) }
+        class Witness(
+            val value: Double,
+            val standardError: Double,
+            val anchorLoadings: Map<DexaScan, Double>,
+            val readings: List<Pair<BodyFatEstimate, Double>>,
+        )
+        val witnesses = members.zip(loadings).groupBy { it.first.method.source }.values.map { group ->
+            val raw = group.map { (e, _) -> 1.0 / (e.standardErrorPp * e.standardErrorPp) }
             val total = raw.sum()
             val shares = raw.map { it / total }
             Witness(
-                value = group.zip(shares).sumOf { (e, w) -> e.fatPercent * w },
+                value = group.zip(shares).sumOf { (m, w) -> m.first.fatPercent * w },
                 // Fully correlated errors add linearly: SE(Σ wᵢxᵢ) = Σ wᵢ·SEᵢ.
-                standardError = group.zip(shares).sumOf { (e, w) -> e.standardErrorPp * w },
-                readings = group.zip(shares),
+                standardError = group.zip(shares).sumOf { (m, w) -> m.first.standardErrorPp * w },
+                anchorLoadings = weightedSum(group.zip(shares).map { (m, w) -> m.second to w }),
+                readings = group.zip(shares).map { (m, w) -> m.first to w },
             )
         }
 
-        // Fuse the independent witnesses by inverse variance.
+        // Fuse the witnesses by inverse variance.
         val witnessWeights = witnesses.map { 1.0 / (it.standardError * it.standardError) }
         val totalWeight = witnessWeights.sum()
+        val fractions = witnessWeights.map { it / totalWeight }
         val fused = witnesses.zip(witnessWeights).sumOf { (w, weight) -> w.value * weight } / totalWeight
-        val fusedSe = sqrt(1.0 / totalWeight)
+        // Var(Σ fᵢxᵢ) = Σ fᵢ²·independentᵢ + σ²_DXA·Σₖ(Σᵢ fᵢ·Lᵢₖ)². With no shared
+        // anchors this is 1/Σw, the plain inverse-variance result.
+        val independentVariance = witnesses.zip(fractions).sumOf { (w, f) ->
+            f * f * (w.standardError * w.standardError - anchorErrorVariance(w.anchorLoadings)).coerceAtLeast(0.0)
+        }
+        val fusedLoadings = weightedSum(witnesses.zip(fractions).map { (w, f) -> w.anchorLoadings to f })
+        val fusedSe = sqrt(independentVariance + anchorErrorVariance(fusedLoadings))
 
         val contributions = witnesses.zip(witnessWeights).flatMap { (witness, weight) ->
             witness.readings.map { (member, shareInWitness) ->
@@ -118,4 +141,14 @@ object CompositionEnsemble {
             caveats = caveats,
         )
     }
+
+    /** Σ fᵢ·Lᵢ, scan by scan. */
+    private fun weightedSum(terms: List<Pair<Map<DexaScan, Double>, Double>>): Map<DexaScan, Double> =
+        buildMap {
+            terms.forEach { (loadings, f) -> loadings.forEach { (scan, l) -> merge(scan, f * l, Double::plus) } }
+        }
+
+    /** The variance an anchor-error mix carries: each scan errs independently by DXA's repeat precision. */
+    private fun anchorErrorVariance(loadings: Map<DexaScan, Double>): Double =
+        MethodAccuracy.DXA_REPEAT_SE_PP * MethodAccuracy.DXA_REPEAT_SE_PP * loadings.values.sumOf { it * it }
 }
