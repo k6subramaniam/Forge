@@ -1,1 +1,75 @@
-cGFja2FnZSBjb20uZm9yZ2UuY29yZS50cmFpbmluZwoKaW1wb3J0IGNvbS5mb3JnZS5jb3JlLm1vZGVsLlJvdXRpbmVFeGVyY2lzZQoKLyoqIEltbXV0YWJsZSByZXN0LXRpbWVyIHN0YXRlIChibHVlcHJpbnQgMy4xKS4gVGhlIHdhdGNoIFVJIHJlbmRlcnMgdGhpcyBhbmQgZm9yd2FyZHMgZXZlbnRzLiAqLwpkYXRhIGNsYXNzIFJlc3RUaW1lclN0YXRlKAogICAgdmFsIHRvdGFsU2Vjb25kczogSW50LAogICAgdmFsIHJlbWFpbmluZ1NlY29uZHM6IEludCwKICAgIHZhbCBpc1J1bm5pbmc6IEJvb2xlYW4sCiAgICB2YWwgaXNGaW5pc2hlZDogQm9vbGVhbiwKKSB7CiAgICB2YWwgZWxhcHNlZFNlY29uZHM6IEludCBnZXQoKSA9IHRvdGFsU2Vjb25kcyAtIHJlbWFpbmluZ1NlY29uZHMKCiAgICAvKiogMGYgd2hlbiB0aGUgcmVzdCBzdGFydHMsIDFmIHdoZW4gaXQgZW5kcy4gKi8KICAgIHZhbCBwcm9ncmVzc0ZyYWN0aW9uOiBGbG9hdAogICAgICAgIGdldCgpID0gaWYgKHRvdGFsU2Vjb25kcyA8PSAwKSB7CiAgICAgICAgICAgIDFmCiAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgKGVsYXBzZWRTZWNvbmRzLnRvRmxvYXQoKSAvIHRvdGFsU2Vjb25kcy50b0Zsb2F0KCkpLmNvZXJjZUluKDBmLCAxZikKICAgICAgICB9Cn0KCi8qKgogKiBQdXJlIHJlc3QtdGltZXIgdHJhbnNpdGlvbnMsIHNvIHRoZSB0aW1lciBiZWhhdmlvdXIgaXMgZnVsbHkgdW5pdC10ZXN0YWJsZSBhbmQgdGhlCiAqIFdlYXIgT1Mgc2NyZWVuIHN0YXlzIGEgdGhpbiBzaGVsbCAoc3RhcnQgb24gc2V0IGNvbXBsZXRpb24sICsxNXMsIHNraXAsIGhhcHRpYyBhdCB6ZXJvIOKAlAogKiB0aGUgaGFwdGljIGl0c2VsZiBpcyBhIFVJIHNpZGUgZWZmZWN0IHRyaWdnZXJlZCBieSBbUmVzdFRpbWVyU3RhdGUuaXNGaW5pc2hlZF0pLgogKi8Kb2JqZWN0IFJlc3RUaW1lckxvZ2ljIHsKCiAgICAvKiogVGhlICIrMTVzIiBidXR0b24gb24gdGhlIHdhdGNoIChibHVlcHJpbnQgMy4xKS4gKi8KICAgIGNvbnN0IHZhbCBRVUlDS19BRERfU0VDT05EUyA9IDE1CgogICAgZnVuIHN0YXJ0KGR1cmF0aW9uU2Vjb25kczogSW50KTogUmVzdFRpbWVyU3RhdGUgewogICAgICAgIHJlcXVpcmUoZHVyYXRpb25TZWNvbmRzID4gMCkgeyAiUmVzdCBkdXJhdGlvbiBtdXN0IGJlIHBvc2l0aXZlLCB3YXMgJGR1cmF0aW9uU2Vjb25kcyIgfQogICAgICAgIHJldHVybiBSZXN0VGltZXJTdGF0ZSgKICAgICAgICAgICAgdG90YWxTZWNvbmRzID0gZHVyYXRpb25TZWNvbmRzLAogICAgICAgICAgICByZW1haW5pbmdTZWNvbmRzID0gZHVyYXRpb25TZWNvbmRzLAogICAgICAgICAgICBpc1J1bm5pbmcgPSB0cnVlLAogICAgICAgICAgICBpc0ZpbmlzaGVkID0gZmFsc2UsCiAgICAgICAgKQogICAgfQoKICAgIC8qKiBEZWZhdWx0IHJlc3QgZHVyYXRpb24gY29tZXMgZnJvbSB0aGUgZXhlcmNpc2UncyByb3V0aW5lIHByZXNjcmlwdGlvbiAoYmx1ZXByaW50IDMuMSkuICovCiAgICBmdW4gc3RhcnRGb3Iocm91dGluZUV4ZXJjaXNlOiBSb3V0aW5lRXhlcmNpc2UpOiBSZXN0VGltZXJTdGF0ZSA9IHN0YXJ0KHJvdXRpbmVFeGVyY2lzZS5yZXN0U2Vjb25kcykKCiAgICBmdW4gdGljayhzdGF0ZTogUmVzdFRpbWVyU3RhdGUsIGVsYXBzZWRTZWNvbmRzOiBJbnQgPSAxKTogUmVzdFRpbWVyU3RhdGUgewogICAgICAgIGlmICghc3RhdGUuaXNSdW5uaW5nIHx8IHN0YXRlLmlzRmluaXNoZWQpIHJldHVybiBzdGF0ZQogICAgICAgIHZhbCByZW1haW5pbmcgPSAoc3RhdGUucmVtYWluaW5nU2Vjb25kcyAtIGVsYXBzZWRTZWNvbmRzKS5jb2VyY2VBdExlYXN0KDApCiAgICAgICAgcmV0dXJuIHN0YXRlLmNvcHkoCiAgICAgICAgICAgIHJlbWFpbmluZ1NlY29uZHMgPSByZW1haW5pbmcsCiAgICAgICAgICAgIGlzUnVubmluZyA9IHJlbWFpbmluZyA+IDAsCiAgICAgICAgICAgIGlzRmluaXNoZWQgPSByZW1haW5pbmcgPT0gMCwKICAgICAgICApCiAgICB9CgogICAgLyoqIEV4dGVuZHMgdGhlIHJlc3QuIEFsc28gcmV2aXZlcyBhIGZpbmlzaGVkIHRpbWVyIChhIGNvbW1vbiBtaWQtcmVzdCBjaGFuZ2Ugb2YgbWluZCkuICovCiAgICBmdW4gYWRkVGltZShzdGF0ZTogUmVzdFRpbWVyU3RhdGUsIHNlY29uZHM6IEludCA9IFFVSUNLX0FERF9TRUNPTkRTKTogUmVzdFRpbWVyU3RhdGUgewogICAgICAgIHJlcXVpcmUoc2Vjb25kcyA+IDApIHsgIkFkZGVkIHRpbWUgbXVzdCBiZSBwb3NpdGl2ZSwgd2FzICRzZWNvbmRzIiB9CiAgICAgICAgcmV0dXJuIHN0YXRlLmNvcHkoCiAgICAgICAgICAgIHRvdGFsU2Vjb25kcyA9IHN0YXRlLnRvdGFsU2Vjb25kcyArIHNlY29uZHMsCiAgICAgICAgICAgIHJlbWFpbmluZ1NlY29uZHMgPSBzdGF0ZS5yZW1haW5pbmdTZWNvbmRzICsgc2Vjb25kcywKICAgICAgICAgICAgaXNSdW5uaW5nID0gdHJ1ZSwKICAgICAgICAgICAgaXNGaW5pc2hlZCA9IGZhbHNlLAogICAgICAgICkKICAgIH0KCiAgICBmdW4gc2tpcChzdGF0ZTogUmVzdFRpbWVyU3RhdGUpOiBSZXN0VGltZXJTdGF0ZSA9CiAgICAgICAgc3RhdGUuY29weShyZW1haW5pbmdTZWNvbmRzID0gMCwgaXNSdW5uaW5nID0gZmFsc2UsIGlzRmluaXNoZWQgPSB0cnVlKQoKICAgIGZ1biBwYXVzZShzdGF0ZTogUmVzdFRpbWVyU3RhdGUpOiBSZXN0VGltZXJTdGF0ZSA9CiAgICAgICAgaWYgKHN0YXRlLmlzRmluaXNoZWQpIHN0YXRlIGVsc2Ugc3RhdGUuY29weShpc1J1bm5pbmcgPSBmYWxzZSkKCiAgICBmdW4gcmVzdW1lKHN0YXRlOiBSZXN0VGltZXJTdGF0ZSk6IFJlc3RUaW1lclN0YXRlID0KICAgICAgICBpZiAoc3RhdGUuaXNGaW5pc2hlZCB8fCBzdGF0ZS5yZW1haW5pbmdTZWNvbmRzID09IDApIHN0YXRlIGVsc2Ugc3RhdGUuY29weShpc1J1bm5pbmcgPSB0cnVlKQp9Cg==
+package com.forge.core.training
+
+import com.forge.core.model.RoutineExercise
+
+/** Immutable rest-timer state (blueprint 3.1). The watch UI renders this and forwards events. */
+data class RestTimerState(
+    val totalSeconds: Int,
+    val remainingSeconds: Int,
+    val isRunning: Boolean,
+    val isFinished: Boolean,
+) {
+    val elapsedSeconds: Int get() = totalSeconds - remainingSeconds
+
+    /** 0f when the rest starts, 1f when it ends. */
+    val progressFraction: Float
+        get() = if (totalSeconds <= 0) {
+            1f
+        } else {
+            (elapsedSeconds.toFloat() / totalSeconds.toFloat()).coerceIn(0f, 1f)
+        }
+}
+
+/**
+ * Pure rest-timer transitions, so the timer behaviour is fully unit-testable and the
+ * Wear OS screen stays a thin shell (start on set completion, +15s, skip, haptic at zero —
+ * the haptic itself is a UI side effect triggered by [RestTimerState.isFinished]).
+ */
+object RestTimerLogic {
+
+    /** The "+15s" button on the watch (blueprint 3.1). */
+    const val QUICK_ADD_SECONDS = 15
+
+    fun start(durationSeconds: Int): RestTimerState {
+        require(durationSeconds > 0) { "Rest duration must be positive, was $durationSeconds" }
+        return RestTimerState(
+            totalSeconds = durationSeconds,
+            remainingSeconds = durationSeconds,
+            isRunning = true,
+            isFinished = false,
+        )
+    }
+
+    /** Default rest duration comes from the exercise's routine prescription (blueprint 3.1). */
+    fun startFor(routineExercise: RoutineExercise): RestTimerState = start(routineExercise.restSeconds)
+
+    fun tick(state: RestTimerState, elapsedSeconds: Int = 1): RestTimerState {
+        if (!state.isRunning || state.isFinished) return state
+        val remaining = (state.remainingSeconds - elapsedSeconds).coerceAtLeast(0)
+        return state.copy(
+            remainingSeconds = remaining,
+            isRunning = remaining > 0,
+            isFinished = remaining == 0,
+        )
+    }
+
+    /** Extends the rest. Also revives a finished timer (a common mid-rest change of mind). */
+    fun addTime(state: RestTimerState, seconds: Int = QUICK_ADD_SECONDS): RestTimerState {
+        require(seconds > 0) { "Added time must be positive, was $seconds" }
+        return state.copy(
+            totalSeconds = state.totalSeconds + seconds,
+            remainingSeconds = state.remainingSeconds + seconds,
+            isRunning = true,
+            isFinished = false,
+        )
+    }
+
+    fun skip(state: RestTimerState): RestTimerState =
+        state.copy(remainingSeconds = 0, isRunning = false, isFinished = true)
+
+    fun pause(state: RestTimerState): RestTimerState =
+        if (state.isFinished) state else state.copy(isRunning = false)
+
+    fun resume(state: RestTimerState): RestTimerState =
+        if (state.isFinished || state.remainingSeconds == 0) state else state.copy(isRunning = true)
+}
