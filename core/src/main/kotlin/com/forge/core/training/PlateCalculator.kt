@@ -102,20 +102,27 @@ object PlateCalculator {
         var remainingPerSide = (targetWeight - barWeight) / 2.0
         val plates = mutableListOf<Double>()
         for (plate in platesFor(unit)) {
-            while (remainingPerSide >= plate) {
+            // A target that went lb → kg → lb can land a hair under a loadable
+            // weight (150 lb comes back as 149.99999999999997): that must not
+            // cost a plate.
+            while (remainingPerSide + CONVERSION_TOLERANCE >= plate) {
                 plates += plate
                 remainingPerSide -= plate
             }
         }
 
         val achieved = barWeight + 2.0 * plates.sum()
+        val shortfall = targetWeight - achieved
         return UnitPlateLoad(
             unit = unit,
             targetWeight = targetWeight,
             barWeight = barWeight,
             platesPerSide = plates,
             achievedWeight = achieved,
-            shortfall = targetWeight - achieved,
+            shortfall = if (kotlin.math.abs(shortfall) < CONVERSION_TOLERANCE) 0.0 else shortfall,
         )
     }
+
+    /** Far below any plate (the smallest is 1.25 lb / 0.5 kg), far above floating-point noise. */
+    private const val CONVERSION_TOLERANCE = 1e-6
 }

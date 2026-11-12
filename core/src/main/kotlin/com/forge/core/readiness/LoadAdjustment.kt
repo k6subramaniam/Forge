@@ -22,7 +22,10 @@ enum class SessionAdjustmentKind {
     /** Drop a set per exercise (and load, modestly) — a genuinely scaled-back day. */
     REDUCE_VOLUME,
 
-    /** Affected movement patterns swap to technique work; the rest proceeds. */
+    /**
+     * Affected movement patterns swap to technique work; the rest proceeds,
+     * still carrying any reduction the readiness band calls for.
+     */
     TECHNIQUE_SWAP,
 }
 
@@ -37,7 +40,11 @@ data class LoadAdjustment(
     val kind: SessionAdjustmentKind,
     /** The readiness band behind the call; null when readiness couldn't be scored. */
     val band: ReadinessBand?,
-    /** Signed % change for top-set weights (e.g. −5.0); 0.0 when loads are untouched. */
+    /**
+     * Signed % change for top-set weights (e.g. −5.0); 0.0 when loads are
+     * untouched. On a [SessionAdjustmentKind.TECHNIQUE_SWAP] day it applies to
+     * the exercises outside [painPatterns], as does [setsToDropPerExercise].
+     */
     val topSetLoadDeltaPercent: Double,
     /** True only for [SessionAdjustmentKind.INCREASE_LOAD]: progress top sets by the 3.2 increments. */
     val applyOverloadIncrementToTopSets: Boolean,
@@ -193,6 +200,10 @@ object LoadAdjuster {
             }
         }
         val painForced = painActive && kind != kindBeforePain
+        // A technique swap only covers the painful patterns. Everything else
+        // still takes the readiness band's reduction (never its increase:
+        // pain rules that out for the whole day).
+        val reductionKind = if (kind == SessionAdjustmentKind.TECHNIQUE_SWAP) kindBeforePain else kind
 
         val reason = buildString {
             append(
@@ -216,7 +227,14 @@ object LoadAdjuster {
                     SessionAdjustmentKind.TECHNIQUE_SWAP -> {
                         val names = sessionPatterns.intersect(pain.patterns)
                             .joinToString(", ") { it.name.lowercase().replace('_', ' ') }
-                        "Pain was reported in the last $PAIN_RECENCY_DAYS days in today's $names work — swap those lifts to technique work; the rest proceeds."
+                        val rest = when (reductionKind) {
+                            SessionAdjustmentKind.REDUCE_TOP_SET_LOAD ->
+                                "the rest proceeds with 5% off the top sets (readiness is STRAINED)."
+                            SessionAdjustmentKind.REDUCE_VOLUME ->
+                                "the rest proceeds scaled back: 5% off the loads and one set fewer (readiness is DEPLETED)."
+                            else -> "the rest proceeds."
+                        }
+                        "Pain was reported in the last $PAIN_RECENCY_DAYS days in today's $names work — swap those lifts to technique work; $rest"
                     }
                 },
             )
@@ -225,14 +243,14 @@ object LoadAdjuster {
         return LoadAdjustment(
             kind = kind,
             band = readiness.band,
-            topSetLoadDeltaPercent = when (kind) {
+            topSetLoadDeltaPercent = when (reductionKind) {
                 SessionAdjustmentKind.REDUCE_TOP_SET_LOAD,
                 SessionAdjustmentKind.REDUCE_VOLUME,
                 -> REDUCED_LOAD_PERCENT
                 else -> 0.0
             },
             applyOverloadIncrementToTopSets = kind == SessionAdjustmentKind.INCREASE_LOAD,
-            setsToDropPerExercise = if (kind == SessionAdjustmentKind.REDUCE_VOLUME) {
+            setsToDropPerExercise = if (reductionKind == SessionAdjustmentKind.REDUCE_VOLUME) {
                 REDUCED_SETS_PER_EXERCISE
             } else {
                 0
