@@ -327,4 +327,30 @@ class CoachContextsTest {
         assertTrue(text.contains("Bodyweight trend: not enough weigh-ins to state a rate."), text)
         assertTrue(text.contains("Diet: nothing logged this week."), text)
     }
+
+    @Test
+    fun `weekly PRs include records beaten since and every improvement in the week`() {
+        val history = listOf(
+            // This week: two bench sessions, each setting records.
+            workout("w1", "2026-11-09T09:00:00Z", ExerciseLibrary.benchPress, listOf(60.0 to 8)),
+            workout("w2", "2026-11-11T09:00:00Z", ExerciseLibrary.benchPress, listOf(62.5 to 8)),
+            // Next week beats them all, so the current board no longer holds any of this week's.
+            workout("w3", "2026-11-18T09:00:00Z", ExerciseLibrary.benchPress, listOf(70.0 to 8)),
+        )
+        val context = CoachContexts.weekly(history, today, zone)
+
+        val maxWeights = context.newPrs.filter { it.type == PrType.MAX_WEIGHT }.map { it.value }
+        assertEquals(listOf(60.0, 62.5), maxWeights)
+        assertTrue(context.newPrs.none { it.date > LocalDate.of(2026, 11, 15) })
+    }
+
+    @Test
+    fun `weekly PRs say what each record measures`() {
+        val history = listOf(workout("w1", "2026-11-09T09:00:00Z", ExerciseLibrary.benchPress, listOf(60.0 to 8)))
+        val text = CoachContexts.weekly(history, today, zone).render(WeightUnit.KG)
+        // One 60 × 8 set: 60 kg lifted, ~76 kg estimated, 480 kg of volume. They must not read alike.
+        assertTrue(text.contains("max weight 60"), text)
+        assertTrue(text.contains("estimated 1RM"), text)
+        assertTrue(text.contains("best set volume 480"), text)
+    }
 }
