@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.androidx.room)
 }
 
 android {
@@ -64,6 +66,18 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+    testOptions {
+        unitTests {
+            // Robolectric reads the merged manifest and resources.
+            isIncludeAndroidResources = true
+        }
+    }
+}
+
+room {
+    // Exported schemas are committed: every future version needs a migration
+    // tested against the schema it migrates from.
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
@@ -81,5 +95,14 @@ dependencies {
 
     implementation(libs.androidx.health.connect.client)
 
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    testImplementation(libs.junit4)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

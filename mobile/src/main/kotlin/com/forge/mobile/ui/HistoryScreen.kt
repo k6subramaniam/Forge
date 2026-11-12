@@ -16,6 +16,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -31,7 +33,10 @@ fun HistoryScreen(
     repository: ForgeRepository,
     onBack: () -> Unit,
 ) {
-    val sessions = remember { repository.allSessions() }
+    // null until the first read from the database lands, so the empty state
+    // never flashes before real history appears.
+    val historyFlow = remember(repository) { repository.observeHistory() }
+    val history by historyFlow.collectAsState(initial = null)
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("History") }) },
@@ -47,7 +52,7 @@ fun HistoryScreen(
             ) {
                 Text("Back to Today")
             }
-            if (sessions.isEmpty()) {
+            if (history?.isEmpty() == true) {
                 Text(
                     "No sessions yet — your first workout will appear here.",
                     style = MaterialTheme.typography.bodyLarge,
@@ -58,8 +63,9 @@ fun HistoryScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(sessions, key = { it.id }) { session ->
-                    val sets = repository.setsFor(session.id)
+                items(history.orEmpty(), key = { it.session.id }) { item ->
+                    val session = item.session
+                    val sets = item.sets
                     val completedSets = sets.count { it.completed }
                     val totalVolume = sets.filter { it.completed }.sumOf { it.volumeKg }
                     Card(Modifier.fillMaxWidth()) {

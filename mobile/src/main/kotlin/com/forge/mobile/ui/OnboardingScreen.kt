@@ -31,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +49,7 @@ import com.forge.core.model.Sex
 import com.forge.core.onboarding.OnboardingGate
 import com.forge.core.onboarding.OnboardingGateResult
 import com.forge.mobile.data.ForgeRepository
+import kotlinx.coroutines.launch
 
 /**
  * Blueprint 3.0 as a flow: goal → body stats → health screen → diet screen, with the
@@ -61,8 +63,15 @@ private enum class OnboardingStep { GOAL, BODY, HEALTH, DIET, CLEARANCE }
 fun OnboardingScreen(
     repository: ForgeRepository,
     onFinished: () -> Unit,
+    /**
+     * Set when a launch finds a completed onboarding whose red flag still awaits
+     * clearance: the flow resumes on the clearance screen instead of step 1.
+     */
+    pendingClearance: OnboardingGateResult? = null,
 ) {
-    var step by remember { mutableStateOf(OnboardingStep.GOAL) }
+    var step by remember {
+        mutableStateOf(if (pendingClearance != null) OnboardingStep.CLEARANCE else OnboardingStep.GOAL)
+    }
 
     // Step 1 — goal
     var goal by remember { mutableStateOf(GoalType.BUILD_MUSCLE) }
@@ -94,7 +103,10 @@ fun OnboardingScreen(
     var allergiesText by remember { mutableStateOf("") }
     var dislikesText by remember { mutableStateOf("") }
 
-    var gateResult by remember { mutableStateOf<OnboardingGateResult?>(null) }
+    var gateResult by remember { mutableStateOf(pendingClearance) }
+    // True while a save is in flight, so a double tap can't write twice.
+    var saving by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     fun buildGoalProfile() = GoalProfile(
         goal = goal,
@@ -133,10 +145,31 @@ fun OnboardingScreen(
         )
         val gate = OnboardingGate.evaluate(health)
         gateResult = gate
-        repository.saveOnboarding(buildGoalProfile(), health)
-        if (gate.planGenerationBlocked) {
-            step = OnboardingStep.CLEARANCE
-        } else {
+        saving = true
+        scope.launch {
+            try {
+                repository.saveOnboarding(buildGoalProfile(), health)
+            } finally {
+                saving = false
+            }
+            if (gate.planGenerationBlocked) {
+                step = OnboardingStep.CLEARANCE
+            } else {
+                onFinished()
+            }
+        }
+    }
+
+    fun recordClearance() {
+        saving = true
+        scope.launch {
+            try {
+                repository.healthProfile()?.let { current ->
+                    repository.updateHealthProfile(current.copy(clearanceState = ClearanceState.OBTAINED))
+                }
+            } finally {
+                saving = false
+            }
             onFinished()
         }
     }
@@ -298,7 +331,7 @@ fun OnboardingScreen(
                         label = { Text("Foods you won't eat, comma-separated — optional") },
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    ContinueButton("Finish setup") { finishOnboarding() }
+                    ContinueButton("Finish setup", enabled = !saving) { finishOnboarding() }
                 }
 
                 OnboardingStep.CLEARANCE -> {
@@ -326,20 +359,18 @@ fun OnboardingScreen(
                         }
                     }
                     Button(
-                        onClick = {
-                            repository.healthProfile?.let { current ->
-                                repository.updateHealthProfile(
-                                    current.copy(clearanceState = ClearanceState.OBTAINED),
-                                )
-                            }
-                            onFinished()
-                        },
+                        onClick = { recordClearance() },
+                        enabled = !saving,
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("I have obtained medical clearance")
                     }
                     OutlinedButton(
-                        onClick = { step = OnboardingStep.HEALTH },
+                        // A resumed clearance has no answers in memory to review, so it
+                        // restarts the flow; finishing it rewrites both profiles.
+                        onClick = {
+                            step = if (pendingClearance != null) OnboardingStep.GOAL else OnboardingStep.HEALTH
+                        },
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text("Go back and review my answers")

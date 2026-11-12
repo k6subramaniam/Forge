@@ -44,9 +44,13 @@ Phase 1's verification (run them with `:core:test`).
 
 ## Known Phase 1 simplifications (all marked with TODOs in code)
 
-- **Storage is in-memory stubs.** `ForgeRepository` seeds demo data; Room
-  (phone = source of truth, watch cache), on-device encryption of the health
-  profile, and Data Layer sync are the next build step.
+- **Storage is on the phone only.** `ForgeRepository` persists to Room
+  (`mobile/.../data/db/`; phone = source of truth): sessions, sets, the goal
+  profile, weigh-ins and body-composition inputs. The health profile is not in
+  the database: it is an AES-256-GCM file whose key lives in the Android
+  Keystore, kept out of backups (`mobile/.../data/secure/`). Still to come: the
+  watch-side cache and Data Layer sync. Until then History fills only from
+  synced sessions, so it starts empty. The demo seed is gone.
 - **Health Connect** write path is implemented against the stable 1.1.0 API;
   the permission-request UX and the call site land with real session flow.
   Reads (sleep/HRV for readiness) are Phase 2.
@@ -61,14 +65,19 @@ needs only a JDK.
 
 ```bash
 gradle :core:test                 # unit tests — the Phase 1 verification
+gradle :mobile:testDebugUnitTest  # storage tests (Room + encrypted store, on Robolectric)
 gradle :mobile:assembleDebug      # phone APK
 gradle :wear:assembleDebug        # watch APK
 ```
 
 (If a Gradle wrapper is present, `./gradlew` works identically.)
 
-CI (`.github/workflows/build.yml`) runs exactly the three commands above on every
-push and pull request.
+CI (`.github/workflows/build.yml`) runs exactly the commands above on every push
+and pull request.
+
+The Room schema is exported to `mobile/schemas/` and committed. Any schema change
+bumps the database version and ships a tested migration; destructive fallback is
+never enabled.
 
 ## Release signing
 
