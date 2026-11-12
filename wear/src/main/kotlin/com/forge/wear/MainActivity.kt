@@ -4,17 +4,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import com.forge.core.data.SampleData
-import com.forge.core.training.RestTimerLogic
-import com.forge.core.training.RestTimerState
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.forge.wear.theme.ForgeWearTheme
+import com.forge.wear.ui.ExercisePickerScreen
+import com.forge.wear.ui.LoggerExercise
 import com.forge.wear.ui.RestTimerScreen
 import com.forge.wear.ui.SetLoggerScreen
+import com.forge.wear.ui.StartScreen
+import com.forge.wear.ui.SummaryScreen
+import com.forge.wear.ui.describe
+import com.forge.wear.workout.WatchUi
+import com.forge.wear.workout.WorkoutViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,52 +33,72 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class WearScreen { LOGGER, REST }
-
 /**
- * Phase 1 watch flow: log sets for the first exercise of Push A, resting between
- * sets via :core's rest-timer state machine.
- *
- * TODO(Phase 1): drive this from a real WorkoutSession (start/freeform, exercise
- * progression, session summary with PRs from :core's PrDetector), persist sets to
- * Room on the watch, and sync to the phone over the Data Layer (blueprint 3.6).
- * The ghost target below becomes the phone's last-performance record for the lift.
+ * The watch flow (blueprint 3.1): start today's plan or a freeform session,
+ * log sets with rest between them, finish, and the session goes to the phone.
+ * Screens are state in, events out; [WorkoutViewModel] holds the session.
  */
 @Composable
-fun WearWorkoutApp() {
-    val prescribed = remember { SampleData.pushA.exercises.first() }
-    // Ghost target (blueprint 3.1): "last time: 60 kg × 8" for the demo exercise.
-    val ghostTarget = remember { "Last time: 60 kg × 8" }
+fun WearWorkoutApp(viewModel: WorkoutViewModel = viewModel()) {
+    val ui by viewModel.ui.collectAsState()
+    var picking by remember { mutableStateOf(false) }
 
-    var screen by remember { mutableStateOf(WearScreen.LOGGER) }
-    var setNumber by remember { mutableIntStateOf(1) }
-    var weightKg by remember { mutableStateOf(prescribed.targetWeightKg) }
-    var reps by remember { mutableIntStateOf(prescribed.repRange.last) }
-    var restState by remember { mutableStateOf(RestTimerLogic.startFor(prescribed)) }
-
-    when (screen) {
-        WearScreen.LOGGER -> SetLoggerScreen(
-            exerciseName = prescribed.exercise.name,
-            ghostTarget = ghostTarget,
-            setNumber = setNumber,
-            targetSets = prescribed.targetSets,
-            weightKg = weightKg,
-            reps = reps,
-            onWeightChange = { weightKg = it },
-            onRepsChange = { reps = it },
-            onCompleteSet = {
-                restState = RestTimerLogic.startFor(prescribed)
-                screen = WearScreen.REST
-            },
+    when (val screen = ui) {
+        WatchUi.Loading -> Unit
+        is WatchUi.Idle -> StartScreen(
+            lookup = screen.lookup,
+            canStartFreeform = screen.canStartFreeform,
+            onStart = viewModel::startSession,
         )
-
-        WearScreen.REST -> RestTimerScreen(
-            initialState = restState,
-            nextSetNumber = setNumber + 1,
-            onRestFinished = {
-                setNumber += 1
-                screen = WearScreen.LOGGER
-            },
+        is WatchUi.Active -> {
+            val current = screen.current
+            val rest = screen.rest
+            when {
+                // One rest screen per logged set, so each starts fresh.
+                rest != null -> key(screen.state.setHistory.size) {
+                    RestTimerScreen(
+                        initialState = rest,
+                        nextLabel = current?.let { "Next: ${it.exercise.name} · set ${it.loggedSets.size + 1}" }
+                            ?: "Next: finish or add an exercise",
+                        onRestFinished = viewModel::restFinished,
+                    )
+                }
+                picking -> ExercisePickerScreen(
+                    menu = screen.menu,
+                    onPick = { id ->
+                        picking = false
+                        viewModel.addExercise(id)
+                    },
+                    onCancel = { picking = false },
+                )
+                else -> SetLoggerScreen(
+                    exercise = current?.let {
+                        LoggerExercise(
+                            name = it.exercise.name,
+                            ghostTarget = screen.ghost?.let { set -> "Last time: ${describe(set)}" },
+                            setNumber = it.loggedSets.size + 1,
+                            targetSets = it.prescription.targetSets,
+                        )
+                    },
+                    weightKg = screen.weightKg,
+                    reps = screen.reps,
+                    hasLoggedSets = screen.hasLoggedSets,
+                    canAddExercise = screen.menu.isNotEmpty(),
+                    onWeightChange = viewModel::adjustWeight,
+                    onRepsChange = viewModel::adjustReps,
+                    onCompleteSet = { viewModel.completeSet() },
+                    onPainSet = { viewModel.completeSet(painReported = true) },
+                    onUndo = viewModel::undoLastSet,
+                    onSkip = viewModel::skipExercise,
+                    onAddExercise = { picking = true },
+                    onFinish = viewModel::finishSession,
+                )
+            }
+        }
+        is WatchUi.Finished -> SummaryScreen(
+            summary = screen.summary,
+            handedOver = screen.handedOver,
+            onDone = viewModel::dismissSummary,
         )
     }
 }

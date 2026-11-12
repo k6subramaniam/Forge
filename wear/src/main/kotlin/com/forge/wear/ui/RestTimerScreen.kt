@@ -30,18 +30,19 @@ import kotlinx.coroutines.delay
  * Rest timer (blueprint 3.1): starts automatically when a set is completed.
  * The countdown itself is :core's [RestTimerLogic] — this screen owns the clock
  * loop and renders state; +15s / skip forward straight into the state machine.
- *
- * TODO(Phase 1): haptic buzz when the timer finishes (Vibrator) and on the
- * button presses, per the blueprint's haptic-polished interactions.
+ * The watch buzzes when rest is over, so the lifter needn't watch the screen.
  */
 @Composable
 fun RestTimerScreen(
     initialState: RestTimerState,
-    nextSetNumber: Int,
+    /** What comes next, e.g. "Next: Bench Press · set 2". */
+    nextLabel: String,
     onRestFinished: () -> Unit,
 ) {
     var state by remember { mutableStateOf(initialState) }
     val latestOnFinished by rememberUpdatedState(onRestFinished)
+    val buzz = rememberRestOverBuzz()
+    var skipped by remember { mutableStateOf(false) }
 
     // One effect per state value: each tick schedules the next, pause idles the
     // effect, and reaching zero hands back after a beat (cancelled if the user
@@ -49,6 +50,8 @@ fun RestTimerScreen(
     LaunchedEffect(state) {
         when {
             state.isFinished -> {
+                // A skip is the lifter's own choice; only a countdown reaching zero buzzes.
+                if (!skipped) buzz()
                 delay(900)
                 latestOnFinished()
             }
@@ -82,7 +85,7 @@ fun RestTimerScreen(
                 )
             }
             Text(
-                text = "Next: set $nextSetNumber",
+                text = nextLabel,
                 style = MaterialTheme.typography.body2,
                 color = MaterialTheme.colors.onSurfaceVariant,
             )
@@ -92,7 +95,10 @@ fun RestTimerScreen(
                     label = { Text("+15s") },
                 )
                 Chip(
-                    onClick = { state = RestTimerLogic.skip(state) },
+                    onClick = {
+                        skipped = true
+                        state = RestTimerLogic.skip(state)
+                    },
                     label = { Text("Skip") },
                 )
             }

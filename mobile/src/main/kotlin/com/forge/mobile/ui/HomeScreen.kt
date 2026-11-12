@@ -1,5 +1,6 @@
 package com.forge.mobile.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,14 +19,21 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.health.connect.client.PermissionController
 import com.forge.core.model.HealthProfile
 import com.forge.core.onboarding.OnboardingGate
+import com.forge.core.sync.PlanLookup
 import com.forge.mobile.data.ForgeRepository
+import com.forge.mobile.health.HealthConnectWriter
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
@@ -36,10 +44,14 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun HomeScreen(
     repository: ForgeRepository,
+    healthConnect: HealthConnectWriter,
     onOpenHistory: () -> Unit,
 ) {
     val today = remember { LocalDate.now() }
-    val routine = remember(today) { repository.routineFor(today) }
+    // The same plan the watch is sent, so phone and watch never disagree on weights.
+    val todaysPlan by produceState<PlanLookup?>(initialValue = null, repository, today) {
+        value = repository.plans(today, ZoneId.systemDefault(), Instant.now()).lookup(today)
+    }
     val healthProfile by produceState<HealthProfile?>(initialValue = null, repository) {
         value = repository.healthProfile()
     }
@@ -85,28 +97,34 @@ fun HomeScreen(
             Card(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text("Today's session", style = MaterialTheme.typography.titleMedium)
-                    if (routine == null) {
-                        Text(
-                            "Rest day — nothing scheduled.",
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    } else {
-                        Text(routine.name, style = MaterialTheme.typography.headlineSmall)
-                        routine.exercises.forEach { prescribed ->
+                    when (val lookup = todaysPlan) {
+                        null -> Unit
+                        is PlanLookup.Scheduled -> {
+                            Text(lookup.plan.routineName, style = MaterialTheme.typography.headlineSmall)
+                            lookup.plan.exercises.forEach { planned ->
+                                val p = planned.prescription
+                                Text(
+                                    "• ${p.exercise.name} — ${p.targetSets} × ${p.repRange.first}–${p.repRange.last}" +
+                                        " @ ${formatKg(p.targetWeightKg)} kg",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                            }
                             Text(
-                                "• ${prescribed.exercise.name} — ${prescribed.targetSets} × " +
-                                    "${prescribed.repRange.first}–${prescribed.repRange.last} @ ${prescribed.targetWeightKg} kg",
-                                style = MaterialTheme.typography.bodyMedium,
+                                "Start this session on your watch. It comes back here when you finish.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
-                        Text(
-                            "Start and log this session on your watch; it syncs back here.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        PlanLookup.Unscheduled, PlanLookup.OutOfDate -> Text(
+                            "Nothing scheduled today. You can still start a freeform session on your watch.",
+                            style = MaterialTheme.typography.bodyLarge,
                         )
+                        is PlanLookup.Blocked -> Text(lookup.reason, style = MaterialTheme.typography.bodyLarge)
                     }
                 }
             }
+
+            HealthConnectCard(healthConnect)
 
             if (gate != null && (gate.constraints.exerciseExclusions.isNotEmpty() || gate.constraints.intensityMayOnlyScaleDown)) {
                 Card(Modifier.fillMaxWidth()) {
@@ -137,3 +155,40 @@ fun HomeScreen(
         }
     }
 }
+
+/**
+ * Health Connect status and the permission request (blueprint 3.6). Hidden on
+ * devices without Health Connect. Workouts are stored in Forge either way.
+ */
+@Composable
+private fun HealthConnectCard(healthConnect: HealthConnectWriter) {
+    if (!remember { healthConnect.isAvailable() }) return
+    var refresh by remember { mutableIntStateOf(0) }
+    val granted by produceState<Boolean?>(initialValue = null, refresh) { value = healthConnect.hasPermissions() }
+    val request = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) {
+        refresh++
+    }
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text("Health Connect", style = MaterialTheme.typography.titleMedium)
+            when (granted) {
+                null -> Unit
+                true -> Text(
+                    "Finished workouts are written to Health Connect, so Samsung Health sees them too.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                false -> {
+                    Text(
+                        "Allow Forge to write workouts so they show up in Samsung Health.",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Button(onClick = { request.launch(HealthConnectWriter.REQUIRED_PERMISSIONS) }) {
+                        Text("Connect Health Connect")
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun formatKg(kg: Double): String = if (kg % 1.0 == 0.0) kg.toInt().toString() else kg.toString()

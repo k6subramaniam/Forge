@@ -14,20 +14,29 @@ import androidx.compose.runtime.setValue
 import com.forge.core.model.HealthProfile
 import com.forge.core.onboarding.OnboardingGate
 import com.forge.mobile.data.ForgeRepository
+import com.forge.mobile.health.HealthConnectWriter
 import com.forge.mobile.theme.ForgeTheme
 import com.forge.mobile.ui.HistoryScreen
 import com.forge.mobile.ui.HomeScreen
 import com.forge.mobile.ui.OnboardingScreen
 
 class MainActivity : ComponentActivity() {
+    private val app get() = application as ForgeApplication
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val repository = (application as ForgeApplication).repository
         setContent {
             ForgeTheme {
-                ForgeApp(repository)
+                ForgeApp(app.repository, app.healthConnect, onPlansChanged = app::syncWatch)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Pick up sessions the watch finished while the app was closed, and send
+        // the watch plans that reflect them (and today's date).
+        app.syncWatch()
     }
 }
 
@@ -54,7 +63,11 @@ internal fun startDestinationFor(profile: HealthProfile?): MobileDestination = w
  * onboarding screen never flashes for a user who has already completed it.
  */
 @Composable
-fun ForgeApp(repository: ForgeRepository) {
+fun ForgeApp(
+    repository: ForgeRepository,
+    healthConnect: HealthConnectWriter,
+    onPlansChanged: () -> Unit,
+) {
     var destination by remember { mutableStateOf<MobileDestination?>(null) }
     var storedProfile by remember { mutableStateOf<HealthProfile?>(null) }
 
@@ -71,15 +84,23 @@ fun ForgeApp(repository: ForgeRepository) {
             null -> Unit // reading the stored profile
             MobileDestination.ONBOARDING -> OnboardingScreen(
                 repository = repository,
-                onFinished = { destination = MobileDestination.HOME },
+                onFinished = {
+                    // The profile now allows (or blocks) plans: tell the watch.
+                    onPlansChanged()
+                    destination = MobileDestination.HOME
+                },
             )
             MobileDestination.CLEARANCE -> OnboardingScreen(
                 repository = repository,
-                onFinished = { destination = MobileDestination.HOME },
+                onFinished = {
+                    onPlansChanged()
+                    destination = MobileDestination.HOME
+                },
                 pendingClearance = storedProfile?.let(OnboardingGate::evaluate),
             )
             MobileDestination.HOME -> HomeScreen(
                 repository = repository,
+                healthConnect = healthConnect,
                 onOpenHistory = { destination = MobileDestination.HISTORY },
             )
             MobileDestination.HISTORY -> HistoryScreen(

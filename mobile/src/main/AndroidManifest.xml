@@ -20,7 +20,25 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- Health Connect permission rationale on Android 13 and earlier. -->
+            <intent-filter>
+                <action android:name="androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE" />
+            </intent-filter>
         </activity>
+
+        <!-- Finished sessions from the watch (Wearable Data Layer, blueprint 3.6).
+             The path matches com.forge.core.sync.ForgeWire.SESSION_PATH_PREFIX. -->
+        <service
+            android:name=".sync.WatchSessionListenerService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.DATA_CHANGED" />
+                <data
+                    android:host="*"
+                    android:pathPrefix="/forge/session/"
+                    android:scheme="wear" />
+            </intent-filter>
+        </service>
 
         <!-- Health Connect permission-usage rationale entry point. -->
         <activity-alias

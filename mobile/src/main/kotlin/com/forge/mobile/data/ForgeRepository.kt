@@ -10,14 +10,20 @@ import com.forge.core.model.Routine
 import com.forge.core.model.SetEntry
 import com.forge.core.model.WorkoutSession
 import com.forge.core.nutrition.WeighIn
+import com.forge.core.sync.WatchPlanner
+import com.forge.core.sync.WatchPlans
+import com.forge.core.training.CompletedSession
 import com.forge.mobile.data.db.ForgeDatabase
 import com.forge.mobile.data.db.toEntity
 import com.forge.mobile.data.db.toModel
 import com.forge.mobile.data.secure.HealthProfileStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 
 /** One past session with its sets, for History. */
 data class SessionHistoryItem(
@@ -37,8 +43,9 @@ data class SessionHistoryItem(
  * Reads that the UI shows live are Flows; everything else suspends. Routines
  * and the weekly schedule are still the built-in templates.
  *
- * TODO(Phase 2): merge sessions arriving from the watch over the Wearable Data
- * Layer into [addSession], then write completed ones out via HealthConnectWriter.
+ * Sessions logged on the watch arrive through [addSession]
+ * (com.forge.mobile.sync.SessionIngest). [plans] is what the watch is sent.
+ *
  * TODO(Phase 2): user-built routines move into the database with the routine builder.
  */
 class ForgeRepository(
@@ -86,6 +93,26 @@ class ForgeRepository(
                 )
             }
         }
+
+    /** Finished sessions in the read-models' shape ([HistoryReadModels]). */
+    suspend fun completedSessions(): List<CompletedSession> =
+        observeHistory().first()
+            .filter { it.session.isCompleted }
+            .map { CompletedSession(it.session, it.sets) }
+
+    /**
+     * The week of plans the watch runs, built from the stored history and
+     * health profile ([WatchPlanner]). Home shows the same plan for today.
+     */
+    suspend fun plans(today: LocalDate, zone: ZoneId, now: Instant): WatchPlans =
+        WatchPlanner.plan(
+            today = today,
+            routineFor = ::routineFor,
+            history = completedSessions(),
+            healthProfile = healthProfile(),
+            zone = zone,
+            generatedAt = now,
+        )
 
     suspend fun setsFor(sessionId: String): List<SetEntry> =
         database.sessionDao().setsFor(sessionId).map { it.toModel() }

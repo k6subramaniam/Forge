@@ -19,10 +19,34 @@ assessment) arriving in their phases behind clear `TODO` markers.
 |---|---|
 | `:core` | Pure Kotlin/JVM, **no Android dependencies** — so all workout/plan logic is unit-testable anywhere. Data models, onboarding gate, plate calculator, 1RM/PR detection, progressive overload, rest-timer state machine, sample data. |
 | `:mobile` | The phone app (`applicationId com.forge.fitness`): Compose Material 3, dark theme with the amber accent (#f2a93b) from the design mockups. Onboarding flow, Today, History, Health Connect writer. |
-| `:wear` | The watch app (same `applicationId` — required for the Wearable Data Layer to pair the two): Compose for Wear OS + Horologist. Set logger with ghost targets and big steppers, rest timer screen. |
+| `:wear` | The watch app (same `applicationId` — required for the Wearable Data Layer to pair the two): Compose for Wear OS + Horologist. Runs today's plan or a freeform session: set logger with ghost targets and big steppers, rest timer that buzzes, pain/undo/skip/add, summary with PRs. |
 
 Phone is the source of truth; the watch caches the active plan and the in-progress
 session, then syncs completed sets back over the Data Layer (blueprint §4).
+
+## Phone ↔ watch sync
+
+Both directions use the Wearable Data Layer. The wire format is one tested codec
+in `core/.../sync/ForgeWire.kt`: versioned JSON, with unknown fields ignored.
+
+- **Plans, phone → watch** (`/forge/plans`). The phone builds a week of plans
+  (`WatchPlanner`) from the same read-models it shows: progression weights,
+  ghost targets and PRs. It also sends a freeform menu of the exercises your
+  limitations allow. The onboarding gate and limitations are applied on the
+  phone, so the watch never sees the health profile and can't skip a
+  limitation. If plans are blocked (onboarding unfinished, clearance pending),
+  the watch is told why and offers nothing. Plans are re-sent when the app
+  opens, when onboarding finishes, and whenever a session arrives. The Data
+  Layer keeps the latest copy on the watch, so it works in the gym without the
+  phone.
+- **Sessions, watch → phone** (`/forge/session/<id>`). While a session runs,
+  the watch saves every action to a journal (`SessionJournal`) that replays
+  through `SessionEngine`. A workout survives the app being killed mid-session.
+  On finish, the session goes to an outbox on disk, then to the Data Layer. The
+  phone stores it in Room, writes it to Health Connect (once permitted from
+  Home), and deletes the item as its receipt. Anything the phone can't store
+  yet is left in place, never dropped. Storing is idempotent and the Health
+  Connect record has a stable client id, so a repeated delivery is harmless.
 
 ## Phase 1 ↔ blueprint map
 
@@ -37,6 +61,7 @@ session, then syncs completed sets back over the Data Layer (blueprint §4).
 | 3.1 watch set logger | `wear/.../ui/SetLoggerScreen.kt` |
 | 3.3 phone history | `mobile/.../ui/HistoryScreen.kt`, `mobile/.../data/ForgeRepository.kt` |
 | 3.6 Health Connect write of completed workouts | `mobile/.../health/HealthConnectWriter.kt` |
+| 3.6 phone ↔ watch sync (plans out, sessions back) | `core/.../sync/`, `mobile/.../sync/`, `wear/.../sync/`, `wear/.../workout/` |
 | Sample plan (Push A / Pull A / Legs A) | `core/.../data/SampleData.kt` |
 
 Every `:core` behaviour above has JUnit 5 tests under `core/src/test/` — they are
@@ -48,14 +73,13 @@ Phase 1's verification (run them with `:core:test`).
   (`mobile/.../data/db/`; phone = source of truth): sessions, sets, the goal
   profile, weigh-ins and body-composition inputs. The health profile is not in
   the database: it is an AES-256-GCM file whose key lives in the Android
-  Keystore, kept out of backups (`mobile/.../data/secure/`). Still to come: the
-  watch-side cache and Data Layer sync. Until then History fills only from
-  synced sessions, so it starts empty. The demo seed is gone.
-- **Health Connect** write path is implemented against the stable 1.1.0 API;
-  the permission-request UX and the call site land with real session flow.
-  Reads (sleep/HRV for readiness) are Phase 2.
-- **The watch demo flow** logs sets for one exercise (Push A opener) with a
-  hard-coded ghost target; full session flow follows with Data Layer sync.
+  Keystore, kept out of backups (`mobile/.../data/secure/`). History fills
+  from sessions synced from the watch, so it starts empty. The demo seed is gone.
+- **Health Connect** writes finished workouts once permission is granted from
+  Home. Reads (sleep/HRV for readiness) are Phase 2.
+- **Watch session**: no live heart rate yet (Health Services), and no ongoing
+  activity, so between sets the app can drop to the watch face. The journal
+  means reopening it resumes the session. Weights show in kg.
 
 ## Building
 
