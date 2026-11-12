@@ -136,12 +136,13 @@ data class PostWorkoutContext(
             }
         }.trimEnd()
     }
+}
 
-    private fun prLabel(type: PrType): String = when (type) {
-        PrType.MAX_WEIGHT -> "max weight"
-        PrType.ESTIMATED_1RM -> "estimated 1RM"
-        PrType.MAX_VOLUME -> "best set volume"
-    }
+/** What a record measures: an actual weight, an estimate, or a volume. The coach must not confuse them. */
+private fun prLabel(type: PrType): String = when (type) {
+    PrType.MAX_WEIGHT -> "max weight"
+    PrType.ESTIMATED_1RM -> "estimated 1RM"
+    PrType.MAX_VOLUME -> "best set volume"
 }
 
 /**
@@ -229,7 +230,7 @@ data class WeeklyReviewContext(
     val totalSets: Int,
     val totalVolumeKg: Double,
     val volumeByMuscleGroup: List<MuscleGroupVolume>,
-    /** Records whose date falls inside the reviewed week. */
+    /** Records set inside the reviewed week, in order, including ones beaten since. */
     val newPrs: List<PRRecord>,
     /** Bodyweight trend rate, kg/week; null when the trend can't be stated. */
     val trendRateKgPerWeek: Double?,
@@ -266,7 +267,7 @@ data class WeeklyReviewContext(
         } else {
             appendLine("New PRs this week:")
             for (pr in newPrs) {
-                appendLine("- ${pr.exerciseName}: ${formatWeight(pr.value, unit)} (${pr.date}).")
+                appendLine("- ${pr.exerciseName}: ${prLabel(pr.type)} ${formatWeight(pr.value, unit)} (${pr.date}).")
             }
         }
         val rate = trendRateKgPerWeek
@@ -358,8 +359,8 @@ object CoachContexts {
         val weekEnd = weekStart.plusDays(6)
         val entries = HistoryReadModels.recentSessions(history, zone)
             .filter { it.date in weekStart..weekEnd }
-        val board = HistoryReadModels.prBoard(history, zone)
-        val newPrs = board.flatMap { listOf(it.maxWeight, it.bestEstimated1Rm, it.bestSetVolume) }
+        // Records set this week, even if beaten since (the board would lose those).
+        val newPrs = HistoryReadModels.prTimeline(history, zone)
             .filter { it.date in weekStart..weekEnd }
             .sortedWith(compareBy<PRRecord> { it.date }.thenBy { it.exerciseName })
         return WeeklyReviewContext(

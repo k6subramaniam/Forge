@@ -300,34 +300,39 @@ object HistoryReadModels {
      * engine reported at finish time on the same workouts.
      */
     fun prBoard(history: List<CompletedSession>, zone: ZoneId): List<ExercisePrBoard> {
-        var accumulated: List<PRRecord> = emptyList()
-        val latest = mutableMapOf<Pair<String, PrType>, PRRecord>()
-        val names = mutableMapOf<String, String>()
-        val order = mutableListOf<String>()
-        for (completed in chronological(history)) {
-            val date = completed.session.startTime.atZone(zone).toLocalDate()
-            val setsByExercise = completed.sets.filter { it.completed }.groupBy { it.exerciseId }
-            for ((exerciseId, sets) in setsByExercise) {
-                if (exerciseId !in names) {
-                    names[exerciseId] = sets.first().exerciseName
-                    order += exerciseId
-                }
-                val newPrs = PrDetector.detectNewPrs(sets, accumulated, date)
-                for (pr in newPrs) latest[exerciseId to pr.type] = pr
-                accumulated = accumulated + newPrs
-            }
-        }
-        // An exercise reaches the board only via a completed set, and a first
-        // completed set always sets all three records — hence getValue is safe.
-        return order.map { exerciseId ->
+        val timeline = prTimeline(history, zone)
+        // Later records replace earlier ones; an exercise reaches the board only
+        // via a completed set, and a first completed set sets all three records.
+        val latest = timeline.associateBy { it.exerciseId to it.type }
+        return timeline.map { it.exerciseId }.distinct().map { exerciseId ->
             ExercisePrBoard(
                 exerciseId = exerciseId,
-                exerciseName = names.getValue(exerciseId),
+                exerciseName = timeline.first { it.exerciseId == exerciseId }.exerciseName,
                 maxWeight = latest.getValue(exerciseId to PrType.MAX_WEIGHT),
                 bestEstimated1Rm = latest.getValue(exerciseId to PrType.ESTIMATED_1RM),
                 bestSetVolume = latest.getValue(exerciseId to PrType.MAX_VOLUME),
             )
         }
+    }
+
+    /**
+     * Every personal record in [history] in the order it was set, including
+     * records later beaten: what each session's finish reported. Use it for
+     * "PRs in a period" questions; [prBoard] keeps only the current records,
+     * so a record set in a period and beaten after it would be missing there.
+     */
+    fun prTimeline(history: List<CompletedSession>, zone: ZoneId): List<PRRecord> {
+        var accumulated: List<PRRecord> = emptyList()
+        val timeline = mutableListOf<PRRecord>()
+        for (completed in chronological(history)) {
+            val date = completed.session.startTime.atZone(zone).toLocalDate()
+            for ((_, sets) in completed.sets.filter { it.completed }.groupBy { it.exerciseId }) {
+                val newPrs = PrDetector.detectNewPrs(sets, accumulated, date)
+                accumulated = accumulated + newPrs
+                timeline += newPrs
+            }
+        }
+        return timeline
     }
 
     // -- History screen queries (blueprint 3.3) ---------------------------------
