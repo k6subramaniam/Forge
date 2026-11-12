@@ -165,4 +165,35 @@ class ReadinessTest {
         assertEquals(14, signal.baselineCount)
         assertEquals(50.0, signal.baselineMean, 1e-9)
     }
+
+    @Test
+    fun `repeated readings of one day count once toward the baseline`() {
+        // Fourteen copies of yesterday's reading are one day of baseline, not fourteen.
+        val copies = (1..14).map { obs(today.minusDays(1), hrv = 50.0, rhr = 60) }
+        val result = Readiness.assess(copies + obs(today, hrv = 50.0, rhr = 60), today)
+        assertEquals(ReadinessStatus.INSUFFICIENT_DATA, result.status)
+        assertEquals(1, result.baselineDaysUsed)
+
+        // With a real baseline, a day's later reading replaces its earlier one.
+        val days = flatBaseline(20, hrv = 50.0, rhr = null, sleepMin = null, quality = null)
+        val corrected = days + obs(today.minusDays(1), hrv = 50.0) + obs(today, hrv = 50.0)
+        val withEarlyOutlier = listOf(obs(today.minusDays(1), hrv = 500.0)) + corrected
+        assertEquals(
+            Readiness.assess(corrected, today).signals.single().baselineMean,
+            Readiness.assess(withEarlyOutlier, today).signals.single().baselineMean,
+            1e-9,
+        )
+        assertEquals(20, Readiness.assess(withEarlyOutlier, today).baselineDaysUsed)
+    }
+
+    @Test
+    fun `the headline says which side of baseline the reading is on, not whether that's good`() {
+        // Resting HR well above baseline drives the score down; the text must still say "above".
+        val values = listOf(50, 55, 60, 65, 70)
+        val baseline = (0 until 20).map { obs(today.minusDays((it + 1).toLong()), rhr = values[it % 5]) }
+        val high = Readiness.assess(baseline + obs(today, rhr = 75), today)
+        assertTrue(high.headline.contains("resting heart rate") && high.headline.endsWith("above yours."), high.headline)
+        val low = Readiness.assess(baseline + obs(today, rhr = 48), today)
+        assertTrue(low.headline.endsWith("below yours."), low.headline)
+    }
 }
