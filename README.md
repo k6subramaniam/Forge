@@ -55,8 +55,9 @@ Phase 1's verification (run them with `:core:test`).
 
 ## Building
 
-Requirements: JDK 17 and Gradle 8.10.2+, plus the Android SDK (compileSdk 35)
-for the two app modules. `:core` needs only a JDK.
+Requirements: JDK 17 and Gradle 8.11.1+ (needed by AGP 8.9), plus the Android SDK
+(compileSdk 36, which Health Connect 1.1.0 requires) for the two app modules. `:core`
+needs only a JDK.
 
 ```bash
 gradle :core:test                 # unit tests — the Phase 1 verification
@@ -68,6 +69,29 @@ gradle :wear:assembleDebug        # watch APK
 
 CI (`.github/workflows/build.yml`) runs exactly the three commands above on every
 push and pull request.
+
+## Release signing
+
+Phone and watch APKs are signed with one permanent release key. The Wearable
+Data Layer pairs the two apps only when applicationId and signing key match,
+and Android installs an update only over an app signed with the same key, so
+losing the key means uninstalling, which wipes on-device data. The key is never
+committed. CI reads it from three repository secrets (Settings → Secrets and
+variables → Actions):
+
+| Secret | Value |
+|---|---|
+| `FORGE_KEYSTORE_BASE64` | the PKCS12 keystore, base64-encoded |
+| `FORGE_KEYSTORE_PASSWORD` | the keystore password (also the key password) |
+| `FORGE_KEY_ALIAS` | the key alias |
+
+With the secrets set, every CI run also builds signed release APKs for both
+apps, checks they share one certificate, and attaches them to the run as the
+`forge-apks-<run number>` artifact. The run number is the versionCode, so each
+build installs as an update over the last. Without the secrets, those steps
+are skipped. To sign locally, export `FORGE_KEYSTORE_FILE` (a path),
+`FORGE_KEYSTORE_PASSWORD` and `FORGE_KEY_ALIAS`, then run
+`gradle :mobile:assembleRelease :wear:assembleRelease`.
 
 ## Deployment (developer mode, no Play Store)
 

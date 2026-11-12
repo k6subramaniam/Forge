@@ -9,20 +9,43 @@ plugins {
 
 android {
     namespace = "com.forge.mobile"
-    compileSdk = 35
+    // Health Connect 1.1.0 requires compiling against API 36. Compile-time only:
+    // targetSdk (runtime behaviour) stays at 35.
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.forge.fitness"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
+        // CI passes its run number, so every build is newer than the last and
+        // installs as an update. Local builds default to 1.
+        versionCode = providers.environmentVariable("FORGE_VERSION_CODE").orNull?.toInt() ?: 1
         versionName = "0.1.0"
+    }
+
+    // Release signing: one permanent key for phone AND watch. The Wearable Data
+    // Layer pairs apps only when applicationId and signing key match, and Android
+    // only installs an update signed with the same key. The key never lives in
+    // the repo: CI decodes it from GitHub secrets (see README "Release signing");
+    // locally, export the same three variables. Without them, release builds come
+    // out unsigned and debug builds are unaffected.
+    val releaseKeystore = providers.environmentVariable("FORGE_KEYSTORE_FILE").orNull
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = providers.environmentVariable("FORGE_KEYSTORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("FORGE_KEY_ALIAS").get()
+                keyPassword = storePassword // PKCS12: one password for store and key
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.findByName("release")
         }
     }
 

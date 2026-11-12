@@ -8,6 +8,10 @@ jobs:
   build:
     name: Core tests + debug builds
     runs-on: ubuntu-latest
+    env:
+      # True once the repo owner has added the release key secrets (README "Release
+      # signing"); the signed-release steps are skipped until then.
+      HAS_SIGNING_KEY: ${{ secrets.FORGE_KEYSTORE_BASE64 != '' }}
 
     steps:
       - name: Check out
@@ -22,13 +26,51 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.10.2'
+          gradle-version: '8.11.1' # minimum for AGP 8.9.x
 
       - name: Unit tests (:core)
         run: gradle :core:test --stacktrace
 
       - name: Assemble debug (:mobile and :wear)
         run: gradle :mobile:assembleDebug :wear:assembleDebug --stacktrace
+
+      - name: Decode release keystore
+        if: env.HAS_SIGNING_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.FORGE_KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/forge-release.p12"
+
+      - name: Assemble signed release (:mobile and :wear)
+        if: env.HAS_SIGNING_KEY == 'true'
+        env:
+          FORGE_KEYSTORE_FILE: ${{ runner.temp }}/forge-release.p12
+          FORGE_KEYSTORE_PASSWORD: ${{ secrets.FORGE_KEYSTORE_PASSWORD }}
+          FORGE_KEY_ALIAS: ${{ secrets.FORGE_KEY_ALIAS }}
+          FORGE_VERSION_CODE: ${{ github.run_number }}
+        run: gradle :mobile:assembleRelease :wear:assembleRelease --stacktrace
+
+      - name: Check phone and watch share one signing key
+        if: env.HAS_SIGNING_KEY == 'true'
+        run: |
+          apksigner="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)/apksigner"
+          phone=$("$apksigner" verify --print-certs mobile/build/outputs/apk/release/mobile-release.apk | grep 'SHA-256')
+          watch=$("$apksigner" verify --print-certs wear/build/outputs/apk/release/wear-release.apk | grep 'SHA-256')
+          echo "phone: $phone"
+          echo "watch: $watch"
+          test -n "$phone" && test "$phone" = "$watch"
+
+      - name: Upload signed APKs
+        if: env.HAS_SIGNING_KEY == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: forge-apks-${{ github.run_number }}
+          path: |
+            mobile/build/outputs/apk/release/mobile-release.apk
+            wear/build/outputs/apk/release/wear-release.apk
+
+      - name: Remove release keystore
+        if: always() && env.HAS_SIGNING_KEY == 'true'
+        run: rm -f "$RUNNER_TEMP/forge-release.p12"
 
       - name: Upload test report
         if: always()
