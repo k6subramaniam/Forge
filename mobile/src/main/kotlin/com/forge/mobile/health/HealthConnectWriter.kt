@@ -10,8 +10,11 @@ import java.time.ZoneId
 
 /** Somewhere finished workouts are mirrored to. Health Connect in the app; a fake in tests. */
 fun interface WorkoutMirror {
-    /** Mirrors a finished session. Does nothing when the destination isn't available or permitted. */
-    suspend fun mirror(session: WorkoutSession)
+    /**
+     * Mirrors a finished session. Returns false, writing nothing, when the
+     * destination isn't available or permitted, so the caller can retry later.
+     */
+    suspend fun mirror(session: WorkoutSession): Boolean
 }
 
 /**
@@ -20,7 +23,8 @@ fun interface WorkoutMirror {
  *
  * The user grants [REQUIRED_PERMISSIONS] from Home (PermissionController's
  * request contract). Until then, and on devices without Health Connect,
- * [mirror] does nothing. The workout is still stored in Forge.
+ * [mirror] writes nothing and says so; the workout is stored in Forge and
+ * queued to be mirrored once it can be (com.forge.mobile.sync.SessionIngest).
  */
 class HealthConnectWriter(private val context: Context) : WorkoutMirror {
 
@@ -42,8 +46,10 @@ class HealthConnectWriter(private val context: Context) : WorkoutMirror {
             HealthConnectClient.getOrCreate(context).permissionController.getGrantedPermissions()
                 .containsAll(REQUIRED_PERMISSIONS)
 
-    override suspend fun mirror(session: WorkoutSession) {
-        if (hasPermissions()) writeCompletedSession(session)
+    override suspend fun mirror(session: WorkoutSession): Boolean {
+        if (!hasPermissions()) return false
+        writeCompletedSession(session)
+        return true
     }
 
     /**

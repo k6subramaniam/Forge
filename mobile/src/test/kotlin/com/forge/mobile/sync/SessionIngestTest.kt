@@ -54,8 +54,15 @@ class SessionIngestTest {
     @After
     fun tearDown() = database.close()
 
-    private fun ingest(mirror: suspend (WorkoutSession) -> Unit = { mirrored += it }) =
-        SessionIngest(repository) { mirror(it) }
+    private val pending = object : PendingMirrors {
+        val ids = mutableSetOf<String>()
+        override fun add(sessionId: String) { ids += sessionId }
+        override fun remove(sessionId: String) { ids -= sessionId }
+        override fun all(): Set<String> = ids.toSet()
+    }
+
+    private fun ingest(mirror: suspend (WorkoutSession) -> Boolean = { mirrored += it; true }) =
+        SessionIngest(repository, { mirror(it) }, pending)
 
     @Test
     fun `a finished watch session is stored and mirrored`() = runTest {
@@ -93,10 +100,41 @@ class SessionIngestTest {
     }
 
     @Test
-    fun `a Health Connect failure doesn't lose the stored session`() = runTest {
+    fun `a Health Connect failure doesn't lose the stored session, and it's retried`() = runTest {
         val stored = ingest { throw IllegalStateException("Health Connect unavailable") }
             .ingest(ForgeWire.encodeSession(session, sets))
         assertTrue(stored)
         assertEquals(1, repository.observeHistory().first().size)
+        assertEquals(setOf(session.id), pending.all())
+
+        // The next sync writes it and clears the queue.
+        ingest().retryPendingMirrors()
+        assertEquals(listOf(session), mirrored)
+        assertTrue(pending.all().isEmpty())
+    }
+
+    @Test
+    fun `sessions stored before the permission are mirrored once it's granted`() = runTest {
+        var permitted = false
+        val writer = ingest { if (permitted) { mirrored += it; true } else false }
+        assertTrue(writer.ingest(ForgeWire.encodeSession(session, sets)))
+        assertTrue(mirrored.isEmpty())
+        assertEquals(setOf(session.id), pending.all())
+
+        writer.retryPendingMirrors() // still not permitted: stays queued
+        assertEquals(setOf(session.id), pending.all())
+
+        permitted = true
+        writer.retryPendingMirrors()
+        assertEquals(listOf(session), mirrored)
+        assertTrue(pending.all().isEmpty())
+    }
+
+    @Test
+    fun `a queued session that no longer exists leaves the queue`() = runTest {
+        pending.add("deleted-session")
+        ingest().retryPendingMirrors()
+        assertTrue(pending.all().isEmpty())
+        assertTrue(mirrored.isEmpty())
     }
 }

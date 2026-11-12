@@ -34,9 +34,10 @@ class WatchSync(
 ) {
     private val mutex = Mutex()
 
-    /** Stores any waiting watch sessions, then sends fresh plans. */
+    /** Stores any waiting watch sessions, retries Health Connect writes, then sends fresh plans. */
     suspend fun syncNow() = mutex.withLock {
         val stored = collectSessionsLocked()
+        ingest.retryPendingMirrors()
         publishPlansLocked()
         stored
     }

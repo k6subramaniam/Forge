@@ -102,6 +102,7 @@ fun ForgeApp(
                 repository = repository,
                 healthConnect = healthConnect,
                 onOpenHistory = { destination = MobileDestination.HISTORY },
+                onHealthConnectChanged = onPlansChanged,
             )
             MobileDestination.HISTORY -> HistoryScreen(
                 repository = repository,

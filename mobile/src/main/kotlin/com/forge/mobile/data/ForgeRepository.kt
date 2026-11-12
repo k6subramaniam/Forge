@@ -114,6 +114,8 @@ class ForgeRepository(
             generatedAt = now,
         )
 
+    suspend fun session(id: String): WorkoutSession? = database.sessionDao().session(id)?.toModel()
+
     suspend fun setsFor(sessionId: String): List<SetEntry> =
         database.sessionDao().setsFor(sessionId).map { it.toModel() }
 

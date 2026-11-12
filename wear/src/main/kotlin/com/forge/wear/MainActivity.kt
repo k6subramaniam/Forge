@@ -2,6 +2,7 @@ package com.forge.wear
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.viewModels
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,13 +24,20 @@ import com.forge.wear.workout.WatchUi
 import com.forge.wear.workout.WorkoutViewModel
 
 class MainActivity : ComponentActivity() {
+    private val workout: WorkoutViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ForgeWearTheme {
-                WearWorkoutApp()
+                WearWorkoutApp(workout)
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        workout.onResume()
     }
 }
 

@@ -1,6 +1,7 @@
 package com.forge.mobile.sync
 
 import android.util.Log
+import com.forge.core.model.WorkoutSession
 import com.forge.core.sync.ForgeWire
 import com.forge.core.sync.WireFormatException
 import com.forge.mobile.data.ForgeRepository
@@ -9,6 +10,9 @@ import com.forge.mobile.health.WorkoutMirror
 /**
  * Stores a session the watch finished (blueprint 3.6: the phone is the source
  * of truth) and mirrors it to Health Connect.
+ *
+ * A session Health Connect couldn't take (not permitted yet, or the write
+ * failed) is queued in [PendingMirrors] and retried by [retryPendingMirrors].
  *
  * The Data Layer item is the only copy once the watch has handed it over, so
  * the caller deletes it only when [ingest] returns true: the session is in the
@@ -20,6 +24,7 @@ import com.forge.mobile.health.WorkoutMirror
 class SessionIngest(
     private val repository: ForgeRepository,
     private val mirror: WorkoutMirror,
+    private val pending: PendingMirrors,
 ) {
 
     suspend fun ingest(bytes: ByteArray): Boolean {
@@ -41,13 +46,35 @@ class SessionIngest(
             Log.w(TAG, "Couldn't store watch session ${session.id}; will retry", e)
             return false
         }
-        // Health Connect is a mirror: a failure here must not lose the stored session.
-        try {
-            mirror.mirror(session)
-        } catch (e: Exception) {
-            Log.w(TAG, "Stored session ${session.id}, but writing it to Health Connect failed", e)
-        }
+        // Health Connect is a mirror: a failure here must not lose the stored
+        // session, and the session is queued to be mirrored later.
+        mirrorOrQueue(session.id) { session }
         return true
+    }
+
+    /**
+     * Mirrors every stored session still waiting for Health Connect (it wasn't
+     * permitted yet, or the write failed). Runs on each sync and after the
+     * permission is granted.
+     */
+    suspend fun retryPendingMirrors() {
+        for (id in pending.all()) {
+            mirrorOrQueue(id) { repository.session(id) }
+        }
+    }
+
+    private suspend fun mirrorOrQueue(sessionId: String, load: suspend () -> WorkoutSession?) {
+        try {
+            val session = load()
+            when {
+                session == null -> pending.remove(sessionId) // deleted since; nothing to mirror
+                mirror.mirror(session) -> pending.remove(sessionId)
+                else -> pending.add(sessionId)
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Writing session $sessionId to Health Connect failed; will retry", e)
+            pending.add(sessionId)
+        }
     }
 
     private companion object {

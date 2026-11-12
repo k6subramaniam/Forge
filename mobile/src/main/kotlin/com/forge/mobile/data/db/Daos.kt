@@ -33,6 +33,9 @@ abstract class SessionDao {
     @Query("SELECT * FROM set_entries WHERE sessionId = :sessionId ORDER BY setNumber")
     abstract suspend fun setsFor(sessionId: String): List<SetEntryEntity>
 
+    @Query("SELECT * FROM workout_sessions WHERE id = :id")
+    abstract suspend fun session(id: String): WorkoutSessionEntity?
+
     /** The most recent completed set of an exercise: the watch's ghost-target source. */
     @Query(
         "SELECT * FROM set_entries WHERE exerciseId = :exerciseId AND completed = 1 " +

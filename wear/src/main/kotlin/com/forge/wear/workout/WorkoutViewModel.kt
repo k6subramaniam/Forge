@@ -118,6 +118,12 @@ class WorkoutViewModel(app: Application) : AndroidViewModel(app) {
     fun startSession(plan: WorkoutPlan?) {
         val current = plans ?: return
         if (current.blockedReason != null || journal != null) return
+        if (plan != null && plan.date != LocalDate.now(clock)) {
+            // The screen was showing another day's plan (the app stayed open
+            // past midnight): show today's instead of starting the wrong one.
+            showIdle()
+            return
+        }
         val started = SessionJournal(
             sessionId = "watch-${UUID.randomUUID()}",
             startTime = now(),
@@ -229,6 +235,15 @@ class WorkoutViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun dismissSummary() = showIdle()
+
+    /**
+     * Called whenever the app comes to the front. With no session running,
+     * "today" is recomputed: the app can stay alive overnight, and the next
+     * morning must offer that morning's plan from the week the watch holds.
+     */
+    fun onResume() {
+        if (_ui.value is WatchUi.Idle) showIdle()
+    }
 
     /** Hands every outbox session to the Data Layer; returns the ids that went. Runs on [io]. */
     private suspend fun deliverOutbox(): Set<String> =

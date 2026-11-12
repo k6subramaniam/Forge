@@ -46,11 +46,16 @@ fun HomeScreen(
     repository: ForgeRepository,
     healthConnect: HealthConnectWriter,
     onOpenHistory: () -> Unit,
+    onHealthConnectChanged: () -> Unit,
 ) {
     val today = remember { LocalDate.now() }
-    // The same plan the watch is sent, so phone and watch never disagree on weights.
+    // The same plan the watch is sent, so phone and watch never disagree on
+    // weights. Rebuilt whenever history changes: a session arriving from the
+    // watch moves the progression, here as on the watch.
     val todaysPlan by produceState<PlanLookup?>(initialValue = null, repository, today) {
-        value = repository.plans(today, ZoneId.systemDefault(), Instant.now()).lookup(today)
+        repository.observeHistory().collect {
+            value = repository.plans(today, ZoneId.systemDefault(), Instant.now()).lookup(today)
+        }
     }
     val healthProfile by produceState<HealthProfile?>(initialValue = null, repository) {
         value = repository.healthProfile()
@@ -124,7 +129,7 @@ fun HomeScreen(
                 }
             }
 
-            HealthConnectCard(healthConnect)
+            HealthConnectCard(healthConnect, onHealthConnectChanged)
 
             if (gate != null && (gate.constraints.exerciseExclusions.isNotEmpty() || gate.constraints.intensityMayOnlyScaleDown)) {
                 Card(Modifier.fillMaxWidth()) {
@@ -161,12 +166,14 @@ fun HomeScreen(
  * devices without Health Connect. Workouts are stored in Forge either way.
  */
 @Composable
-private fun HealthConnectCard(healthConnect: HealthConnectWriter) {
+private fun HealthConnectCard(healthConnect: HealthConnectWriter, onChanged: () -> Unit) {
     if (!remember { healthConnect.isAvailable() }) return
     var refresh by remember { mutableIntStateOf(0) }
     val granted by produceState<Boolean?>(initialValue = null, refresh) { value = healthConnect.hasPermissions() }
     val request = rememberLauncherForActivityResult(PermissionController.createRequestPermissionResultContract()) {
         refresh++
+        // Workouts stored before the permission are waiting to be written.
+        onChanged()
     }
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {

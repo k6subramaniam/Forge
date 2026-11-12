@@ -7,6 +7,7 @@ import com.forge.mobile.data.secure.AndroidKeystoreKeyProvider
 import com.forge.mobile.data.secure.HealthProfileStore
 import com.forge.mobile.health.HealthConnectWriter
 import com.forge.mobile.sync.SessionIngest
+import com.forge.mobile.sync.SharedPreferencesPendingMirrors
 import com.forge.mobile.sync.WatchSync
 import com.google.android.gms.wearable.Wearable
 import kotlinx.coroutines.CoroutineScope
@@ -41,12 +42,15 @@ class ForgeApplication : Application() {
     val watchSync: WatchSync by lazy {
         WatchSync(
             repository = repository,
-            ingest = SessionIngest(repository, healthConnect),
+            ingest = SessionIngest(repository, healthConnect, SharedPreferencesPendingMirrors(this)),
             dataClient = Wearable.getDataClient(this),
         )
     }
 
-    /** Collects waiting watch sessions and sends the watch fresh plans, in the background. */
+    /**
+     * Collects waiting watch sessions, retries Health Connect writes, and sends
+     * the watch fresh plans, in the background.
+     */
     fun syncWatch() {
         appScope.launch { watchSync.syncNow() }
     }
