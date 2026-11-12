@@ -342,6 +342,27 @@ class GenerationValidatorTest {
         assertTrue(edgeResult is GenerationValidationResult.Valid, "was $edgeResult")
     }
 
+    @Test
+    fun `a declared total that contradicts its items is caught, and the items are judged`() {
+        // Items add up to 3500 kcal; the day claims 2000 to match the target.
+        val inconsistent = mealPlanOf(
+            GeneratedMealItem("Pasta Bake", ingredients = listOf("pasta", "tomato", "cheese"), caloriesKcal = 2000),
+            GeneratedMealItem("Dessert", ingredients = listOf("flour", "sugar", "butter"), caloriesKcal = 1500),
+            declaredCaloriesKcal = 2000,
+        )
+        val result = invalid(GenerationValidator.validateMealPlan(inconsistent, goalProfile(), targets))
+        val rules = result.violations.map { it.rule }.toSet()
+        assertEquals(setOf(ValidationRule.CALORIE_TOTAL_MISMATCH, ValidationRule.CALORIES_OUT_OF_RANGE), rules)
+        assertTrue(result.violations.first { it.rule == ValidationRule.CALORIES_OUT_OF_RANGE }.reason.contains("3500 kcal"))
+
+        // Rounding-level differences are fine: items 1990, declared 2000.
+        val rounded = mealPlanOf(
+            GeneratedMealItem("Pasta Bake", ingredients = listOf("pasta", "tomato", "cheese"), caloriesKcal = 1990),
+            declaredCaloriesKcal = 2000,
+        )
+        assertTrue(GenerationValidator.validateMealPlan(rounded, goalProfile(), targets) is GenerationValidationResult.Valid)
+    }
+
     // -- Regeneration guidance --------------------------------------------------
 
     @Test
