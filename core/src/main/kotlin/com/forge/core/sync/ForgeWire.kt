@@ -69,6 +69,13 @@ object ForgeWire {
             CompletedSession(it.session.toModel(), it.sets.map { set -> set.toModel() })
         }
 
+    /** Records kept on the watch between syncs ([PersonalRecords]). */
+    fun encodeRecords(records: List<PRRecord>): ByteArray =
+        encode(RecordsDto.serializer(), RecordsDto(VERSION, records.map { it.toDto() }))
+
+    fun decodeRecords(bytes: ByteArray): List<PRRecord> =
+        decode(bytes, RecordsDto.serializer()) { checkVersion(it.v); it.records.map { r -> r.toModel() } }
+
     fun encodeJournal(journal: SessionJournal): ByteArray = encode(JournalDto.serializer(), journal.toDto())
 
     fun decodeJournal(bytes: ByteArray): SessionJournal =
@@ -198,6 +205,9 @@ private data class PlansDto(
 
 @Serializable
 private data class FinishedDto(val v: Int, val session: SessionDto, val sets: List<SetDto>)
+
+@Serializable
+private data class RecordsDto(val v: Int, val records: List<PrDto>)
 
 @Serializable
 private sealed interface CommandDto {

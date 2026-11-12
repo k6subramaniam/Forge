@@ -4,9 +4,11 @@ import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.forge.core.model.PRRecord
 import com.forge.core.model.SetEntry
 import com.forge.core.sync.ForgeWire
 import com.forge.core.sync.MenuExercise
+import com.forge.core.sync.PersonalRecords
 import com.forge.core.sync.PlanLookup
 import com.forge.core.sync.SessionCommand
 import com.forge.core.sync.SessionJournal
@@ -93,6 +95,8 @@ class WorkoutViewModel(app: Application) : AndroidViewModel(app) {
     val ui: StateFlow<WatchUi> = _ui.asStateFlow()
 
     private var plans: WatchPlans? = null
+    /** PRs earned on this watch since install; merged into every session's baseline. */
+    private var localRecords: List<PRRecord> = emptyList()
     private var journal: SessionJournal? = null
     private var state: LiveSessionState? = null
     private var weightKg = 0.0
@@ -102,6 +106,7 @@ class WorkoutViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
+            localRecords = withContext(io) { store.readRecords() }
             val saved = withContext(io) { store.readJournal() }
             if (saved != null) resume(saved) else showIdle()
             ioScope.launch { deliverOutbox() }
@@ -129,7 +134,10 @@ class WorkoutViewModel(app: Application) : AndroidViewModel(app) {
             startTime = now(),
             plan = plan,
             menu = current.menu,
-            existingPrs = current.existingPrs,
+            // The phone's records plus any earned on the watch since it last
+            // sent plans: several offline sessions mustn't each beat the same
+            // stale record.
+            existingPrs = PersonalRecords.best(current.existingPrs + localRecords),
         )
         journal = started
         state = started.replay()
@@ -225,7 +233,10 @@ class WorkoutViewModel(app: Application) : AndroidViewModel(app) {
         val id = finished.session.id
         val payload = ForgeWire.encodeSession(finished.session, finished.sets)
         _ui.value = WatchUi.Finished(id, finished.summary, handedOver = false)
+        localRecords = PersonalRecords.best(localRecords + finished.summary.newPrs)
+        val records = localRecords
         ioScope.launch {
+            store.writeRecords(records)
             // On disk in the outbox before the journal goes: the session always exists somewhere.
             store.addToOutbox(id, payload)
             store.writeJournal(null)

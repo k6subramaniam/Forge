@@ -1,6 +1,8 @@
 package com.forge.core.sync
 
 import com.forge.core.data.ExerciseLibrary
+import com.forge.core.model.PRRecord
+import com.forge.core.model.PrType
 import com.forge.core.model.RoutineExercise
 import com.forge.core.model.SetEntry
 import com.forge.core.training.SessionEngine
@@ -127,5 +129,40 @@ class SessionJournalTest {
         // Bench (2) + pushdown (1 after the undo) completed sets; the pain set was undone.
         assertEquals(3, replayed.summary.totalSets)
         assertTrue(replayed.summary.painExercises.isEmpty())
+    }
+
+    @Test
+    fun `records earned offline count for the next offline session`() {
+        val bench = ExerciseLibrary.benchPress.copy(tags = null)
+        val freeform = listOf(MenuExercise(bench, null))
+        val synced = listOf(PRRecord(bench.id, bench.name, PrType.MAX_WEIGHT, 60.0, LocalDate.of(2026, 11, 9)))
+
+        fun session(id: String, weight: Double, baseline: List<PRRecord>) =
+            SessionJournal(id, start, null, freeform, baseline)
+                .let { j -> runLive(j, listOf(SessionCommand.AddExercise(bench.id), SessionCommand.LogSet(weight, 5, at(5)))) }
+                .let { (j, live) -> SessionEngine.finish(live, at(30), LocalDate.of(2026, 11, 16), j.existingPrs) }
+
+        val first = session("a", 70.0, synced)
+        assertTrue(first.summary.newPrs.any { it.type == PrType.MAX_WEIGHT && it.value == 70.0 })
+
+        // Without the watch's own records, 65 kg would beat the phone's 60 kg again.
+        val baseline = PersonalRecords.best(synced + first.summary.newPrs)
+        val second = session("b", 65.0, baseline)
+        assertTrue(second.summary.newPrs.none { it.type == PrType.MAX_WEIGHT }, second.summary.newPrs.toString())
+    }
+
+    @Test
+    fun `the record baseline keeps the best per exercise and type`() {
+        val day = LocalDate.of(2026, 11, 9)
+        val records = listOf(
+            PRRecord("ex-a", "A", PrType.MAX_WEIGHT, 60.0, day),
+            PRRecord("ex-a", "A", PrType.MAX_WEIGHT, 70.0, day.plusDays(1)),
+            PRRecord("ex-a", "A", PrType.MAX_VOLUME, 500.0, day),
+            PRRecord("ex-b", "B", PrType.MAX_WEIGHT, 40.0, day),
+        )
+        val best = PersonalRecords.best(records)
+        assertEquals(3, best.size)
+        assertEquals(70.0, best.single { it.exerciseId == "ex-a" && it.type == PrType.MAX_WEIGHT }.value, 0.0)
+        assertEquals(best, ForgeWire.decodeRecords(ForgeWire.encodeRecords(best)))
     }
 }

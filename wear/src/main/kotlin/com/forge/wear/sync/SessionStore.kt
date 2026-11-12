@@ -2,6 +2,7 @@ package com.forge.wear.sync
 
 import android.util.AtomicFile
 import android.util.Log
+import com.forge.core.model.PRRecord
 import com.forge.core.sync.ForgeWire
 import com.forge.core.sync.SessionJournal
 import java.io.File
@@ -16,12 +17,32 @@ import java.io.IOException
  *   session is written here before its journal is cleared, so it exists on
  *   disk at every moment until the phone has it.
  *
+ * - The PRs earned on the watch, so sessions finished before the phone
+ *   sends refreshed plans are judged against them too.
+ *
  * Writes go through [AtomicFile]: a crash mid-write leaves the previous copy.
  */
 class SessionStore(dir: File) {
 
     private val journalFile = AtomicFile(File(dir, "active-session.json"))
     private val outboxDir = File(dir, "outbox")
+    private val recordsFile = AtomicFile(File(dir, "records.json"))
+
+    /** PRs earned on this watch, best per exercise and type ([PersonalRecords]). */
+    fun readRecords(): List<PRRecord> {
+        if (!recordsFile.baseFile.exists()) return emptyList()
+        return try {
+            ForgeWire.decodeRecords(recordsFile.readFully())
+        } catch (e: Exception) {
+            // Only a baseline for celebrating PRs; the phone has the history.
+            Log.w(TAG, "Unreadable local records; starting from the phone's", e)
+            emptyList()
+        }
+    }
+
+    fun writeRecords(records: List<PRRecord>) {
+        write(recordsFile, ForgeWire.encodeRecords(records))
+    }
 
     /** The session in progress, or null. An unreadable journal is set aside (kept for diagnosis), not deleted. */
     fun readJournal(): SessionJournal? {
