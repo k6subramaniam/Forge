@@ -1,5 +1,6 @@
 package com.forge.core.readiness
 
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.testing.TestRoutines
 import com.forge.core.model.MovementPattern
 import com.forge.core.model.SetEntry
@@ -128,6 +129,31 @@ class LoadAdjustmentTest {
     }
 
     @Test
+    fun `a technique swap keeps the readiness reductions for the rest of the session`() {
+        // Squat pain on a squat-and-press day: squats swap to technique work,
+        // and the presses still take what the readiness band calls for.
+        val pain = PainSignal(setOf(TestRoutines.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(2))
+        val patterns = setOf(MovementPattern.SQUAT, MovementPattern.HORIZONTAL_PRESS)
+
+        val depleted = LoadAdjuster.recommend(readiness(ReadinessBand.DEPLETED), unflagged, pain, patterns)
+        assertEquals(SessionAdjustmentKind.TECHNIQUE_SWAP, depleted.kind)
+        assertEquals(LoadAdjuster.REDUCED_LOAD_PERCENT, depleted.topSetLoadDeltaPercent, 1e-9)
+        assertEquals(LoadAdjuster.REDUCED_SETS_PER_EXERCISE, depleted.setsToDropPerExercise)
+        assertTrue("one set fewer" in depleted.reason)
+
+        val strained = LoadAdjuster.recommend(readiness(ReadinessBand.STRAINED), unflagged, pain, patterns)
+        assertEquals(SessionAdjustmentKind.TECHNIQUE_SWAP, strained.kind)
+        assertEquals(LoadAdjuster.REDUCED_LOAD_PERCENT, strained.topSetLoadDeltaPercent, 1e-9)
+        assertEquals(0, strained.setsToDropPerExercise)
+
+        // A good day adds nothing: pain still rules out an increase.
+        val primed = LoadAdjuster.recommend(readiness(ReadinessBand.PRIMED), unflagged, pain, patterns)
+        assertEquals(0.0, primed.topSetLoadDeltaPercent, 1e-9)
+        assertEquals(0, primed.setsToDropPerExercise)
+        assertFalse(primed.applyOverloadIncrementToTopSets)
+    }
+
+    @Test
     fun `pain with unknown session patterns caps the day at a volume reduction`() {
         val pain = PainSignal(setOf(TestRoutines.squat.id), setOf(MovementPattern.SQUAT), today.minusDays(3))
         val adj = LoadAdjuster.recommend(readiness(ReadinessBand.NORMAL), unflagged, pain)
@@ -173,5 +199,18 @@ class LoadAdjustmentTest {
 
         val staleOnly = LoadAdjuster.recentPain(listOf(history[1]), today, zone)
         assertTrue(staleOnly.exerciseIds.isEmpty())
+    }
+
+    @Test
+    fun `recentPain resolves exercises beyond the starter ten by default`() {
+        val incline = ExerciseLibrary.inclineDumbbellPress
+        val start = Instant.parse("2026-11-08T09:00:00Z")
+        val history = listOf(
+            CompletedSession(
+                WorkoutSession(id = "s", startTime = start, endTime = start.plusSeconds(3600)),
+                listOf(SetEntry("s-1", "s", incline.id, incline.name, 1, 22.5, 10, timestamp = start, painReported = true)),
+            ),
+        )
+        assertEquals(setOf(MovementPattern.HORIZONTAL_PRESS), LoadAdjuster.recentPain(history, today, zone).patterns)
     }
 }
