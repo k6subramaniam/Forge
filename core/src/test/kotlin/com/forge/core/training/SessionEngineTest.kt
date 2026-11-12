@@ -1,5 +1,6 @@
 package com.forge.core.training
 
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.testing.TestRoutines
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.JointArea
@@ -221,18 +222,12 @@ class SessionEngineTest {
         val constraints = constraintsFor(
             HealthProfile(jointLimitations = setOf(JointArea.SHOULDER), onboardingComplete = true),
         )
-        // The starter-ten library is passed explicitly: "Landmine press" is not
-        // in it, so this test pins the synthesized-stand-in path. (With the
-        // full library the same case resolves the real exercise — see
-        // TagConstraintTest.)
-        val state = SessionEngine.start(
-            TestRoutines.pushA, sessionId = "s1", startTime = start,
-            constraints = constraints, library = TestRoutines.exercises,
-        )
+        val state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start, constraints = constraints)
 
         assertEquals(3, state.exercises.size)
         val overhead = state.exercises[1]
-        assertEquals("Landmine press", overhead.exercise.name) // first shoulder substitution
+        // First shoulder substitution, resolved to its tagged library entry (the default library).
+        assertEquals(ExerciseLibrary.landminePress, overhead.exercise)
         assertEquals(TestRoutines.overheadPress, overhead.substitutedFor)
         assertNotNull(overhead.adjustmentReason)
         assertTrue(overhead.adjustmentReason!!.contains("Overhead Press"))
@@ -249,16 +244,11 @@ class SessionEngineTest {
         val constraints = constraintsFor(
             HealthProfile(jointLimitations = setOf(JointArea.KNEE), onboardingComplete = true),
         )
-        // Starter-ten library, as above: the box squat is not in it, so the
-        // gate's descriptive phrase stays a synthesized stand-in here.
-        val state = SessionEngine.start(
-            TestRoutines.legsA, sessionId = "s1", startTime = start,
-            constraints = constraints, library = TestRoutines.exercises,
-        )
+        val state = SessionEngine.start(TestRoutines.legsA, sessionId = "s1", startTime = start, constraints = constraints)
         val squatSlot = state.exercises[0]
-        assertEquals("Box squat to comfortable depth", squatSlot.exercise.name)
+        // "Box squat to comfortable depth" resolves to the tagged library box squat.
+        assertEquals(ExerciseLibrary.boxSquat, squatSlot.exercise)
         assertEquals(TestRoutines.squat, squatSlot.substitutedFor)
-        assertTrue(squatSlot.exercise.id.startsWith("substitute-"))
         // Neighbours are unaffected.
         assertEquals(TestRoutines.deadlift, state.exercises[1].exercise)
         assertEquals(TestRoutines.legPress, state.exercises[2].exercise)
@@ -326,9 +316,8 @@ class SessionEngineTest {
             state,
             RoutineExercise(TestRoutines.squat, targetSets = 3, repRange = 5..6, targetWeightKg = 80.0),
             constraints = constraints,
-            library = TestRoutines.exercises, // starter ten: stand-in path, as above
         )
-        assertEquals("Box squat to comfortable depth", state.exercises.single().exercise.name)
+        assertEquals(ExerciseLibrary.boxSquat, state.exercises.single().exercise)
         assertEquals(TestRoutines.squat, state.exercises.single().substitutedFor)
     }
 
@@ -344,7 +333,7 @@ class SessionEngineTest {
         val bench = pain.state.exercises[0]
         assertEquals(2, bench.loggedSets.size) // both sets stay in the record
         assertTrue(bench.painReported)
-        assertTrue(bench.removedForPain)
+        assertTrue(pain.state.isRemovedForPain(0))
         assertEquals(1, pain.state.currentExerciseIndex) // moved on to overhead press
         assertThrows<IllegalArgumentException> { SessionEngine.goToExercise(pain.state, 0) }
 
@@ -357,11 +346,85 @@ class SessionEngineTest {
     fun `undoing the pain set restores the exercise`() {
         var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
         state = SessionEngine.logSet(state, 60.0, 6, at(5), painReported = true).state
-        assertTrue(state.exercises[0].removedForPain)
+        assertTrue(state.isRemovedForPain(0))
 
         state = SessionEngine.undoLastSet(state)
-        assertFalse(state.exercises[0].removedForPain)
+        assertFalse(state.isRemovedForPain(0))
         assertEquals(0, state.currentExerciseIndex)
+    }
+
+    /** Bench twice (two sets each) around an overhead press block. */
+    private val benchTwice = Routine(
+        id = "routine-bench-twice",
+        name = "Bench twice",
+        exercises = listOf(
+            RoutineExercise(TestRoutines.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
+            RoutineExercise(TestRoutines.overheadPress, targetSets = 2, repRange = 8..10, targetWeightKg = 40.0),
+            RoutineExercise(TestRoutines.benchPress, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
+        ),
+    )
+
+    @Test
+    fun `pain in one entry removes every entry of that exercise`() {
+        // Codex P1 (#1): the second bench block must not be prescribed again.
+        var state = SessionEngine.start(benchTwice, sessionId = "s1", startTime = start)
+        state = SessionEngine.logSet(state, 60.0, 6, at(1), painReported = true).state
+
+        assertTrue(state.isRemovedForPain(0))
+        assertTrue(state.isRemovedForPain(2))
+        assertEquals(1, state.currentExerciseIndex) // overhead press, not the second bench
+        assertThrows<IllegalArgumentException> { SessionEngine.goToExercise(state, 2) }
+
+        // Finishing overhead press leaves nothing: both bench entries are out.
+        val done = SessionEngine.logSet(logSets(state, 1, 40.0, 10, fromMinute = 2), 40.0, 10, at(4))
+        assertTrue(done.allWorkComplete)
+        assertNull(done.state.currentExerciseIndex)
+        assertEquals(listOf("Bench Press"), SessionEngine.finish(done.state, at(30), date).summary.painExercises)
+    }
+
+    @Test
+    fun `undoing the pain set restores every entry of the exercise`() {
+        var state = SessionEngine.start(benchTwice, sessionId = "s1", startTime = start)
+        state = SessionEngine.logSet(state, 60.0, 6, at(1), painReported = true).state
+        state = SessionEngine.undoLastSet(state)
+        assertFalse(state.isRemovedForPain(0))
+        assertFalse(state.isRemovedForPain(2))
+        assertTrue(state.isAvailable(2))
+    }
+
+    @Test
+    fun `an exercise added after a pain report stays out until the pain set is undone`() {
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
+        state = SessionEngine.logSet(state, 60.0, 6, at(1), painReported = true).state // bench out
+        state = SessionEngine.skipExercise(state) // overhead press
+        state = SessionEngine.skipExercise(state) // tricep pushdown: no work left
+        assertNull(state.currentExerciseIndex)
+
+        state = SessionEngine.addExercise(
+            state,
+            RoutineExercise(TestRoutines.benchPress, targetSets = 3, repRange = 6..8, targetWeightKg = 60.0),
+        )
+        val added = state.exercises.lastIndex
+        assertTrue(state.isRemovedForPain(added))
+        assertNull(state.currentExerciseIndex) // never pointed at a pain-removed exercise
+
+        state = SessionEngine.undoLastSet(state)
+        assertTrue(state.isAvailable(added))
+    }
+
+    @Test
+    fun `undo onto a skipped exercise un-skips it so the corrected set can be logged`() {
+        // Codex P2 (#1): log, skip, undo used to land on a skipped, unloggable exercise.
+        var state = SessionEngine.start(TestRoutines.pushA, sessionId = "s1", startTime = start)
+        state = log(state, 60.0, 8, 1).state
+        state = SessionEngine.skipExercise(state)
+        assertEquals(1, state.currentExerciseIndex)
+
+        state = SessionEngine.undoLastSet(state)
+        assertEquals(0, state.currentExerciseIndex)
+        assertFalse(state.exercises[0].skipped)
+        val relogged = log(state, 62.5, 8, 2)
+        assertEquals(62.5, relogged.loggedSet.weightKg)
     }
 
     // -- Finishing ---------------------------------------------------------------
