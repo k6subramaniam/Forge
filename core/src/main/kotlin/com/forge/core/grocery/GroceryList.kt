@@ -1,6 +1,7 @@
 package com.forge.core.grocery
 
 import kotlin.math.ceil
+import com.forge.core.text.singular
 
 /**
  * Grocery list building (blueprint 3.13): meal plans and recipes become one
@@ -158,18 +159,17 @@ object GroceryListBuilder {
         return GroceryList(items, excluded, unquantified)
     }
 
-    /** Lowercase, trim, collapse whitespace, drop a trailing plural "s" (not "ss"). */
+    /**
+     * Lowercase, trim, collapse whitespace, and singularize the last word with
+     * the same plural rules the generation validator uses ("tomatoes" →
+     * "tomato", "berries" → "berry"), so both forms land on one line.
+     */
     internal fun normalize(name: String): String {
         val collapsed = name.trim().lowercase().replace(Regex("\\s+"), " ")
         val lastSpace = collapsed.lastIndexOf(' ')
         val head = if (lastSpace < 0) "" else collapsed.substring(0, lastSpace + 1)
         val last = if (lastSpace < 0) collapsed else collapsed.substring(lastSpace + 1)
-        val singular = when {
-            last.endsWith("ss") || last.length <= 1 -> last
-            last.endsWith("s") -> last.dropLast(1)
-            else -> last
-        }
-        return head + singular
+        return head + singular(last)
     }
 
     private class Accumulator(val displayName: String, val aisle: GroceryAisle) {

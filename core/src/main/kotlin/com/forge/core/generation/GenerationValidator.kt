@@ -8,6 +8,7 @@ import com.forge.core.onboarding.ExerciseExclusionMatcher
 import com.forge.core.onboarding.FunctionalConstraints
 import com.forge.core.onboarding.OnboardingGateResult
 import kotlin.math.abs
+import com.forge.core.text.singular
 
 /** Whether a generated workout instruction holds intensity steady, lowers it, or raises it. */
 enum class IntensityDirective {
@@ -709,27 +710,7 @@ private fun canonicalTokens(text: String): List<String> =
     text.lowercase()
         .split(Regex("[^a-z0-9]+"))
         .filter { it.isNotEmpty() }
-        .map(::canonicalToken)
-
-/**
- * Simple English plural normalization, applied identically to terms and to
- * candidate text so both sides meet in singular form: -ies → -y
- * ("berries" → "berry"), -es after a sibilant or -o ("peaches" → "peach",
- * "tomatoes" → "tomato"), and a plain trailing -s ("peanuts" → "peanut").
- * Words ending in -ss or -us are left alone ("glass", "hummus").
- */
-private fun canonicalToken(token: String): String = when {
-    token.length > 3 && token.endsWith("ies") ->
-        token.dropLast(3) + "y"
-    token.length > 4 && (
-        token.endsWith("ches") || token.endsWith("shes") || token.endsWith("sses") ||
-            token.endsWith("xes") || token.endsWith("zes") || token.endsWith("oes")
-        ) ->
-        token.dropLast(2)
-    token.length > 3 && token.endsWith("s") && !token.endsWith("ss") && !token.endsWith("us") ->
-        token.dropLast(1)
-    else -> token
-}
+        .map(::singular)
 
 private fun wordTokens(name: String): Set<String> =
     name.lowercase().split(Regex("[^a-z0-9]+")).filter { it.isNotEmpty() }.toSet()

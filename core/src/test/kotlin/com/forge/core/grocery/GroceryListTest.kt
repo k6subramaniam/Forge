@@ -69,6 +69,43 @@ class GroceryListTest {
     }
 
     @Test
+    fun `common produce plurals aggregate and match staples`() {
+        val list = GroceryListBuilder.build(
+            listOf(
+                recipe(
+                    "Salad",
+                    ingredients = arrayOf(
+                        ing("Tomato", 100.0, GroceryAisle.PRODUCE),
+                        ing("Berries", 80.0, GroceryAisle.PRODUCE),
+                        ing("Peach", 150.0, GroceryAisle.PRODUCE),
+                    ),
+                ),
+                recipe(
+                    "Smoothie",
+                    ingredients = arrayOf(
+                        ing("Tomatoes", 50.0, GroceryAisle.PRODUCE),
+                        ing("berry", 40.0, GroceryAisle.PRODUCE),
+                        ing("Peaches", 150.0, GroceryAisle.PRODUCE),
+                    ),
+                ),
+            ),
+        )
+        // One line per food, named as first seen, quantities summed.
+        assertEquals(
+            mapOf("Berries" to 120.0, "Peach" to 300.0, "Tomato" to 150.0),
+            list.items.associate { it.name to it.totalGrams },
+        )
+
+        // A stocked "tomato" covers a recipe's "tomatoes".
+        val stocked = GroceryListBuilder.build(
+            listOf(recipe("Sauce", ingredients = arrayOf(ing("Tomatoes", 400.0, GroceryAisle.PRODUCE)))),
+            pantryStaples = setOf("tomato"),
+        )
+        assertTrue(stocked.items.isEmpty())
+        assertEquals(listOf("Tomatoes"), stocked.excludedPantry)
+    }
+
+    @Test
     fun `ingredient without quantity is surfaced as unquantified, never dropped silently`() {
         val list = GroceryListBuilder.build(
             listOf(
