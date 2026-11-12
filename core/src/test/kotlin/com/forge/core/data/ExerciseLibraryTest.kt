@@ -1,5 +1,6 @@
 package com.forge.core.data
 
+import com.forge.core.testing.TestRoutines
 import com.forge.core.model.ExerciseFlag
 import com.forge.core.model.MovementPattern
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,8 +36,8 @@ class ExerciseLibraryTest {
 
     @Test
     fun `the starter ten keep their ids and are the library instances`() {
-        assertEquals(10, SampleData.exercises.size)
-        for (exercise in SampleData.exercises) {
+        assertEquals(10, TestRoutines.exercises.size)
+        for (exercise in TestRoutines.exercises) {
             assertSame(exercise, ExerciseLibrary.byId(exercise.id))
         }
         // The exact scaffold ids, unchanged.
@@ -46,7 +47,7 @@ class ExerciseLibraryTest {
                 "ex-barbell-row", "ex-pull-up", "ex-bicep-curl",
                 "ex-squat", "ex-deadlift", "ex-leg-press", "ex-calf-raise",
             ),
-            SampleData.exercises.map { it.id }.toSet(),
+            TestRoutines.exercises.map { it.id }.toSet(),
         )
     }
 

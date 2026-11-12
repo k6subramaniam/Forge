@@ -24,8 +24,9 @@ object OneRepMax {
  * Detects new personal records in a batch of freshly logged sets (blueprint 3.1/3.3).
  *
  * Three PR types are tracked per exercise: heaviest weight, best single-set volume,
- * and best Epley estimated 1RM. Existing bests seed the comparison, and bests are
- * updated as the batch is scanned, so two improving sets in one session each count.
+ * and best Epley estimated 1RM. Existing bests provide the starting baseline
+ * for the comparison, and bests are updated as the batch is scanned, so two
+ * improving sets in one session each count.
  */
 object PrDetector {
 

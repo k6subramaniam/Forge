@@ -1,7 +1,6 @@
 package com.forge.core.training
 
 import com.forge.core.data.ExerciseLibrary
-import com.forge.core.data.SampleData
 import com.forge.core.model.Exercise
 import com.forge.core.model.PRRecord
 import com.forge.core.model.Routine

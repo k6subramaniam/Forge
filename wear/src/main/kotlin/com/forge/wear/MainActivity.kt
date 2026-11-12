@@ -3,18 +3,20 @@ package com.forge.wear
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.forge.core.data.SampleData
-import com.forge.core.training.RestTimerLogic
-import com.forge.core.training.RestTimerState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.Scaffold
+import androidx.wear.compose.material.Text
+import androidx.wear.compose.material.TimeText
 import com.forge.wear.theme.ForgeWearTheme
-import com.forge.wear.ui.RestTimerScreen
-import com.forge.wear.ui.SetLoggerScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,52 +29,39 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-private enum class WearScreen { LOGGER, REST }
-
 /**
- * Phase 1 watch flow: log sets for the first exercise of Push A, resting between
- * sets via :core's rest-timer state machine.
+ * Watch home: until a real session is loaded there is nothing to log, so the
+ * watch says exactly that — no placeholder workout, no fabricated ghost target.
+ * The set logger and rest timer screens stay in this module, ready to be
+ * driven by the real session.
  *
- * TODO(Phase 1): drive this from a real WorkoutSession (start/freeform, exercise
- * progression, session summary with PRs from :core's PrDetector), persist sets to
- * Room on the watch, and sync to the phone over the Data Layer (blueprint 3.6).
- * The ghost target below becomes the phone's last-performance record for the lift.
+ * TODO(Phase 1): drive this from a real WorkoutSession (start/freeform,
+ * exercise progression, session summary with PRs from :core's PrDetector),
+ * persist sets to Room on the watch, and sync to the phone over the Data
+ * Layer (blueprint 3.6). The logger's ghost target then comes from the
+ * phone's last-performance record for the lift — real history only.
  */
 @Composable
 fun WearWorkoutApp() {
-    val prescribed = remember { SampleData.pushA.exercises.first() }
-    // Ghost target (blueprint 3.1): "last time: 60 kg × 8" for the demo exercise.
-    val ghostTarget = remember { "Last time: 60 kg × 8" }
-
-    var screen by remember { mutableStateOf(WearScreen.LOGGER) }
-    var setNumber by remember { mutableIntStateOf(1) }
-    var weightKg by remember { mutableStateOf(prescribed.targetWeightKg) }
-    var reps by remember { mutableIntStateOf(prescribed.repRange.last) }
-    var restState by remember { mutableStateOf(RestTimerLogic.startFor(prescribed)) }
-
-    when (screen) {
-        WearScreen.LOGGER -> SetLoggerScreen(
-            exerciseName = prescribed.exercise.name,
-            ghostTarget = ghostTarget,
-            setNumber = setNumber,
-            targetSets = prescribed.targetSets,
-            weightKg = weightKg,
-            reps = reps,
-            onWeightChange = { weightKg = it },
-            onRepsChange = { reps = it },
-            onCompleteSet = {
-                restState = RestTimerLogic.startFor(prescribed)
-                screen = WearScreen.REST
-            },
-        )
-
-        WearScreen.REST -> RestTimerScreen(
-            initialState = restState,
-            nextSetNumber = setNumber + 1,
-            onRestFinished = {
-                setNumber += 1
-                screen = WearScreen.LOGGER
-            },
-        )
+    Scaffold(timeText = { TimeText() }) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "No workout loaded",
+                style = MaterialTheme.typography.title3,
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "Start one on your phone",
+                style = MaterialTheme.typography.body2,
+                color = MaterialTheme.colors.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }

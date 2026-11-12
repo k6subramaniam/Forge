@@ -18,7 +18,7 @@ assessment) arriving in their phases behind clear `TODO` markers.
 | Module | What it is |
 |---|---|
 | `:core` | Pure Kotlin/JVM, **no Android dependencies** — so all workout/plan logic is unit-testable anywhere. Data models, onboarding gate, plate calculator, 1RM/PR detection, progressive overload, rest-timer state machine, sample data. |
-| `:mobile` | The phone app (`applicationId com.forge.fitness`): Compose Material 3, dark theme with the amber accent (#f2a93b) from the design mockups. Onboarding flow, Today, History, Health Connect writer. |
+| `:mobile` | The phone app (`applicationId com.forge.fitness`): Compose Material 3, dark theme with the amber accent (#f2a93b) from the UI design visuals. Onboarding flow, Today, History, Health Connect writer. |
 | `:wear` | The watch app (same `applicationId` — required for the Wearable Data Layer to pair the two): Compose for Wear OS + Horologist. Set logger with ghost targets and big steppers, rest timer screen. |
 
 Phone is the source of truth; the watch caches the active plan and the in-progress
@@ -37,27 +37,28 @@ session, then syncs completed sets back over the Data Layer (blueprint §4).
 | 3.1 watch set logger | `wear/.../ui/SetLoggerScreen.kt` |
 | 3.3 phone history | `mobile/.../ui/HistoryScreen.kt`, `mobile/.../data/ForgeRepository.kt` |
 | 3.6 Health Connect write of completed workouts | `mobile/.../health/HealthConnectWriter.kt` |
-| Sample plan (Push A / Pull A / Legs A) | `core/.../data/SampleData.kt` |
+| Built-in exercise library (35 exercises, fully tagged) | `core/.../data/ExerciseLibrary.kt` |
 
 Every `:core` behaviour above has JUnit 5 tests under `core/src/test/` — they are
 Phase 1's verification (run them with `:core:test`).
 
 ## Known Phase 1 simplifications (all marked with TODOs in code)
 
-- **Storage is in-memory stubs.** `ForgeRepository` seeds demo data; Room
-  (phone = source of truth, watch cache), on-device encryption of the health
-  profile, and Data Layer sync are the next build step.
+- **Storage is in-memory stubs.** `ForgeRepository` starts empty — no
+  pre-filled routines, schedule, or history; Room (phone = source of truth, watch
+  cache), on-device encryption of the health profile, and Data Layer sync
+  are the next build step.
 - **Health Connect** write path is implemented against the stable 1.1.0 API;
   the permission-request UX and the call site land with real session flow.
   Reads (sleep/HRV for readiness) are Phase 2.
-- **The watch demo flow** logs sets for one exercise (Push A opener) with a
-  hard-coded ghost target; full session flow follows with Data Layer sync.
+- **The watch shows an empty state** ("No workout loaded") until a real
+  session is started; the logger and rest-timer screens are in place, and
+  the full session flow follows with Data Layer sync.
 
 ## Building
 
-Requirements: JDK 17 and Gradle 8.11.1+ (needed by AGP 8.9), plus the Android SDK
-(compileSdk 36, which Health Connect 1.1.0 requires) for the two app modules. `:core`
-needs only a JDK.
+Requirements: JDK 17 and Gradle 8.10.2+, plus the Android SDK (compileSdk 35)
+for the two app modules. `:core` needs only a JDK.
 
 ```bash
 gradle :core:test                 # unit tests — the Phase 1 verification
@@ -69,29 +70,6 @@ gradle :wear:assembleDebug        # watch APK
 
 CI (`.github/workflows/build.yml`) runs exactly the three commands above on every
 push and pull request.
-
-## Release signing
-
-Phone and watch APKs are signed with one permanent release key. The Wearable
-Data Layer pairs the two apps only when applicationId and signing key match,
-and Android installs an update only over an app signed with the same key, so
-losing the key means uninstalling, which wipes on-device data. The key is never
-committed. CI reads it from three repository secrets (Settings → Secrets and
-variables → Actions):
-
-| Secret | Value |
-|---|---|
-| `FORGE_KEYSTORE_BASE64` | the PKCS12 keystore, base64-encoded |
-| `FORGE_KEYSTORE_PASSWORD` | the keystore password (also the key password) |
-| `FORGE_KEY_ALIAS` | the key alias |
-
-With the secrets set, every CI run also builds signed release APKs for both
-apps, checks they share one certificate, and attaches them to the run as the
-`forge-apks-<run number>` artifact. The run number is the versionCode, so each
-build installs as an update over the last. Without the secrets, those steps
-are skipped. To sign locally, export `FORGE_KEYSTORE_FILE` (a path),
-`FORGE_KEYSTORE_PASSWORD` and `FORGE_KEY_ALIAS`, then run
-`gradle :mobile:assembleRelease :wear:assembleRelease`.
 
 ## Deployment (developer mode, no Play Store)
 

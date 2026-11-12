@@ -1,19 +1,19 @@
-package com.forge.core.data
+package com.forge.core.testing
 
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.model.Exercise
 import com.forge.core.model.Routine
 import com.forge.core.model.RoutineExercise
 import java.time.DayOfWeek
 
 /**
- * Built-in starter content (blueprint 3.2): the ten starter exercises and the
- * Push/Pull/Legs templates so day one isn't a blank page. Shared by the phone
- * and watch apps. The exercises themselves live in [ExerciseLibrary] — fully
- * tagged — and are referenced here so their ids stay stable.
- * TODO(Phase 2): move the templates (Upper/Lower, 5×5) into the routine
- * builder's seed data once Room lands.
+ * Test-only fixtures: the Push/Pull/Legs routines and schedule that tests run
+ * against, built from [ExerciseLibrary] entries. Production code carries no
+ * sample routines, target weights, or schedules — fixtures like these live
+ * under `src/test` only. Target weights and the weekly split mirror what the
+ * behavioural tests were written against, so their expectations are unchanged.
  */
-object SampleData {
+object TestRoutines {
 
     val benchPress = ExerciseLibrary.benchPress
     val overheadPress = ExerciseLibrary.overheadPress
@@ -26,6 +26,7 @@ object SampleData {
     val legPress = ExerciseLibrary.legPress
     val calfRaise = ExerciseLibrary.calfRaise
 
+    /** The ten exercises the tests treat as the "starter set" library. */
     val exercises: List<Exercise> = listOf(
         benchPress, overheadPress, tricepPushdown,
         barbellRow, pullUp, bicepCurl,
@@ -65,7 +66,7 @@ object SampleData {
 
     val routines: List<Routine> = listOf(pushA, pullA, legsA)
 
-    /** Default weekly schedule (blueprint 3.2): weekday → routine id. */
+    /** Weekly schedule the tests assume: weekday → routine id. */
     val schedule: Map<DayOfWeek, String> = mapOf(
         DayOfWeek.MONDAY to pushA.id,
         DayOfWeek.WEDNESDAY to pullA.id,

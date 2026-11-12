@@ -5,7 +5,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// Palette lifted from the Forge UI mockups (Forge_UI_Mockups.html):
+// Palette lifted from the Forge UI design visuals:
 // deep charcoal surfaces, off-white text, a single amber accent.
 val ForgeAmber = Color(0xFFF2A93B)
 val ForgeAmberLight = Color(0xFFFFCF7D)
