@@ -96,9 +96,8 @@ class VolumeLandmarksTest {
     fun `a realistic push week lands chest in the productive band`() {
         // Tuesday: bench 4 + incline dumbbell press 3 (both CHEST primary).
         // Friday: bench 4 + overhead press 3 (SHOULDERS primary).
-        // The incline press is outside the 10-exercise starter set the other
-        // tests use; the full library is passed explicitly for clarity (it is
-        // also the production default now).
+        // The incline press is outside the 10-exercise starter set, so the
+        // full library is passed explicitly — the default would skip it.
         val history = listOf(
             workout("tue1", "2026-11-03T09:00:00Z", TestRoutines.benchPress, sets = 4),
             workout("tue2", "2026-11-03T10:00:00Z", ExerciseLibrary.inclineDumbbellPress, sets = 3),

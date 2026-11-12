@@ -193,6 +193,85 @@ class HistoryReadModelsTest {
     }
 
     @Test
+    fun `progression needs every prescribed set at the weight being progressed`() {
+        // Codex P2 (#3): one 80 kg set plus three 60 kg sets used to suggest 82.5.
+        // All four prescribed sets reached 60, so 60 is the weight that progresses.
+        val history = listOf(
+            workout("s1", "2026-11-10T15:00:00Z", bench to listOf(80.0 to 8, 60.0 to 8, 60.0 to 8, 60.0 to 8)),
+        )
+        val target = HistoryReadModels.nextSessionPrescription(TestRoutines.pushA, history, zone).exercises[0]
+        assertEquals(62.5, target.suggestedWeightKg, 1e-9)
+        assertEquals(60.0, target.overload!!.currentTargetWeightKg, 1e-9)
+    }
+
+    /** Bench in two 2-set blocks around overhead press. */
+    private val benchTwice = Routine(
+        id = "routine-bench-twice",
+        name = "Bench twice",
+        exercises = listOf(
+            RoutineExercise(bench, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
+            RoutineExercise(overhead, targetSets = 2, repRange = 8..10, targetWeightKg = 40.0),
+            RoutineExercise(bench, targetSets = 2, repRange = 6..8, targetWeightKg = 60.0),
+        ),
+    )
+
+    @Test
+    fun `repeated blocks of one exercise don't count toward each other's targets`() {
+        // Codex P2 (#3): one 8-rep set in each 2-set bench block (2 of the 4
+        // prescribed) used to progress both blocks.
+        val history = listOf(
+            workout("s1", "2026-11-10T15:00:00Z", bench to listOf(60.0 to 8, 60.0 to 8)),
+        )
+        val plan = HistoryReadModels.nextSessionPrescription(benchTwice, history, zone)
+        listOf(plan.exercises[0], plan.exercises[2]).forEach {
+            assertNull(it.overload)
+            assertEquals(60.0, it.suggestedWeightKg, 1e-9)
+        }
+    }
+
+    @Test
+    fun `repeated blocks progress once the combined prescription was done`() {
+        val history = listOf(
+            workout("s1", "2026-11-10T15:00:00Z", bench to listOf(60.0 to 8, 60.0 to 8, 60.0 to 8, 60.0 to 8)),
+        )
+        val plan = HistoryReadModels.nextSessionPrescription(benchTwice, history, zone)
+        assertEquals(62.5, plan.exercises[0].suggestedWeightKg, 1e-9)
+        assertEquals(62.5, plan.exercises[2].suggestedWeightKg, 1e-9)
+    }
+
+    @Test
+    fun `repeated blocks pick the working weight with the combined set count`() {
+        // Codex P2 (#3, follow-up): two 2-set bench blocks, sets 80×8 twice then
+        // 60×8 twice. All four prescribed sets supported 60 kg, so both blocks
+        // progress to 62.5. The per-block count picked 80 and held there.
+        val history = listOf(
+            workout("s1", "2026-11-10T15:00:00Z", bench to listOf(80.0 to 8, 80.0 to 8, 60.0 to 8, 60.0 to 8)),
+        )
+        val plan = HistoryReadModels.nextSessionPrescription(benchTwice, history, zone)
+        assertEquals(62.5, plan.exercises[0].suggestedWeightKg, 1e-9)
+        assertEquals(62.5, plan.exercises[2].suggestedWeightKg, 1e-9)
+    }
+
+    @Test
+    fun `a heart-rate cap holds the weight instead of progressing it`() {
+        // Codex P1 (#3): with intensity allowed to scale down only (high blood
+        // pressure here), a session that earned +2.5 kg holds at 60 instead.
+        val constraints = constraintsFor(
+            HealthProfile(hasHighBloodPressure = true, onboardingComplete = true),
+        )
+        assertTrue(constraints.intensityMayOnlyScaleDown)
+        val history = listOf(
+            workout("s1", "2026-11-10T15:00:00Z", bench to listOf(60.0 to 8, 60.0 to 8, 60.0 to 8, 60.0 to 8)),
+        )
+        val target = HistoryReadModels.nextSessionPrescription(
+            TestRoutines.pushA, history, zone, constraints = constraints,
+        ).exercises[0]
+        assertEquals(60.0, target.suggestedWeightKg, 1e-9)
+        assertNull(target.overload)
+        assertTrue(target.reason.contains("only scales down"))
+    }
+
+    @Test
     fun `prescription falls back to routine targets with no history`() {
         val plan = HistoryReadModels.nextSessionPrescription(TestRoutines.pullA, emptyList(), zone)
 
