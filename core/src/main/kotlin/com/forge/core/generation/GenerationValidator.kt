@@ -7,6 +7,7 @@ import com.forge.core.nutrition.MacroTargets
 import com.forge.core.onboarding.ExerciseExclusionMatcher
 import com.forge.core.onboarding.FunctionalConstraints
 import com.forge.core.onboarding.OnboardingGateResult
+import kotlin.math.abs
 
 /** Whether a generated workout instruction holds intensity steady, lowers it, or raises it. */
 enum class IntensityDirective {
@@ -104,6 +105,9 @@ enum class ValidationRule {
     UNVERIFIABLE_INGREDIENTS,
     CALORIES_OUT_OF_RANGE,
     UNVERIFIABLE_CALORIES,
+
+    /** A day's declared total contradicts the calories its own items add up to. */
+    CALORIE_TOTAL_MISMATCH,
 }
 
 /**
@@ -182,6 +186,9 @@ object GenerationValidator {
      * This is a validator default, not a blueprint number.
      */
     const val CALORIE_TOLERANCE_FRACTION: Double = 0.10
+
+    /** Declared total vs item sum: room for per-item rounding, none for a different day. */
+    const val CALORIE_TOTAL_MISMATCH_FRACTION: Double = 0.05
 
     // -- Workouts ---------------------------------------------------------
 
@@ -469,13 +476,30 @@ object GenerationValidator {
         findings: MutableList<ValidationFinding>,
     ) {
         val allItems = day.meals.flatMap { it.items }
-        val actual = day.declaredCaloriesKcal
-            ?: if (allItems.isNotEmpty() && allItems.all { it.caloriesKcal != null }) {
-                allItems.sumOf { it.caloriesKcal ?: 0 }
-            } else {
-                null
-            }
+        val itemTotal = if (allItems.isNotEmpty() && allItems.all { it.caloriesKcal != null }) {
+            allItems.sumOf { it.caloriesKcal ?: 0 }
+        } else {
+            null
+        }
+        val declared = day.declaredCaloriesKcal
         val location = "${day.label} in '$planName'"
+        // A declared total can't vouch for itself against the items it describes:
+        // when they disagree, the plan is inconsistent and the items (what would
+        // actually be eaten) are what's judged against the target.
+        if (declared != null && itemTotal != null &&
+            abs(declared - itemTotal) > CALORIE_TOTAL_MISMATCH_FRACTION * maxOf(declared, itemTotal)
+        ) {
+            findings += violation(
+                rule = ValidationRule.CALORIE_TOTAL_MISMATCH,
+                subject = day.label,
+                location = location,
+                reason = "${day.label} declares $declared kcal, but its items add up to " +
+                    "$itemTotal kcal. The day can't be trusted until the two agree.",
+                correction = "Make ${day.label}'s stated total match its items, or fix the " +
+                    "item calories, and re-validate.",
+            )
+        }
+        val actual = itemTotal ?: declared
         if (actual == null) {
             findings += ValidationFinding(
                 severity = ValidationSeverity.WARNING,
