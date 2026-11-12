@@ -2,6 +2,9 @@
 // must be right (blueprint §4, "Testing") is unit-tested on any JVM in CI.
 plugins {
     alias(libs.plugins.kotlin.jvm)
+    // The phone ↔ watch wire format (com.forge.core.sync) is JSON, so both apps
+    // share one tested codec.
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -9,6 +12,8 @@ kotlin {
 }
 
 dependencies {
+    implementation(libs.kotlinx.serialization.json)
+
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testRuntimeOnly(libs.junit.platform.launcher)

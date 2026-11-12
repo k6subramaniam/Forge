@@ -10,6 +10,7 @@ import com.forge.core.bodycomp.DexaBrand
 import com.forge.core.bodycomp.DexaScan
 import com.forge.core.bodycomp.DexaScanner
 import com.forge.core.bodycomp.TapeMeasurement
+import com.forge.core.data.ExerciseLibrary
 import com.forge.core.model.ActivityLevel
 import com.forge.core.model.ClearanceState
 import com.forge.core.model.EquipmentAccess
@@ -22,6 +23,7 @@ import com.forge.core.model.SetEntry
 import com.forge.core.model.Sex
 import com.forge.core.model.WorkoutSession
 import com.forge.core.nutrition.WeighIn
+import com.forge.core.sync.WatchPlanner
 import com.forge.mobile.data.db.ForgeDatabase
 import com.forge.mobile.data.secure.HealthProfileStore
 import kotlinx.coroutines.flow.first
@@ -236,6 +238,38 @@ class ForgeRepositoryTest {
         assertEquals(listOf(21.4), BiaProtocol.acceptedEstimates(bia).map { it.fatPercent })
         assertEquals(listOf(tape), repository.tapeMeasurements())
         assertEquals(listOf(scan), repository.dexaScans())
+    }
+
+    @Test
+    fun `the watch gets nothing to run until onboarding is done`() = runTest {
+        val plans = openRepository().plans(LocalDate.of(2026, 11, 16), java.time.ZoneOffset.UTC, t0)
+        assertEquals(WatchPlanner.ONBOARDING_UNFINISHED, plans.blockedReason)
+        assertTrue(plans.menu.isEmpty())
+    }
+
+    @Test
+    fun `plans for the watch are built from stored history and the health profile`() = runTest {
+        val repository = openRepository()
+        repository.saveOnboarding(
+            GoalProfile(
+                goal = GoalType.RECOMP, ageYears = 38, sex = Sex.MALE, heightCm = 178.0, weightKg = 84.5,
+                trainingDaysPerWeek = 3, experienceLevel = ExperienceLevel.INTERMEDIATE,
+                equipmentAccess = EquipmentAccess.FULL_GYM, activityLevel = ActivityLevel.MODERATE,
+            ),
+            HealthProfile(jointLimitations = setOf(JointArea.SHOULDER), onboardingComplete = true),
+        )
+        repository.addSession(session("s1", t0), listOf(set("a", "s1", 1, t0, weight = 70.0)))
+        // An unfinished session isn't history.
+        repository.addSession(session("s2", t0.plusSeconds(86_400), end = null), emptyList())
+
+        assertEquals(listOf("s1"), repository.completedSessions().map { it.session.id })
+
+        val plans = repository.plans(LocalDate.of(2026, 11, 16), java.time.ZoneOffset.UTC, t0)
+        assertNull(plans.blockedReason)
+        // The shoulder limitation is applied before plans leave the phone.
+        assertTrue(plans.menu.none { it.exercise.id == ExerciseLibrary.overheadPress.id })
+        assertEquals(70.0, plans.menu.first { it.exercise.id == "ex-bench-press" }.lastTopSet?.weightKg)
+        assertTrue(plans.existingPrs.all { it.exerciseId == "ex-bench-press" })
     }
 
     private companion object {
