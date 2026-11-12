@@ -175,14 +175,20 @@ object Readiness {
 
     /**
      * Assess [today] against the baseline formed by the observations in the
-     * [BASELINE_WINDOW_DAYS] days before it. Observations dated today are the
-     * reading being judged (the latest one wins if duplicated); future-dated
-     * observations are ignored. Dates are parameters — core stays clock-free.
+     * [BASELINE_WINDOW_DAYS] days before it. Each day counts once: when a date
+     * has several observations, the latest one wins, for the baseline days as
+     * for today, so repeated readings can't stand in for days of baseline or
+     * weight the statistics. Future-dated observations are ignored. Dates are
+     * parameters — core stays clock-free.
      */
     fun assess(observations: List<DailyRecoveryObservation>, today: LocalDate): ReadinessAssessment {
         val windowStart = today.minusDays(BASELINE_WINDOW_DAYS.toLong())
-        val baseline = observations.filter { !it.date.isBefore(windowStart) && it.date.isBefore(today) }
-        val baselineDaysUsed = baseline.map { it.date }.distinct().size
+        val baseline = observations
+            .filter { !it.date.isBefore(windowStart) && it.date.isBefore(today) }
+            .groupBy { it.date }
+            .values
+            .map { it.last() }
+        val baselineDaysUsed = baseline.size
         val todays = observations.filter { it.date == today }.lastOrNull()
 
         if (todays == null) {
@@ -283,7 +289,9 @@ object Readiness {
             RecoverySignal.SLEEP_DURATION -> "sleep duration"
             RecoverySignal.SLEEP_QUALITY -> "sleep quality"
         }
-        val direction = if (top.favorabilityZ >= 0) "above" else "below"
+        // The raw reading's side of the baseline: for resting HR the favourability
+        // sign is flipped (lower is better), so it can't say which side it's on.
+        val direction = if (top.todayValue >= top.baselineMean) "above" else "below"
         val summary = when (band) {
             ReadinessBand.PRIMED -> "Primed — readiness is above your baseline"
             ReadinessBand.NORMAL -> "Normal readiness — in line with your baseline"
