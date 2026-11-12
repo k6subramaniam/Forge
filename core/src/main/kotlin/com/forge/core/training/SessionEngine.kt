@@ -8,6 +8,7 @@ import com.forge.core.model.RoutineExercise
 import com.forge.core.model.SetEntry
 import com.forge.core.model.WorkoutSession
 import com.forge.core.onboarding.ExerciseExclusion
+import com.forge.core.onboarding.ExerciseExclusionMatcher
 import com.forge.core.onboarding.FunctionalConstraints
 import java.time.Duration
 import java.time.Instant
@@ -473,25 +474,18 @@ object SessionEngine {
      * [com.forge.core.model.ExerciseTags] is judged by its movement pattern and
      * loading traits, which is what separates a barbell row (unsupported) from a
      * chest-supported row — same pattern, different traits, opposite verdicts.
-     * The name matcher below remains as the fallback for exercises without tags:
-     * user-created exercises start untagged, and free-text limitations a user
-     * types in onboarding can only ever be expressed as names.
+     * The name matcher in the shared [ExerciseExclusionMatcher] remains as
+     * the fallback for exercises without tags: user-created exercises start
+     * untagged, and free-text limitations a user types in onboarding can only
+     * ever be expressed as names. The generated-plan validator uses the same
+     * matcher, so generated and live sessions are judged identically.
      */
     private fun matchExclusion(
         exercise: Exercise,
         constraints: FunctionalConstraints,
-    ): Pair<ExerciseExclusion, String>? {
-        for (exclusion in constraints.exerciseExclusions) {
-            val tags = exercise.tags
-            if (tags != null) {
-                val rule = exclusion.restrictions.firstOrNull { it.matches(tags) }
-                if (rule != null) return exclusion to rule.description
-            }
-            val movement = exclusion.excludedMovements.firstOrNull { nameMatches(exercise.name, it) }
-            if (movement != null) return exclusion to "'$movement'"
-        }
-        return null
-    }
+    ): Pair<ExerciseExclusion, String>? =
+        ExerciseExclusionMatcher.match(exercise, constraints)
+            ?.let { match -> match.exclusion to match.matchedDescription }
 
     /**
      * Resolves a substitution name from the constraint data (plain language) to
@@ -520,23 +514,6 @@ object SessionEngine {
             equipment = original.equipment,
             isCustom = false,
         )
-    }
-
-    /**
-     * Name matching for the onboarding exclusions (blueprint 3.0) — the fallback
-     * path, used for untagged exercises and for the exclusion data's plain-
-     * language movement names. An exercise counts as excluded when either
-     * name's words are a subset of the other's: "Squat" matches "Deep squat",
-     * "Overhead Press" matches "Overhead press". Deliberately conservative:
-     * "Barbell Row" does not match "Heavy unsupported row", because a name alone
-     * cannot tell a supported row from an unsupported one. Tagged exercises
-     * never depend on that guess — the UNSUPPORTED_ROW trait decides it.
-     */
-    private fun nameMatches(exerciseName: String, movementName: String): Boolean {
-        val a = nameTokens(exerciseName)
-        val b = nameTokens(movementName)
-        if (a.isEmpty() || b.isEmpty()) return false
-        return a.containsAll(b) || b.containsAll(a)
     }
 
     private fun nameTokens(name: String): Set<String> =
