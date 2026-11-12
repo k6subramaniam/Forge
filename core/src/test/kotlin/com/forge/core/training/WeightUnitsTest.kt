@@ -91,4 +91,15 @@ class WeightUnitsTest {
         assertEquals(5.0, ProgressiveOverload.incrementFor(SampleData.benchPress, WeightUnit.LB), 0.0)
         assertEquals(10.0, ProgressiveOverload.incrementFor(SampleData.squat, WeightUnit.LB), 0.0)
     }
+
+    @Test
+    fun `a pound target that round-tripped through kg still gets every plate`() {
+        // 150 lb stored as kg comes back as 149.99999999999997 lb.
+        val roundTripped = WeightConverter.kgToLb(WeightConverter.lbToKg(150.0))
+        assertTrue(roundTripped < 150.0)
+        val load = PlateCalculator.calculate(roundTripped, WeightUnit.LB)
+        assertEquals(listOf(45.0, 5.0, 2.5), load.platesPerSide)
+        assertEquals(150.0, load.achievedWeight, 1e-9)
+        assertEquals(0.0, load.shortfall, 0.0)
+    }
 }
