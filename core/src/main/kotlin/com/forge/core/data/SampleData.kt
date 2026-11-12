@@ -1,30 +1,30 @@
 package com.forge.core.data
 
-import com.forge.core.model.Equipment
 import com.forge.core.model.Exercise
-import com.forge.core.model.MuscleGroup
 import com.forge.core.model.Routine
 import com.forge.core.model.RoutineExercise
 import java.time.DayOfWeek
 
 /**
- * Built-in starter content (blueprint 3.2): a small exercise library and Push/Pull/Legs
- * templates so day one isn't a blank page. Shared by the phone and watch apps.
- * TODO(Phase 2): move the full library + templates (Upper/Lower, 5×5) into the routine
+ * Built-in starter content (blueprint 3.2): the ten starter exercises and the
+ * Push/Pull/Legs templates so day one isn't a blank page. Shared by the phone
+ * and watch apps. The exercises themselves live in [ExerciseLibrary] — fully
+ * tagged — and are referenced here so their ids stay stable.
+ * TODO(Phase 2): move the templates (Upper/Lower, 5×5) into the routine
  * builder's seed data once Room lands.
  */
 object SampleData {
 
-    val benchPress = Exercise("ex-bench-press", "Bench Press", MuscleGroup.CHEST, Equipment.BARBELL)
-    val overheadPress = Exercise("ex-overhead-press", "Overhead Press", MuscleGroup.SHOULDERS, Equipment.BARBELL)
-    val tricepPushdown = Exercise("ex-tricep-pushdown", "Tricep Pushdown", MuscleGroup.TRICEPS, Equipment.CABLE)
-    val barbellRow = Exercise("ex-barbell-row", "Barbell Row", MuscleGroup.BACK, Equipment.BARBELL)
-    val pullUp = Exercise("ex-pull-up", "Pull-Up", MuscleGroup.BACK, Equipment.BODYWEIGHT)
-    val bicepCurl = Exercise("ex-bicep-curl", "Bicep Curl", MuscleGroup.BICEPS, Equipment.DUMBBELL)
-    val squat = Exercise("ex-squat", "Squat", MuscleGroup.QUADS, Equipment.BARBELL)
-    val deadlift = Exercise("ex-deadlift", "Deadlift", MuscleGroup.HAMSTRINGS, Equipment.BARBELL)
-    val legPress = Exercise("ex-leg-press", "Leg Press", MuscleGroup.QUADS, Equipment.MACHINE)
-    val calfRaise = Exercise("ex-calf-raise", "Calf Raise", MuscleGroup.CALVES, Equipment.MACHINE)
+    val benchPress = ExerciseLibrary.benchPress
+    val overheadPress = ExerciseLibrary.overheadPress
+    val tricepPushdown = ExerciseLibrary.tricepPushdown
+    val barbellRow = ExerciseLibrary.barbellRow
+    val pullUp = ExerciseLibrary.pullUp
+    val bicepCurl = ExerciseLibrary.bicepCurl
+    val squat = ExerciseLibrary.squat
+    val deadlift = ExerciseLibrary.deadlift
+    val legPress = ExerciseLibrary.legPress
+    val calfRaise = ExerciseLibrary.calfRaise
 
     val exercises: List<Exercise> = listOf(
         benchPress, overheadPress, tricepPushdown,

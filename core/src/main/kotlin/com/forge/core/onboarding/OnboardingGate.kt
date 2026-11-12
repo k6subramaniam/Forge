@@ -1,19 +1,31 @@
 package com.forge.core.onboarding
 
 import com.forge.core.model.ClearanceState
+import com.forge.core.model.ExerciseFlag
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.JointArea
+import com.forge.core.model.MovementRestriction
 
 /**
  * A movement pattern removed from generated plans because of a limitation, together
  * with the safer variants that replace it (blueprint 3.0: swaps are shown and explained,
  * and a per-swap override is possible in the UI — the override is a UI concern, not a gate one).
+ *
+ * The exclusion is expressed twice, deliberately:
+ * - [excludedMovements] names movements in plain language. This is the form the
+ *   prompt constraints and the UI explanations use, and it is the only form that
+ *   can match an untagged (e.g. user-created) exercise.
+ * - [restrictions] is the structured form — movement patterns and loading
+ *   traits — that matching runs on whenever an exercise carries tags. It can
+ *   tell apart exercises that names cannot (a barbell row vs a chest-supported
+ *   row), which is why it takes precedence in the session engine.
  */
 data class ExerciseExclusion(
     val area: JointArea,
     val excludedMovements: List<String>,
     val substitutions: List<String>,
     val reason: String,
+    val restrictions: List<MovementRestriction> = emptyList(),
 )
 
 /**
@@ -57,53 +69,93 @@ object OnboardingGate {
         area: JointArea,
         excluded: List<String>,
         substitutions: List<String>,
+        restrictions: List<MovementRestriction> = emptyList(),
     ) = ExerciseExclusion(
         area = area,
         excludedMovements = excluded,
         substitutions = substitutions,
         reason = "Declared ${area.name.lowercase().replace('_', ' ')} limitation in the onboarding health screen.",
+        restrictions = restrictions,
     )
+
+    private fun restricted(flag: ExerciseFlag, description: String) =
+        MovementRestriction(flags = setOf(flag), description = description)
 
     private val EXCLUSIONS: Map<JointArea, ExerciseExclusion> = listOf(
         exclusion(
             JointArea.KNEE,
             excluded = listOf("Deep squat", "Lunge", "Jumping movements"),
             substitutions = listOf("Box squat to comfortable depth", "Leg press", "Step-up"),
+            restrictions = listOf(
+                // Lunges are caught by the deep-flexion trait, not their pattern:
+                // a controlled step-up shares the lunge pattern but not the trait,
+                // and it is one of this exclusion's own substitutes.
+                restricted(ExerciseFlag.DEEP_KNEE_FLEXION, "no deep knee flexion under load"),
+                restricted(ExerciseFlag.IMPACT, "no jumping or impact movements"),
+            ),
         ),
         exclusion(
             JointArea.SHOULDER,
             excluded = listOf("Overhead press", "Behind-neck press", "Upright row"),
             substitutions = listOf("Landmine press", "Neutral-grip dumbbell press", "Cable lateral raise"),
+            restrictions = listOf(
+                restricted(ExerciseFlag.OVERHEAD_PRESSING, "no overhead pressing"),
+                restricted(ExerciseFlag.IMPINGEMENT_PRONE, "no impingement-prone loaded shoulder elevation"),
+            ),
         ),
         exclusion(
             JointArea.LOWER_BACK,
             excluded = listOf("Max-effort conventional deadlift", "Good morning", "Heavy unsupported row"),
             substitutions = listOf("Trap-bar deadlift", "Hip thrust", "Chest-supported row"),
+            restrictions = listOf(
+                restricted(ExerciseFlag.HEAVY_SPINAL_LOADING, "no heavy spinal loading"),
+                restricted(ExerciseFlag.UNSUPPORTED_ROW, "no unsupported rowing"),
+            ),
         ),
         exclusion(
             JointArea.ELBOW,
             excluded = listOf("Skull crusher", "Heavy close-grip press", "Straight-bar curl"),
             substitutions = listOf("Cable pushdown", "EZ-bar curl", "Hammer curl"),
+            restrictions = listOf(
+                restricted(ExerciseFlag.DEEP_ELBOW_FLEXION_UNDER_LOAD, "no deep elbow flexion under load"),
+                restricted(ExerciseFlag.CLOSE_GRIP_PRESSING, "no heavy close-grip pressing"),
+                restricted(ExerciseFlag.FIXED_SUPINATED_GRIP, "no straight-bar curls"),
+            ),
         ),
         exclusion(
             JointArea.WRIST,
             excluded = listOf("Straight-bar curl", "Barbell front rack position", "Wrist-loaded pressing"),
             substitutions = listOf("EZ-bar curl", "Dumbbell press", "Safety-bar squat"),
+            restrictions = listOf(
+                restricted(ExerciseFlag.WRIST_UNDER_LOAD, "no wrist-loaded positions"),
+                restricted(ExerciseFlag.FIXED_SUPINATED_GRIP, "no straight-bar curls"),
+            ),
         ),
         exclusion(
             JointArea.HIP,
             excluded = listOf("Deep hip-flexion squat", "Sumo deadlift at max load"),
             substitutions = listOf("Box squat above parallel", "Hip thrust", "Step-up"),
+            restrictions = listOf(
+                restricted(ExerciseFlag.DEEP_HIP_FLEXION, "no deep hip flexion under load"),
+                restricted(ExerciseFlag.WIDE_STANCE_HIP_LOAD, "no wide-stance heavy pulling"),
+            ),
         ),
         exclusion(
             JointArea.ANKLE,
             excluded = listOf("Jumping movements", "Deep-stance lunge"),
             substitutions = listOf("Heel-elevated squat", "Leg press", "Seated calf raise"),
+            restrictions = listOf(
+                restricted(ExerciseFlag.IMPACT, "no jumping or impact movements"),
+                restricted(ExerciseFlag.DEEP_ANKLE_DORSIFLEXION, "no deep-stance lunging"),
+            ),
         ),
         exclusion(
             JointArea.NECK,
             excluded = listOf("Behind-neck press", "Heavy shrug", "Neck harness work"),
             substitutions = listOf("Front press", "Cable lateral raise", "Farmer's carry"),
+            restrictions = listOf(
+                restricted(ExerciseFlag.HEAVY_NECK_LOAD, "no heavy shrugs or direct neck loading"),
+            ),
         ),
     ).associateBy { it.area }
 
