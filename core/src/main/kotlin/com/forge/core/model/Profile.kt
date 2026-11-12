@@ -57,6 +57,13 @@ data class GoalProfile(
     val dislikes: List<String> = emptyList(),
     /** Hard constraints — generated meal plans must never include these (blueprint 3.0). */
     val allergies: List<String> = emptyList(),
+    /** Blueprint 3.0 step 5 (expanded 2026-11-11): cuisines the user likes, for meal-plan variety. */
+    val likedCuisines: List<String> = emptyList(),
+    /**
+     * Blueprint 3.0 step 5: the diet screen must be completed even when every
+     * answer is "none" — an unanswered diet screen is not the same as no restrictions.
+     */
+    val dietScreenCompleted: Boolean = false,
 )
 
 /** Joint/bone problem areas asked about on the PAR-Q-style health screen (blueprint 3.0). */

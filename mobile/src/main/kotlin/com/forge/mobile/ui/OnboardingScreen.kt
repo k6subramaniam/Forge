@@ -38,6 +38,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.forge.core.model.ActivityLevel
 import com.forge.core.model.ClearanceState
+import com.forge.core.model.CoachProfile
+import com.forge.core.model.CoachTone
 import com.forge.core.model.EquipmentAccess
 import com.forge.core.model.ExperienceLevel
 import com.forge.core.model.GoalProfile
@@ -45,16 +47,18 @@ import com.forge.core.model.GoalType
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.JointArea
 import com.forge.core.model.Sex
+import com.forge.core.model.UserPreferences
 import com.forge.core.onboarding.OnboardingGate
 import com.forge.core.onboarding.OnboardingGateResult
 import com.forge.mobile.data.ForgeRepository
 
 /**
- * Blueprint 3.0 as a flow: goal → body stats → health screen → diet screen, with the
- * red-flag clearance screen inserted when the gate in :core blocks plan generation.
- * Nothing else in the app is reachable until this completes — there is no skip.
+ * Blueprint 3.0 as a flow: goal → body stats → health screen → diet screen → coach
+ * setup, with the red-flag clearance screen inserted when the gate in :core blocks
+ * plan generation. Nothing else in the app is reachable until this completes —
+ * there is no skip.
  */
-private enum class OnboardingStep { GOAL, BODY, HEALTH, DIET, CLEARANCE }
+private enum class OnboardingStep { GOAL, BODY, HEALTH, DIET, COACH, CLEARANCE }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
@@ -93,6 +97,11 @@ fun OnboardingScreen(
     var dietaryPatternText by remember { mutableStateOf("") }
     var allergiesText by remember { mutableStateOf("") }
     var dislikesText by remember { mutableStateOf("") }
+    var cuisinesText by remember { mutableStateOf("") }
+
+    // Step 5 — coach setup (blueprint 3.0 step 6)
+    var coachNameText by remember { mutableStateOf("") }
+    var coachTone by remember { mutableStateOf(CoachTone.SUPPORTIVE) }
 
     var gateResult by remember { mutableStateOf<OnboardingGateResult?>(null) }
 
@@ -109,6 +118,17 @@ fun OnboardingScreen(
         dietaryPattern = dietaryPatternText.trim().ifBlank { null },
         dislikes = splitList(dislikesText),
         allergies = splitList(allergiesText),
+        likedCuisines = splitList(cuisinesText),
+        // Reaching the end of the flow means this screen was answered — an
+        // all-"none" answer still counts as completed (blueprint 3.0 step 5).
+        dietScreenCompleted = true,
+    )
+
+    fun buildPreferences() = UserPreferences(
+        coach = CoachProfile(
+            name = coachNameText.trim(),
+            tone = coachTone,
+        ),
     )
 
     fun buildHealthProfile(clearance: ClearanceState) = HealthProfile(
@@ -131,10 +151,13 @@ fun OnboardingScreen(
         val health = buildHealthProfile(
             if (redFlag) ClearanceState.REQUIRED else ClearanceState.NOT_REQUIRED,
         )
-        val gate = OnboardingGate.evaluate(health)
-        gateResult = gate
-        repository.saveOnboarding(buildGoalProfile(), health)
-        if (gate.planGenerationBlocked) {
+        // The full gate: health screen + completed diet screen + named coach.
+        val goalProfile = buildGoalProfile()
+        val preferences = buildPreferences()
+        val completion = OnboardingGate.evaluateCompletion(goalProfile, health, preferences)
+        gateResult = completion.healthGate
+        repository.saveOnboarding(goalProfile, health, preferences)
+        if (completion.healthGate.planGenerationBlocked) {
             step = OnboardingStep.CLEARANCE
         } else {
             onFinished()
@@ -298,7 +321,53 @@ fun OnboardingScreen(
                         label = { Text("Foods you won't eat, comma-separated — optional") },
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    ContinueButton("Finish setup") { finishOnboarding() }
+                    OutlinedTextField(
+                        value = cuisinesText,
+                        onValueChange = { cuisinesText = it },
+                        label = { Text("Cuisines you like, comma-separated — optional") },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(
+                        "Leaving these blank is a valid answer — finishing this screen is what counts.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    ContinueButton("Continue") { step = OnboardingStep.COACH }
+                }
+
+                OnboardingStep.COACH -> {
+                    SectionTitle("Meet your coach")
+                    Text(
+                        "Your AI Coach needs a name and a tone before its first briefing. " +
+                            "Both can be changed later in Settings.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = coachNameText,
+                        onValueChange = { coachNameText = it },
+                        label = { Text("Coach name") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text("Suggestions", style = MaterialTheme.typography.labelLarge)
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("Forge", "Atlas", "Nova", "Coach K").forEach { suggestion ->
+                            FilterChip(
+                                selected = coachNameText.trim() == suggestion,
+                                onClick = { coachNameText = suggestion },
+                                label = { Text(suggestion) },
+                            )
+                        }
+                    }
+                    ChipRow(
+                        label = "Tone",
+                        options = CoachTone.entries,
+                        selected = coachTone,
+                        optionLabel = { it.toneLabel() },
+                        onSelect = { coachTone = it },
+                    )
+                    ContinueButton("Finish setup", enabled = coachNameText.isNotBlank()) { finishOnboarding() }
                 }
 
                 OnboardingStep.CLEARANCE -> {
@@ -428,4 +497,10 @@ private fun EquipmentAccess.equipmentLabel(): String = when (this) {
     EquipmentAccess.FULL_GYM -> "Full gym"
     EquipmentAccess.DUMBBELLS_ONLY -> "Dumbbells only"
     EquipmentAccess.HOME_MINIMAL -> "Home / minimal"
+}
+
+private fun CoachTone.toneLabel(): String = when (this) {
+    CoachTone.SUPPORTIVE -> "Supportive"
+    CoachTone.DRILL_SERGEANT -> "Drill sergeant"
+    CoachTone.STRAIGHT_DATA -> "Straight data"
 }

@@ -2,9 +2,11 @@ package com.forge.core.onboarding
 
 import com.forge.core.model.ClearanceState
 import com.forge.core.model.ExerciseFlag
+import com.forge.core.model.GoalProfile
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.JointArea
 import com.forge.core.model.MovementRestriction
+import com.forge.core.model.UserPreferences
 
 /**
  * A movement pattern removed from generated plans because of a limitation, together
@@ -211,4 +213,46 @@ object OnboardingGate {
             ),
         )
     }
+
+    /**
+     * The full onboarding-completion gate (blueprint 3.0, expanded 2026-11-11).
+     * Plan generation must check this — not [evaluate] alone: in addition to a
+     * completed, unblocked health screen it requires
+     * (a) the diet screen to be completed ([GoalProfile.dietScreenCompleted] —
+     * an explicit "none" on every diet answer satisfies it; an unanswered
+     * screen does not, even when the allergy list happens to be empty), and
+     * (b) coach setup to be completed ([UserPreferences.coachConfigured] — a
+     * non-blank coach name chosen in onboarding).
+     * Red-flag behaviour is inherited from [evaluate] unchanged.
+     */
+    fun evaluateCompletion(
+        goalProfile: GoalProfile,
+        healthProfile: HealthProfile,
+        preferences: UserPreferences,
+    ): OnboardingCompletionResult {
+        val healthGate = evaluate(healthProfile)
+        val dietScreenComplete = goalProfile.dietScreenCompleted
+        val coachConfigured = preferences.coachConfigured
+        return OnboardingCompletionResult(
+            healthGate = healthGate,
+            dietScreenComplete = dietScreenComplete,
+            coachConfigured = coachConfigured,
+            canGeneratePlans = healthGate.canGeneratePlans && dietScreenComplete && coachConfigured,
+        )
+    }
 }
+
+/**
+ * Result of the full onboarding-completion gate ([OnboardingGate.evaluateCompletion]).
+ * [healthGate] carries the health screen's own verdict — red flags, clearance
+ * state, and the functional constraints — so callers need only one evaluation.
+ */
+data class OnboardingCompletionResult(
+    val healthGate: OnboardingGateResult,
+    /** Blueprint 3.0 step 5: true once the diet screen has been completed (all-"none" counts). */
+    val dietScreenComplete: Boolean,
+    /** Blueprint 3.0 step 6: true once the coach has been named in onboarding. */
+    val coachConfigured: Boolean,
+    /** True only when the health gate passes AND both onboarding additions are complete. */
+    val canGeneratePlans: Boolean,
+)
