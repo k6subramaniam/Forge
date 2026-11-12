@@ -22,6 +22,9 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.ConcurrentHashMap
 
 /** Supplies the key that encrypts the health profile. */
 fun interface SecretKeyProvider {
@@ -74,7 +77,20 @@ class HealthProfileStore(
 ) {
     private val atomicFile = AtomicFile(file)
 
-    suspend fun read(): HealthProfile? = withContext(Dispatchers.IO) {
+    // AtomicFile isn't safe to read while it's being written: opening the base
+    // file for reading deletes an in-progress ".new" file, so a read during a
+    // write (say, a recreated activity reading while the clearance answer is
+    // saved) can lose the write. Every whole read, write and clear holds the
+    // same lock, shared by any stores on the same file.
+    private val lock: Mutex = locks.getOrPut(file.absolutePath) { Mutex() }
+
+    suspend fun read(): HealthProfile? = lock.withLock { readUnlocked() }
+
+    suspend fun write(profile: HealthProfile) = lock.withLock { writeUnlocked(profile) }
+
+    suspend fun clear() = lock.withLock { withContext(Dispatchers.IO) { atomicFile.delete() } }
+
+    private suspend fun readUnlocked(): HealthProfile? = withContext(Dispatchers.IO) {
         val bytes = try {
             atomicFile.readFully()
         } catch (_: FileNotFoundException) {
@@ -92,7 +108,7 @@ class HealthProfileStore(
         }
     }
 
-    suspend fun write(profile: HealthProfile) = withContext(Dispatchers.IO) {
+    private suspend fun writeUnlocked(profile: HealthProfile) = withContext(Dispatchers.IO) {
         val bytes = encrypt(encode(profile))
         val stream = atomicFile.startWrite()
         try {
@@ -103,8 +119,6 @@ class HealthProfileStore(
             throw e
         }
     }
-
-    suspend fun clear() = withContext(Dispatchers.IO) { atomicFile.delete() }
 
     private fun encrypt(plaintext: ByteArray): ByteArray {
         val cipher = Cipher.getInstance(TRANSFORMATION)
@@ -136,6 +150,8 @@ class HealthProfileStore(
     companion object {
         /** The file name, under the app's no-backup directory. */
         const val FILE_NAME = "health_profile.enc"
+
+        private val locks = ConcurrentHashMap<String, Mutex>()
 
         private const val TAG = "HealthProfileStore"
         private const val TRANSFORMATION = "AES/GCM/NoPadding"

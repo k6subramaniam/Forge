@@ -5,6 +5,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.forge.core.model.ClearanceState
 import com.forge.core.model.HealthProfile
 import com.forge.core.model.JointArea
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -96,6 +102,23 @@ class HealthProfileStoreTest {
         store.write(profile)
         store.clear()
         assertNull(store.read())
+    }
+
+    @Test
+    fun `reads running alongside writes never lose a write`() = runBlocking {
+        // A read starting mid-write must not disturb it (AtomicFile deletes an
+        // in-progress ".new" file when a read opens the base file).
+        val store = HealthProfileStore(file) { key }
+        store.write(profile)
+        val reader = launch(Dispatchers.IO) {
+            while (isActive) store.read()
+        }
+        val versions = (1..200).map { profile.copy(injuriesOrSurgeries = "version $it") }
+        for (version in versions) {
+            withContext(Dispatchers.IO) { store.write(version) }
+            assertEquals(version, store.read())
+        }
+        reader.cancelAndJoin()
     }
 
     private fun newKey(): SecretKey = KeyGenerator.getInstance("AES").apply { init(256) }.generateKey()
